@@ -21,6 +21,7 @@ export default function Card({
   isInPipeline = false,
   onRemove = null,
   disabled = false,
+  small = false,
 }) {
   const [showInfo, setShowInfo] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -50,8 +51,13 @@ export default function Card({
     if (onRemove) onRemove(cardInfo);
   };
 
-  // Pipeline cards same size as hand cards
-  const cardSize = isInPipeline ? 'w-32 h-44' : 'w-32 h-44';
+  // Card sizes
+  const cardSize = small ? 'w-20 h-28' : 'w-32 h-44';
+  const iconSize = small ? 'text-2xl mt-1' : 'text-4xl mt-2';
+  const nameSize = small ? 'text-[10px]' : 'text-sm';
+  const techNameSize = small ? 'text-[8px]' : 'text-[11px]';
+  const buttonSize = small ? 'w-4 h-4 text-[8px]' : 'w-6 h-6 text-[11px]';
+  const borderWidth = small ? '2px' : '3px';
 
   return (
     <>
@@ -73,7 +79,7 @@ export default function Card({
             transition-all duration-200
           `}
           style={{
-            border: `3px solid ${colors.border}`,
+            border: `${borderWidth} solid ${colors.border}`,
             boxShadow: disabled ? 'none' : `
               0 6px 20px rgba(0, 0, 0, 0.15),
               0 0 25px ${colors.glow}
@@ -89,13 +95,13 @@ export default function Card({
           />
 
           {/* Card content */}
-          <div className="relative h-full flex flex-col p-2 text-white">
+          <div className={`relative h-full flex flex-col ${small ? 'p-1' : 'p-2'} text-white`}>
             {/* Top buttons row */}
             <div className="flex justify-between items-start">
               {/* Info button - TOP LEFT */}
               <button
                 onClick={handleInfoClick}
-                className="w-6 h-6 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center text-[11px] font-bold transition-colors backdrop-blur-sm shadow-sm"
+                className={`${buttonSize} rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center font-bold transition-colors backdrop-blur-sm shadow-sm`}
                 title="Info"
               >
                 ?
@@ -105,30 +111,32 @@ export default function Card({
               {isInPipeline && onRemove ? (
                 <button
                   onClick={handleRemove}
-                  className="w-6 h-6 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 text-lg font-bold shadow-md transition-colors"
+                  className={`${buttonSize} rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 font-bold shadow-md transition-colors`}
                   title="Retirer"
                 >
                   ×
                 </button>
               ) : (
-                <div className="w-6 h-6" />
+                <div className={buttonSize} />
               )}
             </div>
 
             {/* Icon */}
-            <div className="text-center text-4xl mt-2 drop-shadow-lg">
+            <div className={`text-center ${iconSize} drop-shadow-lg`}>
               {cardInfo.icon}
             </div>
 
             {/* Name */}
-            <div className="text-center font-bold text-sm mt-1 drop-shadow-md leading-tight">
+            <div className={`text-center font-bold ${nameSize} mt-1 drop-shadow-md leading-tight`}>
               {cardInfo.name}
             </div>
 
-            {/* Technical name */}
-            <div className="text-center text-[11px] opacity-80 font-mono">
-              {cardInfo.shortName}
-            </div>
+            {/* Technical name - hide on small */}
+            {!small && (
+              <div className={`text-center ${techNameSize} opacity-80 font-mono`}>
+                {cardInfo.shortName}
+              </div>
+            )}
 
             {/* Parameters - only show in pipeline */}
             {cardInfo.paramLabel && isInPipeline && (

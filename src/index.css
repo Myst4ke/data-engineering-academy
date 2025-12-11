@@ -27,10 +27,17 @@ html, body, #root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Game view needs fixed height, homescreen needs scroll */
+/* Game view - fixed on desktop, scrollable on mobile */
 .game-view {
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .game-view {
+    height: 100vh;
+    overflow: hidden;
+  }
 }
 
 .home-view {

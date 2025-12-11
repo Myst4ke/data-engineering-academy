@@ -210,30 +210,30 @@ function App() {
   }
 
   return (
-    <div className="game-view flex flex-col p-3 gap-2 relative z-10">
+    <div className="game-view flex flex-col p-2 sm:p-3 gap-2 relative z-10 pb-4">
       {/* HEADER */}
-      <div className="flex-none flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex-none flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={handleBackToHome}
-            className="game-btn px-3 py-1.5 text-sm font-semibold flex items-center gap-2"
+            className="game-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold flex items-center gap-1"
           >
-            ← Accueil
+            ← <span className="hidden sm:inline">Accueil</span>
           </button>
-          <h1 className="text-xl font-bold text-indigo-600 tracking-wide">
+          <h1 className="text-base sm:text-xl font-bold text-indigo-600 tracking-wide">
             DATA DOJO
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-slate-600 text-sm font-medium">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-slate-600 text-xs sm:text-sm font-medium hidden sm:block">
             {exerciseData?.config?.title}
           </span>
           <HintPopup hint={exerciseData?.config?.hint} />
         </div>
       </div>
 
-      {/* TABLES ROW */}
-      <div className="flex-none grid grid-cols-3 gap-3">
+      {/* TABLES - Stack on mobile, row on desktop */}
+      <div className="flex-none grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
         {/* Current Table */}
         <TableView
           data={currentTable}
@@ -249,7 +249,7 @@ function App() {
             title="Table Secondaire"
           />
         ) : (
-          <div />
+          <div className="hidden md:block" />
         )}
 
         {/* Target Table */}
@@ -261,7 +261,7 @@ function App() {
       </div>
 
       {/* PIPELINE */}
-      <div className="flex-1 min-h-[220px]">
+      <div className="flex-1 min-h-[120px] sm:min-h-[180px] md:min-h-[220px]">
         <Pipeline
           cards={pipeline}
           onRemoveCard={handleRemoveCard}
@@ -269,31 +269,51 @@ function App() {
         />
       </div>
 
-      {/* CARDS HAND */}
-      <div className="flex-none flex items-end justify-center pb-1 h-[180px]">
-        <div className="flex items-end gap-2">
-          {allCards.map((card, index) => {
+      {/* CARDS HAND - Horizontal scroll on mobile, fan on desktop */}
+      <div className="flex-none pb-2">
+        {/* Mobile: horizontal scroll */}
+        <div className="flex md:hidden overflow-x-auto gap-2 pb-2 px-1 snap-x snap-mandatory">
+          {allCards.map((card) => {
             const isUsed = isCardInPipeline(card.id);
-            const rotation = (index - (allCards.length - 1) / 2) * 4;
-            const yOffset = Math.abs(index - (allCards.length - 1) / 2) * 8;
-
             return (
-              <div
-                key={card.id}
-                style={{
-                  transform: `rotate(${rotation}deg) translateY(${yOffset}px)`,
-                  transition: 'all 0.2s ease',
-                }}
-                className="hover:!-translate-y-6 hover:!rotate-0 hover:z-10"
-              >
+              <div key={card.id} className="flex-shrink-0 snap-center">
                 <Card
                   cardInfo={card}
                   onClick={handleAddCard}
                   disabled={isUsed}
+                  small
                 />
               </div>
             );
           })}
+        </div>
+
+        {/* Desktop: fanned cards */}
+        <div className="hidden md:flex items-end justify-center h-[180px]">
+          <div className="flex items-end gap-2">
+            {allCards.map((card, index) => {
+              const isUsed = isCardInPipeline(card.id);
+              const rotation = (index - (allCards.length - 1) / 2) * 4;
+              const yOffset = Math.abs(index - (allCards.length - 1) / 2) * 8;
+
+              return (
+                <div
+                  key={card.id}
+                  style={{
+                    transform: `rotate(${rotation}deg) translateY(${yOffset}px)`,
+                    transition: 'all 0.2s ease',
+                  }}
+                  className="hover:!-translate-y-6 hover:!rotate-0 hover:z-10"
+                >
+                  <Card
+                    cardInfo={card}
+                    onClick={handleAddCard}
+                    disabled={isUsed}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

@@ -1,0 +1,8 @@
+{
+  "id": "ex-14",
+  "title": "Fusion Avancée",
+  "description": "Joignez les tables, supprimez la colonne Temp, puis triez par Montant décroissant.",
+  "difficulty": 3,
+  "hasSecondTable": true,
+  "hint": "Joindre sur ID → Suppr. Colonne Temp → Trier par Montant décroissant."
+}

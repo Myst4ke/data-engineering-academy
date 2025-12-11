@@ -1,0 +1,8 @@
+{
+  "id": "ex-02",
+  "title": "Données Complètes",
+  "description": "Retirez les lignes qui contiennent des cellules vides.",
+  "difficulty": 1,
+  "hasSecondTable": false,
+  "hint": "Utilisez la carte 'Suppr. Vides' pour nettoyer les lignes incomplètes."
+}

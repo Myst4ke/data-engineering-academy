@@ -1,0 +1,8 @@
+{
+  "id": "ex-13",
+  "title": "Pipeline Complet",
+  "description": "Nettoyez les données: supprimez doublons, lignes vides, filtrez Type=Premium, et triez par Score.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Enchaînez: Supprimer Doublons → Suppr. Vides → Filtrer Type=Premium → Trier par Score décroissant."
+}

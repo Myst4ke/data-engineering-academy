@@ -112,6 +112,63 @@ export function join(table1, table2, params) {
 }
 
 /**
+ * rename - Rename a column
+ */
+export function rename(table, params) {
+  const { oldName, newName } = params;
+  return table.map(row => {
+    const newRow = {};
+    for (const [key, value] of Object.entries(row)) {
+      if (key === oldName) {
+        newRow[newName] = value;
+      } else {
+        newRow[key] = value;
+      }
+    }
+    return newRow;
+  });
+}
+
+/**
+ * select - Keep only specified columns
+ */
+export function select(table, params) {
+  const { columns } = params;
+  return table.map(row => {
+    const newRow = {};
+    for (const col of columns) {
+      if (row.hasOwnProperty(col)) {
+        newRow[col] = row[col];
+      }
+    }
+    return newRow;
+  });
+}
+
+/**
+ * fill_na - Fill empty cells with a value
+ */
+export function fillNa(table, params) {
+  const { column, value } = params;
+  return table.map(row => {
+    const newRow = { ...row };
+    const cellValue = newRow[column];
+    if (cellValue === null || cellValue === undefined ||
+        (typeof cellValue === 'string' && cellValue.trim() === '')) {
+      newRow[column] = value;
+    }
+    return newRow;
+  });
+}
+
+/**
+ * concat - Concatenate two tables vertically (union)
+ */
+export function concat(table1, table2) {
+  return [...table1, ...table2];
+}
+
+/**
  * Apply a transformation card to the current table state
  */
 export function applyTransformation(table, card, secondTable = null) {
@@ -134,6 +191,18 @@ export function applyTransformation(table, card, secondTable = null) {
         return table;
       }
       return join(table, secondTable, params);
+    case 'rename':
+      return rename(table, params);
+    case 'select':
+      return select(table, params);
+    case 'fill_na':
+      return fillNa(table, params);
+    case 'concat':
+      if (!secondTable) {
+        console.warn('Concat requires a second table');
+        return table;
+      }
+      return concat(table, secondTable);
     default:
       console.warn(`Unknown transformation type: ${type}`);
       return table;

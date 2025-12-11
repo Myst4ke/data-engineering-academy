@@ -1,0 +1,8 @@
+{
+  "id": "ex-03",
+  "title": "Tri par Prix",
+  "description": "Triez les articles par prix croissant.",
+  "difficulty": 1,
+  "hasSecondTable": false,
+  "hint": "Utilisez la carte 'Trier' sur la colonne Prix en ordre croissant."
+}

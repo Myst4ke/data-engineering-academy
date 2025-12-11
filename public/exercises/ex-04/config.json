@@ -1,0 +1,8 @@
+{
+  "id": "ex-04",
+  "title": "Colonne Inutile",
+  "description": "Supprimez la colonne 'Notes' qui n'est plus nécessaire.",
+  "difficulty": 1,
+  "hasSecondTable": false,
+  "hint": "Utilisez la carte 'Suppr. Colonne' pour retirer la colonne Notes."
+}

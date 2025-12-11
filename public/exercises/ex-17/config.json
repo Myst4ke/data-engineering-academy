@@ -1,0 +1,8 @@
+{
+  "id": "ex-17",
+  "title": "Union & Clean",
+  "description": "Concaténez les deux tables de ventes, supprimez les doublons, puis triez par Date.",
+  "difficulty": 3,
+  "hasSecondTable": true,
+  "hint": "Concaténer → Supprimer Doublons → Trier par Date croissant."
+}

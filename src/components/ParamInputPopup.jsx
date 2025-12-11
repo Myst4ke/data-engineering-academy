@@ -5,6 +5,8 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
   const [column, setColumn] = useState('');
   const [value, setValue] = useState('');
   const [order, setOrder] = useState('asc');
+  const [newName, setNewName] = useState('');
+  const [selectedColumns, setSelectedColumns] = useState([]);
 
   // Get unique values for the selected column (for filter)
   const columnValues = useMemo(() => {
@@ -38,6 +40,18 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
       case 'sort':
         params = { column, order };
         break;
+      case 'rename':
+        params = { oldName: column, newName };
+        break;
+      case 'select':
+        params = { columns: selectedColumns };
+        break;
+      case 'fill_na':
+        params = { column, value };
+        break;
+      case 'concat':
+        params = {};
+        break;
       default:
         break;
     }
@@ -46,9 +60,21 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
   };
 
   const isValid = () => {
+    if (cardType === 'concat') return true;
+    if (cardType === 'select') return selectedColumns.length > 0;
     if (!column) return false;
     if (cardType === 'filter' && !value) return false;
+    if (cardType === 'fill_na' && !value) return false;
+    if (cardType === 'rename' && !newName) return false;
     return true;
+  };
+
+  const toggleColumnSelection = (col) => {
+    setSelectedColumns(prev =>
+      prev.includes(col)
+        ? prev.filter(c => c !== col)
+        : [...prev, col]
+    );
   };
 
   const getTitle = () => {
@@ -61,6 +87,14 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
         return 'Trier par quelle colonne ?';
       case 'join':
         return 'Sur quelle colonne joindre ?';
+      case 'rename':
+        return 'Renommer une colonne';
+      case 'select':
+        return 'Quelles colonnes garder ?';
+      case 'fill_na':
+        return 'Remplir les vides';
+      case 'concat':
+        return 'Empiler les tables';
       default:
         return 'Paramètres';
     }
@@ -152,6 +186,71 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
                 ↓ Décroissant
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Rename - New Name Input */}
+        {cardType === 'rename' && (
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Nouveau nom
+            </label>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Entrez le nouveau nom..."
+              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-indigo-400 focus:outline-none transition-colors"
+            />
+          </div>
+        )}
+
+        {/* Select - Multiple Column Selection */}
+        {cardType === 'select' && (
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Colonnes à garder
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {columns.map((col) => (
+                <button
+                  key={col}
+                  onClick={() => toggleColumnSelection(col)}
+                  className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm ${
+                    selectedColumns.includes(col)
+                      ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                  }`}
+                >
+                  {selectedColumns.includes(col) ? '✓ ' : ''}{col}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fill NA - Value Input */}
+        {cardType === 'fill_na' && (
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Valeur de remplacement
+            </label>
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Entrez la valeur..."
+              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-indigo-400 focus:outline-none transition-colors"
+            />
+          </div>
+        )}
+
+        {/* Concat - Just info */}
+        {cardType === 'concat' && (
+          <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+            <p className="text-sm text-slate-600">
+              Les lignes de la table secondaire seront ajoutées sous la table actuelle.
+            </p>
           </div>
         )}
 

@@ -1,0 +1,8 @@
+{
+  "id": "ex-15",
+  "title": "ETL Basique",
+  "description": "Sélectionnez Code et Valeur, renommez Code en Reference, remplissez les Valeur vides avec '0', puis triez.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Sélectionner Code+Valeur → Renommer Code→Reference → Remplir Vides Valeur=0 → Trier par Reference."
+}

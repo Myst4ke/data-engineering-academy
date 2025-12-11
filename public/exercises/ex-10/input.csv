@@ -1,0 +1,6 @@
+Produit,Stock,Status
+Produit A,50,Disponible
+Produit B,,Disponible
+Produit C,30,Rupture
+Produit D,,Disponible
+Produit E,100,Disponible

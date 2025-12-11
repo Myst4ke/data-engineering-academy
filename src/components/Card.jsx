@@ -9,6 +9,10 @@ const CARD_COLORS = {
   delete_na: { bg: 'from-amber-400 to-orange-500', border: '#fcd34d', glow: 'rgba(252, 211, 77, 0.3)' },
   filter: { bg: 'from-emerald-400 to-green-500', border: '#6ee7b7', glow: 'rgba(110, 231, 183, 0.3)' },
   join: { bg: 'from-blue-500 to-indigo-600', border: '#93c5fd', glow: 'rgba(147, 197, 253, 0.3)' },
+  rename: { bg: 'from-pink-400 to-rose-500', border: '#f9a8d4', glow: 'rgba(249, 168, 212, 0.3)' },
+  select: { bg: 'from-teal-400 to-cyan-500', border: '#5eead4', glow: 'rgba(94, 234, 212, 0.3)' },
+  fill_na: { bg: 'from-slate-400 to-slate-600', border: '#94a3b8', glow: 'rgba(148, 163, 184, 0.3)' },
+  concat: { bg: 'from-lime-400 to-green-500', border: '#bef264', glow: 'rgba(190, 242, 100, 0.3)' },
 };
 
 export default function Card({

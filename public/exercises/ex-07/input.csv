@@ -1,0 +1,7 @@
+Commande,Client,Montant
+CMD001,Alice,150
+CMD002,Bob,
+CMD001,Alice,150
+CMD003,Claire,200
+CMD004,,75
+CMD003,Claire,200

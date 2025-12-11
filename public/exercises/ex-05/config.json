@@ -1,0 +1,8 @@
+{
+  "id": "ex-05",
+  "title": "Filtrer Actifs",
+  "description": "Gardez uniquement les utilisateurs avec le statut 'Actif'.",
+  "difficulty": 1,
+  "hasSecondTable": false,
+  "hint": "Utilisez la carte 'Filtrer' sur la colonne Statut avec la valeur 'Actif'."
+}

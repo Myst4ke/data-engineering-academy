@@ -1,0 +1,8 @@
+Ticket,Priorite,Assigne,Notes
+T001,Haute,Alice,urgent
+T002,Basse,Bob,
+T001,Haute,Alice,urgent
+T003,Haute,,review
+T004,Moyenne,Claire,pending
+T005,Haute,David,critical
+T005,Haute,David,critical

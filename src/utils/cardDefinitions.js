@@ -135,6 +135,94 @@ export const CARD_DEFINITIONS = {
       ],
     },
   },
+
+  rename: {
+    name: 'Renommer',
+    shortName: 'rename',
+    icon: '✏️',
+    description: 'Renomme une colonne du tableau.',
+    detailedExplanation: `Cette carte change le nom d'une colonne.
+
+• Sélectionne la colonne à renommer
+• Donne le nouveau nom souhaité
+• Les données de la colonne restent inchangées`,
+    example: {
+      before: [
+        { SKU: '123', Prix: '100' },
+        { SKU: '456', Prix: '200' },
+      ],
+      after: [
+        { Code: '123', Prix: '100' },
+        { Code: '456', Prix: '200' },
+      ],
+    },
+  },
+
+  select: {
+    name: 'Sélectionner',
+    shortName: 'select',
+    icon: '✅',
+    description: 'Garde uniquement les colonnes choisies.',
+    detailedExplanation: `Cette carte ne garde que certaines colonnes du tableau.
+
+• Sélectionne les colonnes à conserver
+• Toutes les autres colonnes sont supprimées
+• L'ordre des colonnes est préservé`,
+    example: {
+      before: [
+        { SKU: '123', Nom: 'A', Prix: '100', Note: 'test' },
+      ],
+      after: [
+        { SKU: '123', Nom: 'A' },
+      ],
+    },
+  },
+
+  fill_na: {
+    name: 'Remplir Vides',
+    shortName: 'fill_na',
+    icon: '🔧',
+    description: 'Remplit les cellules vides avec une valeur.',
+    detailedExplanation: `Cette carte remplace les cellules vides par une valeur donnée.
+
+• Sélectionne la colonne à traiter
+• Indique la valeur de remplacement
+• Seules les cellules vides sont modifiées`,
+    example: {
+      before: [
+        { SKU: '123', Stock: '50' },
+        { SKU: '456', Stock: '' },
+      ],
+      after: [
+        { SKU: '123', Stock: '50' },
+        { SKU: '456', Stock: '0' },
+      ],
+    },
+  },
+
+  concat: {
+    name: 'Concaténer',
+    shortName: 'concat',
+    icon: '⬇️',
+    description: 'Empile deux tables verticalement.',
+    detailedExplanation: `Cette carte combine deux tables l'une sous l'autre.
+
+• Les lignes de la table secondaire sont ajoutées
+• Les colonnes doivent être compatibles
+• Utile pour fusionner des données similaires`,
+    example: {
+      before: [
+        { SKU: '123', Nom: 'A' },
+      ],
+      secondTable: [
+        { SKU: '456', Nom: 'B' },
+      ],
+      after: [
+        { SKU: '123', Nom: 'A' },
+        { SKU: '456', Nom: 'B' },
+      ],
+    },
+  },
 };
 
 /**
@@ -155,6 +243,14 @@ export function getCardDisplayInfo(card) {
       paramLabel = card.params.column;
     } else if (card.type === 'join') {
       paramLabel = `sur ${card.params.column}`;
+    } else if (card.type === 'rename') {
+      paramLabel = `${card.params.oldName} → ${card.params.newName}`;
+    } else if (card.type === 'select') {
+      paramLabel = card.params.columns.join(', ');
+    } else if (card.type === 'fill_na') {
+      paramLabel = `${card.params.column} ← "${card.params.value}"`;
+    } else if (card.type === 'concat') {
+      paramLabel = 'tables empilées';
     }
   }
 
@@ -168,11 +264,14 @@ export function getCardDisplayInfo(card) {
 }
 
 /**
- * Get all 6 cards as generic versions (no pre-configured params)
+ * Get all 10 cards as generic versions (no pre-configured params)
  * Users will configure params themselves via popup
  */
 export function getAllCards() {
-  const allTypes = ['drop_duplicates', 'sort', 'delete', 'delete_na', 'filter', 'join'];
+  const allTypes = [
+    'drop_duplicates', 'sort', 'delete', 'delete_na', 'filter', 'join',
+    'rename', 'select', 'fill_na', 'concat'
+  ];
 
   // Return generic cards without any pre-configured params
   return allTypes.map((type) => {

@@ -95,11 +95,27 @@ export async function loadExercise(exerciseId) {
  * Get list of available exercises
  */
 export async function getExerciseList() {
-  // For now, return hardcoded list
-  // In a more dynamic setup, this could scan the exercises folder
   return [
-    { id: 'exercice-1', title: 'Nettoyage des Articles', difficulty: 1 },
-    { id: 'exercice-2', title: 'Deduplication des Familles', difficulty: 2 },
-    { id: 'exercice-3', title: 'Jointure des Tables', difficulty: 3 },
+    // Beginner (1-6)
+    { id: 'ex-01', title: 'Doublons Articles', difficulty: 1 },
+    { id: 'ex-02', title: 'Données Complètes', difficulty: 1 },
+    { id: 'ex-03', title: 'Tri par Prix', difficulty: 1 },
+    { id: 'ex-04', title: 'Colonne Inutile', difficulty: 1 },
+    { id: 'ex-05', title: 'Filtrer Actifs', difficulty: 1 },
+    { id: 'ex-06', title: 'Renommer Colonne', difficulty: 1 },
+    // Intermediate (7-12)
+    { id: 'ex-07', title: 'Nettoyage Complet', difficulty: 2 },
+    { id: 'ex-08', title: 'Tri Filtré', difficulty: 2 },
+    { id: 'ex-09', title: 'Sélection Nette', difficulty: 2 },
+    { id: 'ex-10', title: 'Remplir Vides', difficulty: 2 },
+    { id: 'ex-11', title: 'Fusion Tables', difficulty: 2 },
+    { id: 'ex-12', title: 'Multi-Suppression', difficulty: 2 },
+    // Expert (13-18)
+    { id: 'ex-13', title: 'Pipeline Complet', difficulty: 3 },
+    { id: 'ex-14', title: 'Fusion Avancée', difficulty: 3 },
+    { id: 'ex-15', title: 'ETL Basique', difficulty: 3 },
+    { id: 'ex-16', title: 'Nettoyage Pro', difficulty: 3 },
+    { id: 'ex-17', title: 'Union & Clean', difficulty: 3 },
+    { id: 'ex-18', title: 'Master Data', difficulty: 3 },
   ];
 }

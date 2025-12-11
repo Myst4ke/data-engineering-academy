@@ -5,14 +5,17 @@ import Pipeline from './components/Pipeline';
 import SuccessModal from './components/SuccessModal';
 import HintPopup from './components/HintPopup';
 import ParamInputPopup from './components/ParamInputPopup';
+import HomeScreen from './components/HomeScreen';
 import { loadExercise, getExerciseList } from './utils/csvParser';
 import { getAllCards, getCardDisplayInfo } from './utils/cardDefinitions';
 import { applyPipeline, tablesEqual } from './transformations';
+import { markExerciseCompleted } from './utils/progress';
 import './index.css';
 
 function App() {
+  const [view, setView] = useState('home'); // 'home' or 'game'
   const [exercises, setExercises] = useState([]);
-  const [currentExerciseId, setCurrentExerciseId] = useState('exercice-1');
+  const [currentExerciseId, setCurrentExerciseId] = useState(null);
   const [exerciseData, setExerciseData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,10 +30,15 @@ function App() {
   const [pendingCard, setPendingCard] = useState(null);
 
   useEffect(() => {
-    getExerciseList().then(setExercises);
+    getExerciseList().then((list) => {
+      setExercises(list);
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
+    if (!currentExerciseId) return;
+
     const loadData = async () => {
       setLoading(true);
       setPipeline([]);
@@ -64,18 +72,20 @@ function App() {
     if (pipeline.length > 0 && tablesEqual(newTable, exerciseData.outputTable)) {
       if (!hasWon) {
         setHasWon(true);
+        // Save progress
+        markExerciseCompleted(currentExerciseId);
         setTimeout(() => setShowSuccess(true), 600);
       }
     } else {
       setHasWon(false);
     }
-  }, [pipeline, exerciseData, hasWon]);
+  }, [pipeline, exerciseData, hasWon, currentExerciseId]);
 
   const allCards = getAllCards();
 
-  // Check if join card is in pipeline to hide secondary table
-  const hasJoinInPipeline = useMemo(() => {
-    return pipeline.some((c) => c.type === 'join');
+  // Check if join/concat card is in pipeline to hide secondary table
+  const hasSecondTableUsed = useMemo(() => {
+    return pipeline.some((c) => c.type === 'join' || c.type === 'concat');
   }, [pipeline]);
 
   // Get available columns from current table
@@ -101,9 +111,23 @@ function App() {
     return pipeline.some((c) => c.id === cardId);
   }, [pipeline]);
 
+  const handleSelectExercise = useCallback((exerciseId) => {
+    setCurrentExerciseId(exerciseId);
+    setView('game');
+  }, []);
+
+  const handleBackToHome = useCallback(() => {
+    setView('home');
+    setCurrentExerciseId(null);
+    setExerciseData(null);
+    setPipeline([]);
+    setHasWon(false);
+    setShowSuccess(false);
+  }, []);
+
   const handleAddCard = useCallback((cardInfo) => {
-    // Cards that need params: delete, filter, sort, join
-    const needsParams = ['delete', 'filter', 'sort', 'join'].includes(cardInfo.type);
+    // Cards that need params
+    const needsParams = ['delete', 'filter', 'sort', 'join', 'rename', 'select', 'fill_na', 'concat'].includes(cardInfo.type);
 
     // Always show popup for cards that need params (user configures every time)
     if (needsParams) {
@@ -151,6 +175,29 @@ function App() {
     setShowSuccess(false);
   }, [exercises, currentExerciseId]);
 
+  // Show loading while fetching exercise list
+  if (loading && exercises.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-xl text-indigo-600 flex items-center gap-3 font-medium">
+          <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full" />
+          Chargement...
+        </div>
+      </div>
+    );
+  }
+
+  // Home screen
+  if (view === 'home') {
+    return (
+      <HomeScreen
+        exercises={exercises}
+        onSelectExercise={handleSelectExercise}
+      />
+    );
+  }
+
+  // Loading exercise data
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -167,20 +214,15 @@ function App() {
       {/* HEADER */}
       <div className="flex-none flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-indigo-600 tracking-wide">
-            🎴 DATA TRANSFORM
-          </h1>
-          <select
-            value={currentExerciseId}
-            onChange={(e) => setCurrentExerciseId(e.target.value)}
-            className="game-btn px-3 py-1.5 text-sm cursor-pointer"
+          <button
+            onClick={handleBackToHome}
+            className="game-btn px-3 py-1.5 text-sm font-semibold flex items-center gap-2"
           >
-            {exercises.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {'⭐'.repeat(ex.difficulty)} {ex.title}
-              </option>
-            ))}
-          </select>
+            ← Accueil
+          </button>
+          <h1 className="text-xl font-bold text-indigo-600 tracking-wide">
+            DATA DOJO
+          </h1>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-slate-600 text-sm font-medium">
@@ -200,8 +242,8 @@ function App() {
           isSuccess={hasWon}
         />
 
-        {/* Second Table (for join) - hide when join is applied */}
-        {exerciseData?.secondTable && !hasJoinInPipeline ? (
+        {/* Second Table (for join/concat) - hide when used */}
+        {exerciseData?.secondTable && !hasSecondTableUsed ? (
           <TableView
             data={exerciseData.secondTable}
             title="Table Secondaire"
@@ -232,8 +274,8 @@ function App() {
         <div className="flex items-end gap-2">
           {allCards.map((card, index) => {
             const isUsed = isCardInPipeline(card.id);
-            const rotation = (index - (allCards.length - 1) / 2) * 5;
-            const yOffset = Math.abs(index - (allCards.length - 1) / 2) * 12;
+            const rotation = (index - (allCards.length - 1) / 2) * 4;
+            const yOffset = Math.abs(index - (allCards.length - 1) / 2) * 8;
 
             return (
               <div

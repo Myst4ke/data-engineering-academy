@@ -4,12 +4,13 @@ import Card from './components/Card';
 import Pipeline from './components/Pipeline';
 import SuccessModal from './components/SuccessModal';
 import HintPopup from './components/HintPopup';
+import SolutionPopup from './components/SolutionPopup';
 import ParamInputPopup from './components/ParamInputPopup';
 import HomeScreen from './components/HomeScreen';
 import { loadExercise, getExerciseList } from './utils/csvParser';
 import { getAllCards, getCardDisplayInfo } from './utils/cardDefinitions';
 import { applyPipeline, tablesEqual } from './transformations';
-import { markExerciseCompleted } from './utils/progress';
+import { markExerciseCompleted, saveSolution, getSolution, isExerciseCompleted } from './utils/progress';
 import './index.css';
 
 function App() {
@@ -29,6 +30,10 @@ function App() {
   // Pending card waiting for params input
   const [pendingCard, setPendingCard] = useState(null);
 
+  // Show saved solution popup
+  const [showSolutionPopup, setShowSolutionPopup] = useState(false);
+  const [savedSolution, setSavedSolution] = useState(null);
+
   useEffect(() => {
     getExerciseList().then((list) => {
       setExercises(list);
@@ -44,6 +49,11 @@ function App() {
       setPipeline([]);
       setHasWon(false);
       setShowSuccess(false);
+      setShowSolutionPopup(false);
+
+      // Load saved solution if exists
+      const solution = getSolution(currentExerciseId);
+      setSavedSolution(solution);
 
       try {
         const data = await loadExercise(currentExerciseId);
@@ -72,8 +82,10 @@ function App() {
     if (pipeline.length > 0 && tablesEqual(newTable, exerciseData.outputTable)) {
       if (!hasWon) {
         setHasWon(true);
-        // Save progress
+        // Save progress and solution
         markExerciseCompleted(currentExerciseId);
+        saveSolution(currentExerciseId, pipeline);
+        setSavedSolution(pipeline.map(card => ({ type: card.type, params: card.params || null })));
         setTimeout(() => setShowSuccess(true), 600);
       }
     } else {
@@ -175,6 +187,13 @@ function App() {
     setShowSuccess(false);
   }, [exercises, currentExerciseId]);
 
+  const handleApplySolution = useCallback((solutionCards) => {
+    setPipeline(solutionCards);
+  }, []);
+
+  // Check if current exercise was previously completed
+  const wasCompleted = currentExerciseId && isExerciseCompleted(currentExerciseId);
+
   // Show loading while fetching exercise list
   if (loading && exercises.length === 0) {
     return (
@@ -228,6 +247,16 @@ function App() {
           <span className="text-slate-600 text-xs sm:text-sm font-medium hidden sm:block">
             {exerciseData?.config?.title}
           </span>
+          {/* Show solution button if exercise was completed before */}
+          {wasCompleted && savedSolution && savedSolution.length > 0 && (
+            <button
+              onClick={() => setShowSolutionPopup(true)}
+              className="game-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold flex items-center gap-1 text-emerald-600"
+              title="Voir ma solution précédente"
+            >
+              💡 <span className="hidden sm:inline">Solution</span>
+            </button>
+          )}
           <HintPopup hint={exerciseData?.config?.hint} />
         </div>
       </div>
@@ -335,6 +364,15 @@ function App() {
           tableData={currentTable}
           onConfirm={handleParamConfirm}
           onCancel={handleParamCancel}
+        />
+      )}
+
+      {/* SOLUTION POPUP */}
+      {showSolutionPopup && savedSolution && (
+        <SolutionPopup
+          solution={savedSolution}
+          onClose={() => setShowSolutionPopup(false)}
+          onApply={handleApplySolution}
         />
       )}
     </div>

@@ -85,3 +85,46 @@ export function isTierUnlocked(tier, exercisesByTier) {
 export function resetProgress() {
   saveProgress(defaultState);
 }
+
+// Solution storage
+const SOLUTIONS_KEY = 'dataDojoSolutions';
+
+function getSolutions() {
+  try {
+    const stored = localStorage.getItem(SOLUTIONS_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Error reading solutions:', e);
+  }
+  return {};
+}
+
+function saveSolutions(solutions) {
+  try {
+    localStorage.setItem(SOLUTIONS_KEY, JSON.stringify(solutions));
+  } catch (e) {
+    console.error('Error saving solutions:', e);
+  }
+}
+
+export function saveSolution(exerciseId, pipeline) {
+  const solutions = getSolutions();
+  // Store minimal card info (type and params)
+  solutions[exerciseId] = pipeline.map(card => ({
+    type: card.type,
+    params: card.params || null,
+  }));
+  saveSolutions(solutions);
+}
+
+export function getSolution(exerciseId) {
+  const solutions = getSolutions();
+  return solutions[exerciseId] || null;
+}
+
+export function hasSolution(exerciseId) {
+  const solutions = getSolutions();
+  return !!solutions[exerciseId];
+}

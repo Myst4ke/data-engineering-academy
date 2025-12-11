@@ -18,33 +18,24 @@ export default function Pipeline({ cards, onRemoveCard, onReset }) {
       </div>
 
       {cards.length === 0 ? (
-        <div className="flex-1 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-slate-50 min-h-[80px] sm:min-h-[120px] md:min-h-[180px]">
+        <div className="flex-1 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-slate-50 min-h-[60px] sm:min-h-[80px] md:min-h-[100px]">
           <p className="text-slate-500 text-xs sm:text-sm font-medium text-center px-2">
             ↓ Sélectionnez des cartes ↓
           </p>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-start sm:justify-center gap-1 sm:gap-3 overflow-x-auto py-2 min-h-[80px] sm:min-h-[120px] md:min-h-[180px] px-1">
+        <div className="flex-1 flex items-center justify-start sm:justify-center gap-1 sm:gap-3 overflow-x-auto py-1 min-h-[60px] sm:min-h-[80px] md:min-h-[100px] px-1">
           {cards.map((card, index) => (
             <div key={`${card.id}-${index}`} className="flex items-center shrink-0">
-              {/* Small cards on mobile, normal on desktop */}
-              <div className="block md:hidden">
-                <Card
-                  cardInfo={card}
-                  isInPipeline={true}
-                  onRemove={onRemoveCard}
-                  small
-                />
-              </div>
-              <div className="hidden md:block">
-                <Card
-                  cardInfo={card}
-                  isInPipeline={true}
-                  onRemove={onRemoveCard}
-                />
-              </div>
+              {/* Small cards everywhere to save space */}
+              <Card
+                cardInfo={card}
+                isInPipeline={true}
+                onRemove={onRemoveCard}
+                small
+              />
               {index < cards.length - 1 && (
-                <span className="mx-1 sm:mx-2 text-lg sm:text-2xl text-amber-500 font-bold">→</span>
+                <span className="mx-1 sm:mx-2 text-lg sm:text-xl text-amber-500 font-bold">→</span>
               )}
             </div>
           ))}

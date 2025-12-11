@@ -261,7 +261,7 @@ function App() {
       </div>
 
       {/* PIPELINE */}
-      <div className="flex-1 min-h-[120px] sm:min-h-[180px] md:min-h-[220px]">
+      <div className="flex-1 min-h-[80px] sm:min-h-[100px] md:min-h-[120px]">
         <Pipeline
           cards={pipeline}
           onRemoveCard={handleRemoveCard}
@@ -289,7 +289,7 @@ function App() {
         </div>
 
         {/* Desktop: fanned cards */}
-        <div className="hidden md:flex items-end justify-center h-[180px]">
+        <div className="hidden md:flex items-end justify-center h-[160px]">
           <div className="flex items-end gap-2">
             {allCards.map((card, index) => {
               const isUsed = isCardInPipeline(card.id);

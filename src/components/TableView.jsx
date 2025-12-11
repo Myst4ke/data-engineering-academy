@@ -58,8 +58,8 @@ export default function TableView({
         </span>
       </div>
 
-      {/* Table with max-height on mobile to allow scrolling */}
-      <div className="overflow-x-auto max-h-[150px] sm:max-h-[200px] md:max-h-none overflow-y-auto">
+      {/* Table with max-height to allow scrolling */}
+      <div className="overflow-x-auto max-h-[120px] sm:max-h-[150px] md:max-h-[180px] overflow-y-auto">
         <table className="game-table text-xs sm:text-sm">
           <thead>
             <tr>

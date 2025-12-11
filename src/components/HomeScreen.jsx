@@ -150,8 +150,8 @@ export default function HomeScreen({ exercises, onSelectExercise }) {
                         isCompleted ? (
                           <span className="text-base sm:text-lg">✓</span>
                         ) : (
-                          <span className="text-[10px] sm:text-xs text-slate-400 truncate max-w-full px-0.5">
-                            {exercise.title.slice(0, 8)}
+                          <span className="text-[10px] sm:text-xs text-slate-400 text-center leading-tight">
+                            {exercise.title}
                           </span>
                         )
                       ) : (

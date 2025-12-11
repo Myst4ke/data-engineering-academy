@@ -97,25 +97,25 @@ export async function loadExercise(exerciseId) {
 export async function getExerciseList() {
   return [
     // Beginner (1-6)
-    { id: 'ex-01', title: 'Doublons Articles', difficulty: 1 },
-    { id: 'ex-02', title: 'Données Complètes', difficulty: 1 },
-    { id: 'ex-03', title: 'Tri par Prix', difficulty: 1 },
-    { id: 'ex-04', title: 'Colonne Inutile', difficulty: 1 },
-    { id: 'ex-05', title: 'Filtrer Actifs', difficulty: 1 },
-    { id: 'ex-06', title: 'Renommer Colonne', difficulty: 1 },
+    { id: 'ex-01', title: 'Doublons', difficulty: 1 },
+    { id: 'ex-02', title: 'Complet', difficulty: 1 },
+    { id: 'ex-03', title: 'Tri Prix', difficulty: 1 },
+    { id: 'ex-04', title: 'Suppr Col', difficulty: 1 },
+    { id: 'ex-05', title: 'Filtrer', difficulty: 1 },
+    { id: 'ex-06', title: 'Renommer', difficulty: 1 },
     // Intermediate (7-12)
-    { id: 'ex-07', title: 'Nettoyage Complet', difficulty: 2 },
-    { id: 'ex-08', title: 'Tri Filtré', difficulty: 2 },
-    { id: 'ex-09', title: 'Sélection Nette', difficulty: 2 },
-    { id: 'ex-10', title: 'Remplir Vides', difficulty: 2 },
-    { id: 'ex-11', title: 'Fusion Tables', difficulty: 2 },
-    { id: 'ex-12', title: 'Multi-Suppression', difficulty: 2 },
+    { id: 'ex-07', title: 'Nettoyer', difficulty: 2 },
+    { id: 'ex-08', title: 'Tri+Filtre', difficulty: 2 },
+    { id: 'ex-09', title: 'Sélection', difficulty: 2 },
+    { id: 'ex-10', title: 'Remplir', difficulty: 2 },
+    { id: 'ex-11', title: 'Fusion', difficulty: 2 },
+    { id: 'ex-12', title: 'Multi-Sup', difficulty: 2 },
     // Expert (13-18)
-    { id: 'ex-13', title: 'Pipeline Complet', difficulty: 3 },
-    { id: 'ex-14', title: 'Fusion Avancée', difficulty: 3 },
-    { id: 'ex-15', title: 'ETL Basique', difficulty: 3 },
-    { id: 'ex-16', title: 'Nettoyage Pro', difficulty: 3 },
-    { id: 'ex-17', title: 'Union & Clean', difficulty: 3 },
-    { id: 'ex-18', title: 'Master Data', difficulty: 3 },
+    { id: 'ex-13', title: 'Pipeline', difficulty: 3 },
+    { id: 'ex-14', title: 'Join++', difficulty: 3 },
+    { id: 'ex-15', title: 'ETL', difficulty: 3 },
+    { id: 'ex-16', title: 'Clean Pro', difficulty: 3 },
+    { id: 'ex-17', title: 'Union', difficulty: 3 },
+    { id: 'ex-18', title: 'Master', difficulty: 3 },
   ];
 }

@@ -21,7 +21,8 @@ export default function Card({
   isInPipeline = false,
   onRemove = null,
   disabled = false,
-  small = false,
+  size = 'normal', // 'small', 'medium', 'normal'
+  small = false, // deprecated, use size='small'
 }) {
   const [showInfo, setShowInfo] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -29,6 +30,9 @@ export default function Card({
   if (!cardInfo) return null;
 
   const colors = CARD_COLORS[cardInfo.type] || CARD_COLORS.filter;
+
+  // Handle deprecated small prop
+  const effectiveSize = small ? 'small' : size;
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -51,20 +55,48 @@ export default function Card({
     if (onRemove) onRemove(cardInfo);
   };
 
-  // Card sizes
-  const cardSize = small ? 'w-20 h-28' : 'w-32 h-44';
-  const iconSize = small ? 'text-2xl mt-1' : 'text-4xl mt-2';
-  const nameSize = small ? 'text-[10px]' : 'text-sm';
-  const techNameSize = small ? 'text-[8px]' : 'text-[11px]';
-  const buttonSize = small ? 'w-4 h-4 text-[8px]' : 'w-6 h-6 text-[11px]';
-  const borderWidth = small ? '2px' : '3px';
+  // Card sizes based on size prop
+  const sizes = {
+    small: {
+      card: 'w-20 h-28',
+      icon: 'text-2xl mt-1',
+      name: 'text-[10px]',
+      techName: 'text-[8px]',
+      button: 'w-4 h-4 text-[8px]',
+      border: '2px',
+      padding: 'p-1',
+      showTechName: false,
+    },
+    medium: {
+      card: 'w-24 h-32',
+      icon: 'text-3xl mt-1',
+      name: 'text-xs',
+      techName: 'text-[9px]',
+      button: 'w-5 h-5 text-[9px]',
+      border: '2px',
+      padding: 'p-1.5',
+      showTechName: false,
+    },
+    normal: {
+      card: 'w-32 h-44',
+      icon: 'text-4xl mt-2',
+      name: 'text-sm',
+      techName: 'text-[11px]',
+      button: 'w-6 h-6 text-[11px]',
+      border: '3px',
+      padding: 'p-2',
+      showTechName: true,
+    },
+  };
+
+  const s = sizes[effectiveSize] || sizes.normal;
 
   return (
     <>
       <div
         onClick={handleClick}
         className={`
-          relative ${cardSize} cursor-pointer select-none
+          relative ${s.card} cursor-pointer select-none
           ${!disabled && !isInPipeline ? 'card-hover' : ''}
           ${isSelecting ? 'card-select' : ''}
           ${isInPipeline ? 'card-enter-pipeline' : ''}
@@ -79,7 +111,7 @@ export default function Card({
             transition-all duration-200
           `}
           style={{
-            border: `${borderWidth} solid ${colors.border}`,
+            border: `${s.border} solid ${colors.border}`,
             boxShadow: disabled ? 'none' : `
               0 6px 20px rgba(0, 0, 0, 0.15),
               0 0 25px ${colors.glow}
@@ -95,13 +127,13 @@ export default function Card({
           />
 
           {/* Card content */}
-          <div className={`relative h-full flex flex-col ${small ? 'p-1' : 'p-2'} text-white`}>
+          <div className={`relative h-full flex flex-col ${s.padding} text-white`}>
             {/* Top buttons row */}
             <div className="flex justify-between items-start">
               {/* Info button - TOP LEFT */}
               <button
                 onClick={handleInfoClick}
-                className={`${buttonSize} rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center font-bold transition-colors backdrop-blur-sm shadow-sm`}
+                className={`${s.button} rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center font-bold transition-colors backdrop-blur-sm shadow-sm`}
                 title="Info"
               >
                 ?
@@ -111,29 +143,29 @@ export default function Card({
               {isInPipeline && onRemove ? (
                 <button
                   onClick={handleRemove}
-                  className={`${buttonSize} rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 font-bold shadow-md transition-colors`}
+                  className={`${s.button} rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 font-bold shadow-md transition-colors`}
                   title="Retirer"
                 >
                   ×
                 </button>
               ) : (
-                <div className={buttonSize} />
+                <div className={s.button} />
               )}
             </div>
 
             {/* Icon */}
-            <div className={`text-center ${iconSize} drop-shadow-lg`}>
+            <div className={`text-center ${s.icon} drop-shadow-lg`}>
               {cardInfo.icon}
             </div>
 
             {/* Name */}
-            <div className={`text-center font-bold ${nameSize} mt-1 drop-shadow-md leading-tight`}>
+            <div className={`text-center font-bold ${s.name} mt-1 drop-shadow-md leading-tight`}>
               {cardInfo.name}
             </div>
 
-            {/* Technical name - hide on small */}
-            {!small && (
-              <div className={`text-center ${techNameSize} opacity-80 font-mono`}>
+            {/* Technical name - hide on small/medium */}
+            {s.showTechName && (
+              <div className={`text-center ${s.techName} opacity-80 font-mono`}>
                 {cardInfo.shortName}
               </div>
             )}

@@ -261,7 +261,7 @@ function App() {
       </div>
 
       {/* PIPELINE */}
-      <div className="flex-1 min-h-[80px] sm:min-h-[100px] md:min-h-[120px]">
+      <div className="flex-1 min-h-[80px] sm:min-h-[100px] md:min-h-[150px]">
         <Pipeline
           cards={pipeline}
           onRemoveCard={handleRemoveCard}

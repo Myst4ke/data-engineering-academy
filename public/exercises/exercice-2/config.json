@@ -1,0 +1,25 @@
+{
+  "id": "exercice-2",
+  "title": "Deduplication des Familles",
+  "description": "Nettoyez la table des familles d'articles en supprimant les lignes incompletes, la colonne de commentaire, et les doublons.",
+  "difficulty": 2,
+  "availableCards": [
+    {
+      "id": "card-1",
+      "type": "delete_na"
+    },
+    {
+      "id": "card-2",
+      "type": "delete",
+      "params": {
+        "column": "Commentaire ADV"
+      }
+    },
+    {
+      "id": "card-3",
+      "type": "drop_duplicates"
+    }
+  ],
+  "hasSecondTable": false,
+  "hint": "L'ordre des operations est important ! Supprimez d'abord les lignes vides."
+}

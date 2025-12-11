@@ -1,0 +1,5 @@
+Article SKU,Famille d'article,Prix de l'article,Article dormant
+ABC,Stellair,125,NON
+DEF,Logiciels,750,NON
+ABC,Stellair,75,OUI
+XXX,,,

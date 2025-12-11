@@ -1,0 +1,25 @@
+{
+  "id": "exercice-3",
+  "title": "Jointure des Tables",
+  "description": "Combinez la table des articles avec la table des familles en utilisant une jointure, puis triez le resultat.",
+  "difficulty": 3,
+  "availableCards": [
+    {
+      "id": "card-1",
+      "type": "join",
+      "params": {
+        "column": "Famille d'article"
+      }
+    },
+    {
+      "id": "card-2",
+      "type": "sort",
+      "params": {
+        "column": "Famille d'article",
+        "order": "asc"
+      }
+    }
+  ],
+  "hasSecondTable": true,
+  "hint": "Joignez d'abord les tables sur la colonne commune, puis triez le resultat."
+}

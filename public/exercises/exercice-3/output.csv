@@ -1,0 +1,5 @@
+Article SKU,Famille d'article,Prix de l'article,Categorie comptable,TVA %
+DEF,Logiciels,750,DOM-TOM,0
+DEF,Logiciels,750,FRANCE,20
+ABC,Stellair,125,FRANCE,10
+ABC,Stellair,125,EUROPE,20

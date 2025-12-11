@@ -1,0 +1,29 @@
+{
+  "id": "exercice-1",
+  "title": "Nettoyage des Articles",
+  "description": "Nettoyez la table des articles en supprimant les lignes vides, en filtrant les articles actifs, puis en retirant la colonne inutile.",
+  "difficulty": 1,
+  "availableCards": [
+    {
+      "id": "card-1",
+      "type": "delete_na"
+    },
+    {
+      "id": "card-2",
+      "type": "filter",
+      "params": {
+        "column": "Article dormant",
+        "value": "NON"
+      }
+    },
+    {
+      "id": "card-3",
+      "type": "delete",
+      "params": {
+        "column": "Article dormant"
+      }
+    }
+  ],
+  "hasSecondTable": false,
+  "hint": "Commencez par supprimer les lignes vides, puis filtrez les articles non dormants."
+}

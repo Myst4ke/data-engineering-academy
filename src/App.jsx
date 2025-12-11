@@ -210,7 +210,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col p-3 gap-2 relative z-10">
+    <div className="game-view flex flex-col p-3 gap-2 relative z-10">
       {/* HEADER */}
       <div className="flex-none flex items-center justify-between">
         <div className="flex items-center gap-4">

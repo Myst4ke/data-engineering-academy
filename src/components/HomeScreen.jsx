@@ -40,14 +40,14 @@ export default function HomeScreen({ exercises, onSelectExercise }) {
   const totalExercises = exercises.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+    <div className="home-view min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6 pb-12">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
             DATA DOJO
           </h1>
-          <p className="text-slate-500 text-lg font-medium">
+          <p className="text-slate-500 text-sm sm:text-lg font-medium">
             L'art de la transformation de données
           </p>
 
@@ -94,25 +94,25 @@ export default function HomeScreen({ exercises, onSelectExercise }) {
           return (
             <div key={tier.id} className="mb-8">
               {/* Tier Header */}
-              <div className={`flex items-center gap-3 mb-4 ${!tierUnlocked ? 'opacity-50' : ''}`}>
+              <div className={`flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4 ${!tierUnlocked ? 'opacity-50' : ''}`}>
                 <div className="flex">
                   {Array.from({ length: tier.stars }).map((_, i) => (
-                    <span key={i} className="text-2xl">⭐</span>
+                    <span key={i} className="text-lg sm:text-2xl">⭐</span>
                   ))}
                 </div>
-                <h2 className="text-xl font-bold text-slate-700">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-700">
                   {tier.name}
                 </h2>
-                <span className="text-sm text-slate-500 font-medium">
+                <span className="text-xs sm:text-sm text-slate-500 font-medium">
                   ({completedInTier}/{tierExercises.length})
                 </span>
                 {!tierUnlocked && (
-                  <span className="ml-2 text-2xl">🔒</span>
+                  <span className="ml-1 sm:ml-2 text-lg sm:text-2xl">🔒</span>
                 )}
               </div>
 
-              {/* Exercise Grid */}
-              <div className="grid grid-cols-6 gap-3">
+              {/* Exercise Grid - Responsive */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
                 {tierExercises.map((exercise, index) => {
                   const isCompleted = completedExercises.includes(exercise.id);
                   const exerciseNumber = index + 1 + (tier.id === 'intermediate' ? 6 : tier.id === 'expert' ? 12 : 0);
@@ -123,8 +123,8 @@ export default function HomeScreen({ exercises, onSelectExercise }) {
                       onClick={() => handleExerciseClick(exercise, tierUnlocked)}
                       disabled={!tierUnlocked}
                       className={`
-                        relative aspect-square rounded-xl border-3 transition-all
-                        flex flex-col items-center justify-center gap-1
+                        relative aspect-square rounded-xl border-2 sm:border-3 transition-all
+                        flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-2
                         ${tierUnlocked
                           ? isCompleted
                             ? 'bg-gradient-to-br from-emerald-100 to-green-100 border-emerald-400 hover:scale-105 cursor-pointer shadow-md'
@@ -135,7 +135,7 @@ export default function HomeScreen({ exercises, onSelectExercise }) {
                       title={exercise.title}
                     >
                       {/* Exercise Number */}
-                      <span className={`text-2xl font-bold ${
+                      <span className={`text-xl sm:text-2xl font-bold ${
                         tierUnlocked
                           ? isCompleted
                             ? 'text-emerald-600'
@@ -148,14 +148,14 @@ export default function HomeScreen({ exercises, onSelectExercise }) {
                       {/* Status Icon */}
                       {tierUnlocked ? (
                         isCompleted ? (
-                          <span className="text-lg">✓</span>
+                          <span className="text-base sm:text-lg">✓</span>
                         ) : (
-                          <span className="text-xs text-slate-400 truncate max-w-full px-1">
-                            {exercise.title.slice(0, 10)}
+                          <span className="text-[10px] sm:text-xs text-slate-400 truncate max-w-full px-0.5">
+                            {exercise.title.slice(0, 8)}
                           </span>
                         )
                       ) : (
-                        <span className="text-lg">🔒</span>
+                        <span className="text-base sm:text-lg">🔒</span>
                       )}
                     </button>
                   );

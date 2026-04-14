@@ -1,0 +1,9 @@
+{
+  "id": "ex-22",
+  "title": "Clean+Filt",
+  "description": "Supprimez les lignes vides puis filtrez par Categorie Electronique.",
+  "difficulty": 2,
+  "hasSecondTable": false,
+  "hint": "Supprimez les lignes vides puis filtrez par Categorie Electronique.",
+  "optimalSteps": 2
+}

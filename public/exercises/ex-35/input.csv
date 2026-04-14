@@ -1,0 +1,7 @@
+ref,nom_produit,cat,prix,stock,note
+P01,Clavier K1,periph,45,120,
+P02,Souris M2,periph,25,80,ok
+P03,Ecran E3,ecran,350,15,ok
+P04,Cable C4,access,8,200,ok
+P05,Casque H5,periph,75,,ok
+P06,Hub USB,access,20,150,

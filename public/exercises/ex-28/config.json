@@ -1,0 +1,9 @@
+{
+  "id": "ex-28",
+  "title": "Join++",
+  "description": "Joignez sur CodeProduit, supprimez Categorie, triez par Prix croissant.",
+  "difficulty": 3,
+  "hasSecondTable": true,
+  "hint": "Joignez sur CodeProduit, supprimez Categorie, triez par Prix croissant.",
+  "optimalSteps": 3
+}

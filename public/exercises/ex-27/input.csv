@@ -1,0 +1,7 @@
+ID,Nom,Region,CA,Note
+1,Alice,Nord,50000,A
+2,Bob,Sud,,B
+3,Clara,Nord,75000,A
+4,David,Sud,30000,C
+5,Eve,Nord,60000,B
+6,Frank,Sud,45000,A

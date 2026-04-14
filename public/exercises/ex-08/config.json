@@ -4,5 +4,6 @@
   "description": "Filtrez les ventes de la région 'Nord' puis triez par montant décroissant.",
   "difficulty": 2,
   "hasSecondTable": false,
-  "hint": "D'abord 'Filtrer' sur Region=Nord, puis 'Trier' par Montant décroissant."
+  "hint": "D'abord 'Filtrer' sur Region=Nord, puis 'Trier' par Montant décroissant.",
+  "optimalSteps": 2
 }

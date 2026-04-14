@@ -234,7 +234,9 @@ export function getCardDisplayInfo(card) {
 
   let paramLabel = '';
   if (card.params) {
-    if (card.type === 'filter') {
+    if (card.type === 'drop_duplicates') {
+      paramLabel = card.params.columns ? card.params.columns.join(', ') : 'toutes';
+    } else if (card.type === 'filter') {
       paramLabel = `${card.params.column} = ${card.params.value}`;
     } else if (card.type === 'sort') {
       const orderLabel = card.params.order === 'desc' ? '↓' : '↑';

@@ -1,0 +1,9 @@
+{
+  "id": "ex-32",
+  "title": "ETL Full",
+  "description": "Supprimez les vides, filtrez Disponible=oui, renommez PrixVente en Prix, sélectionnez Code/Produit/Prix, triez par Prix croissant.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Supprimez les vides, filtrez Disponible=oui, renommez PrixVente en Prix, sélectionnez Code/Produit/Prix, triez par Prix croissant.",
+  "optimalSteps": 5
+}

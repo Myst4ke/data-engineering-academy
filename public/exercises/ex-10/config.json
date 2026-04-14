@@ -4,5 +4,6 @@
   "description": "Remplissez les stocks vides avec '0' puis filtrez les produits disponibles.",
   "difficulty": 2,
   "hasSecondTable": false,
-  "hint": "Utilisez 'Remplir Vides' sur Stock avec '0', puis filtrez Status=Disponible."
+  "hint": "Utilisez 'Remplir Vides' sur Stock avec '0', puis filtrez Status=Disponible.",
+  "optimalSteps": 2
 }

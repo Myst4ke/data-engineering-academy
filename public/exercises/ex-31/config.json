@@ -1,0 +1,9 @@
+{
+  "id": "ex-31",
+  "title": "Clean Expert",
+  "description": "Supprimez les vides, les doublons, filtrez Categorie=Deco, triez par Prix croissant.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Supprimez les vides, les doublons, filtrez Categorie=Deco, triez par Prix croissant, puis supprimez la colonne Stock.",
+  "optimalSteps": 5
+}

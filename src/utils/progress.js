@@ -67,16 +67,24 @@ export function isTierUnlocked(tier, exercisesByTier) {
   // Beginner is always unlocked
   if (tier === 'beginner') return true;
 
-  // Intermediate unlocks when all beginner completed
+  // Intermediate unlocks when all beginner completed (6/6)
   if (tier === 'intermediate') {
     const beginnerIds = exercisesByTier.beginner.map(e => e.id);
     return beginnerIds.every(id => progress.completed.includes(id));
   }
 
-  // Expert unlocks when all intermediate completed
-  if (tier === 'expert') {
+  // Hard unlocks when 6 intermediate completed (6/12)
+  if (tier === 'hard') {
     const intermediateIds = exercisesByTier.intermediate.map(e => e.id);
-    return intermediateIds.every(id => progress.completed.includes(id));
+    const completedCount = intermediateIds.filter(id => progress.completed.includes(id)).length;
+    return completedCount >= 6;
+  }
+
+  // Expert unlocks when 6 hard completed (6/12)
+  if (tier === 'expert') {
+    const hardIds = exercisesByTier.hard.map(e => e.id);
+    const completedCount = hardIds.filter(id => progress.completed.includes(id)).length;
+    return completedCount >= 6;
   }
 
   return false;
@@ -127,4 +135,27 @@ export function getSolution(exerciseId) {
 export function hasSolution(exerciseId) {
   const solutions = getSolutions();
   return !!solutions[exerciseId];
+}
+
+// Star rating storage
+const RATINGS_KEY = 'dataDojoRatings';
+
+function getRatings() {
+  try {
+    const stored = localStorage.getItem(RATINGS_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch (e) { /* ignore */ }
+  return {};
+}
+
+export function saveBestRating(exerciseId, stars) {
+  const ratings = getRatings();
+  if (!ratings[exerciseId] || stars > ratings[exerciseId]) {
+    ratings[exerciseId] = stars;
+    try { localStorage.setItem(RATINGS_KEY, JSON.stringify(ratings)); } catch (e) { /* ignore */ }
+  }
+}
+
+export function getBestRating(exerciseId) {
+  return getRatings()[exerciseId] || 0;
 }

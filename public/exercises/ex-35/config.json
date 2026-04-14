@@ -1,0 +1,9 @@
+{
+  "id": "ex-35",
+  "title": "Transform",
+  "description": "Remplissez les notes vides par 'ok', supprimez les lignes vides restantes, filtrez cat=periph, triez par prix décroissant, supprimez la colonne note.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Remplissez les notes vides par 'ok', supprimez les lignes vides restantes, filtrez cat=periph, triez par prix décroissant, supprimez la colonne note.",
+  "optimalSteps": 5
+}

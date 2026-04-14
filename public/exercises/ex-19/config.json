@@ -1,0 +1,9 @@
+{
+  "id": "ex-19",
+  "title": "Tri + Suppr",
+  "description": "Triez par Prix décroissant puis supprimez la colonne Note.",
+  "difficulty": 2,
+  "hasSecondTable": false,
+  "hint": "Triez par Prix décroissant puis supprimez la colonne Note.",
+  "optimalSteps": 2
+}

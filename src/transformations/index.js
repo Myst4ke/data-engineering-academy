@@ -5,15 +5,18 @@
  */
 
 /**
- * drop_duplicates - Remove duplicate rows (exact matches only)
+ * drop_duplicates - Remove duplicate rows
+ * If params.columns is provided, only those columns are used to detect duplicates (keeps first occurrence)
+ * Otherwise, all columns are compared (exact match)
  */
-export function dropDuplicates(table) {
+export function dropDuplicates(table, params) {
+  const subset = params?.columns;
   const seen = new Set();
   return table.filter(row => {
-    const key = JSON.stringify(row);
-    if (seen.has(key)) {
-      return false;
-    }
+    const key = subset
+      ? JSON.stringify(subset.map(c => row[c]))
+      : JSON.stringify(row);
+    if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
@@ -176,7 +179,7 @@ export function applyTransformation(table, card, secondTable = null) {
 
   switch (type) {
     case 'drop_duplicates':
-      return dropDuplicates(table);
+      return dropDuplicates(table, params);
     case 'sort':
       return sort(table, params);
     case 'delete':
@@ -225,16 +228,26 @@ export function tablesEqual(table1, table2) {
   if (table1.length !== table2.length) return false;
   if (table1.length === 0) return true;
 
-  const cols1 = Object.keys(table1[0]).sort();
-  const cols2 = Object.keys(table2[0]).sort();
+  const cols1 = Object.keys(table1[0]);
+  const cols2 = Object.keys(table2[0]);
 
   if (cols1.length !== cols2.length) return false;
-  if (!cols1.every((col, i) => col === cols2[i])) return false;
+
+  // Case-insensitive column matching: build a mapping from table1 cols to table2 cols
+  const colMap = new Map();
+  const usedCols2 = new Set();
+  for (const c1 of cols1) {
+    const match = cols2.find(c2 => !usedCols2.has(c2) && c1.toLowerCase() === c2.toLowerCase());
+    if (!match) return false;
+    colMap.set(c1, match);
+    usedCols2.add(match);
+  }
 
   for (let i = 0; i < table1.length; i++) {
-    for (const col of cols1) {
-      const val1 = String(table1[i][col] ?? '').trim();
-      const val2 = String(table2[i][col] ?? '').trim();
+    for (const col1 of cols1) {
+      const col2 = colMap.get(col1);
+      const val1 = String(table1[i][col1] ?? '').trim();
+      const val2 = String(table2[i][col2] ?? '').trim();
       if (val1 !== val2) return false;
     }
   }

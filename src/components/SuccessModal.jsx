@@ -1,6 +1,24 @@
 import { useEffect, useState } from 'react';
 
-export default function SuccessModal({ isOpen, onClose, onNextExercise, exerciseTitle }) {
+function StarDisplay({ rating, maxStars = 3 }) {
+  return (
+    <div className="flex items-center justify-center gap-1 my-3">
+      {Array.from({ length: maxStars }, (_, i) => (
+        <span
+          key={i}
+          className={`text-3xl transition-all duration-300 ${
+            i < rating ? 'scale-110' : 'opacity-30 grayscale'
+          }`}
+          style={{ animationDelay: `${i * 0.15}s` }}
+        >
+          {i < rating ? '\u2B50' : '\u2606'}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export default function SuccessModal({ isOpen, onClose, onNextExercise, exerciseTitle, starRating = 3, cardCount = 0, optimalSteps = 0 }) {
   const [confetti, setConfetti] = useState([]);
 
   useEffect(() => {
@@ -44,7 +62,7 @@ export default function SuccessModal({ isOpen, onClose, onNextExercise, exercise
       <div className="game-panel max-w-sm w-full mx-4 text-center overflow-hidden">
         {/* Header */}
         <div className="p-6 bg-gradient-to-b from-emerald-100 to-transparent">
-          <div className="text-6xl mb-3">🏆</div>
+          <div className="text-6xl mb-3">{'\uD83C\uDFC6'}</div>
           <h2 className="text-3xl font-bold text-emerald-600">
             VICTOIRE !
           </h2>
@@ -52,16 +70,26 @@ export default function SuccessModal({ isOpen, onClose, onNextExercise, exercise
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-slate-600 mb-6">
-            Exercice <span className="text-slate-800 font-bold">{exerciseTitle}</span> complété !
+          <p className="text-slate-600 mb-2">
+            Exercice <span className="text-slate-800 font-bold">{exerciseTitle}</span> complete !
           </p>
+
+          {/* Star rating */}
+          <StarDisplay rating={starRating} />
+
+          {/* Card count vs optimal */}
+          {optimalSteps > 0 && (
+            <p className="text-sm text-slate-500 mb-4">
+              {cardCount} carte{cardCount > 1 ? 's' : ''} utilisee{cardCount > 1 ? 's' : ''} — optimal : {optimalSteps}
+            </p>
+          )}
 
           <div className="space-y-3">
             <button
               onClick={onNextExercise}
               className="game-btn w-full py-3 text-amber-600 hover:text-amber-700 font-semibold border-amber-400"
             >
-              Exercice Suivant →
+              Exercice Suivant
             </button>
             <button
               onClick={onClose}

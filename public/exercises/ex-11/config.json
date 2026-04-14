@@ -4,5 +4,6 @@
   "description": "Joignez les produits avec leurs prix en utilisant le SKU.",
   "difficulty": 2,
   "hasSecondTable": true,
-  "hint": "Utilisez la carte 'Joindre' sur la colonne SKU commune aux deux tables."
+  "hint": "Utilisez la carte 'Joindre' sur la colonne SKU commune aux deux tables.",
+  "optimalSteps": 1
 }

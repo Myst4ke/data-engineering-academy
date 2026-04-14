@@ -1,0 +1,9 @@
+{
+  "id": "ex-27",
+  "title": "Analyse",
+  "description": "Supprimez les vides, filtrez Region=Nord, triez par CA décroissant, supprimez la colonne Note.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Supprimez les vides, filtrez Region=Nord, triez par CA décroissant, supprimez la colonne Note.",
+  "optimalSteps": 4
+}

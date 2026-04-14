@@ -4,5 +4,6 @@
   "description": "Renommez la colonne 'Qte' en 'Quantite' pour plus de clarté.",
   "difficulty": 1,
   "hasSecondTable": false,
-  "hint": "Utilisez la carte 'Renommer' pour changer 'Qte' en 'Quantite'."
+  "hint": "Utilisez la carte 'Renommer' pour changer 'Qte' en 'Quantite'.",
+  "optimalSteps": 1
 }

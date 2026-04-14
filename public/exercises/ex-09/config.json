@@ -4,5 +4,6 @@
   "description": "Gardez seulement les colonnes Nom et Departement, puis triez par Nom.",
   "difficulty": 2,
   "hasSecondTable": false,
-  "hint": "Utilisez 'Sélectionner' pour garder Nom et Departement, puis 'Trier' par Nom."
+  "hint": "Utilisez 'Sélectionner' pour garder Nom et Departement, puis 'Trier' par Nom.",
+  "optimalSteps": 2
 }

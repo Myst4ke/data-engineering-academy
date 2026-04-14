@@ -4,5 +4,6 @@
   "description": "Supprimez les doublons et les lignes vides pour nettoyer les commandes.",
   "difficulty": 2,
   "hasSecondTable": false,
-  "hint": "Combinez 'Supprimer Doublons' et 'Suppr. Vides' pour un nettoyage complet."
+  "hint": "Combinez 'Supprimer Doublons' et 'Suppr. Vides' pour un nettoyage complet.",
+  "optimalSteps": 2
 }

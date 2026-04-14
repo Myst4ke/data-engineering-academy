@@ -1,0 +1,9 @@
+{
+  "id": "ex-29",
+  "title": "Dbl Rename",
+  "description": "Renommez qte en Quantite, pu en PrixUnitaire, puis triez par PrixUnitaire croissant.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Renommez qte en Quantite, pu en PrixUnitaire, puis triez par PrixUnitaire croissant.",
+  "optimalSteps": 3
+}

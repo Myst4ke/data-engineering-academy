@@ -1,0 +1,9 @@
+{
+  "id": "ex-33",
+  "title": "Fus+Clean",
+  "description": "Joignez sur ID, supprimez les vides, triez par Resultat décroissant, sélectionnez Nom/Service/Resultat.",
+  "difficulty": 3,
+  "hasSecondTable": true,
+  "hint": "Joignez sur ID, supprimez les vides, triez par Resultat décroissant, renommez Resultat en Score, sélectionnez Nom/Service/Score.",
+  "optimalSteps": 5
+}

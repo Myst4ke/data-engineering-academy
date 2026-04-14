@@ -1,0 +1,6 @@
+SKU,Designation,Categorie,PrixHT,Actif
+S01,Laptop Pro,Info,1200,oui
+S02,Souris RGB,Info,35,oui
+S03,Chaise,Mobilier,300,non
+S04,Bureau,Mobilier,450,oui
+S05,Cable USB,Info,10,non

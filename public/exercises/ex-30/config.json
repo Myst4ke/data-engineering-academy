@@ -1,0 +1,9 @@
+{
+  "id": "ex-30",
+  "title": "Pipe Select",
+  "description": "Filtrez Service=IT, sélectionnez ID, Nom, Salaire et Anciennete, triez par Salaire décroissant.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Filtrez Service=IT, sélectionnez ID, Nom, Salaire et Anciennete, triez par Salaire décroissant.",
+  "optimalSteps": 3
+}

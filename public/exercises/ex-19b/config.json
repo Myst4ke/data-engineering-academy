@@ -1,0 +1,9 @@
+{
+  "id": "ex-19b",
+  "title": "Filtre + Tri",
+  "description": "Filtrez la Categorie A puis triez par Score décroissant.",
+  "difficulty": 2,
+  "hasSecondTable": false,
+  "hint": "Filtrez la Categorie A puis triez par Score décroissant.",
+  "optimalSteps": 2
+}

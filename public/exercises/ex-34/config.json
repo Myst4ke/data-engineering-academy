@@ -1,0 +1,9 @@
+{
+  "id": "ex-34",
+  "title": "Union+Pipe",
+  "description": "Concaténez les tables, supprimez les doublons, triez par Prix croissant.",
+  "difficulty": 3,
+  "hasSecondTable": true,
+  "hint": "Concaténez les tables, supprimez les doublons, triez par Prix croissant.",
+  "optimalSteps": 3
+}

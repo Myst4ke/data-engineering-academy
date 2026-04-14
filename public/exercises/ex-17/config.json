@@ -4,5 +4,6 @@
   "description": "Concaténez les deux tables de ventes, supprimez les doublons, puis triez par Date.",
   "difficulty": 3,
   "hasSecondTable": true,
-  "hint": "Concaténer → Supprimer Doublons → Trier par Date croissant."
+  "hint": "Concaténer → Supprimer Doublons → Trier par Date croissant.",
+  "optimalSteps": 3
 }

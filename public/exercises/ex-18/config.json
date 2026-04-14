@@ -4,5 +4,6 @@
   "description": "Challenge final: joignez, sélectionnez les colonnes clés, renommez, triez et filtrez!",
   "difficulty": 3,
   "hasSecondTable": true,
-  "hint": "Joindre sur Code → Sélectionner Code+Nom+Categorie+Prix → Renommer Code→SKU → Trier par Prix décroissant → Filtrer Categorie=A."
+  "hint": "Joindre sur Code → Sélectionner Code+Nom+Categorie+Prix → Renommer Code→SKU → Trier par Prix décroissant → Filtrer Categorie=A.",
+  "optimalSteps": 5
 }

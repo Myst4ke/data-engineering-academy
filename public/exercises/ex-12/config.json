@@ -4,5 +4,6 @@
   "description": "Supprimez les colonnes inutiles (Notes, Temp) et les doublons.",
   "difficulty": 2,
   "hasSecondTable": false,
-  "hint": "Utilisez 'Suppr. Colonne' deux fois pour Notes et Temp, puis 'Supprimer Doublons'."
+  "hint": "Utilisez 'Suppr. Colonne' deux fois pour Notes et Temp, puis 'Supprimer Doublons'.",
+  "optimalSteps": 3
 }

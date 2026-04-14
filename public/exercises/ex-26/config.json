@@ -1,0 +1,9 @@
+{
+  "id": "ex-26",
+  "title": "ETL Avance",
+  "description": "Filtrez Actif=oui, renommez Designation en NomProduit, sélectionnez SKU, NomProduit et PrixHT.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Filtrez Actif=oui, renommez Designation en NomProduit, sélectionnez SKU, NomProduit et PrixHT.",
+  "optimalSteps": 3
+}

@@ -1,0 +1,7 @@
+Code,Produit,PrixVente,Disponible
+C01,Laptop,1200,oui
+C02,Souris,35,oui
+C03,Chaise,,non
+C04,Ecran,450,oui
+C05,Lampe,80,non
+C06,Clavier,75,oui

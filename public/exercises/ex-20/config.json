@@ -1,0 +1,9 @@
+{
+  "id": "ex-20",
+  "title": "Remplir+Tri",
+  "description": "Remplissez les Departements vides par 'General' puis triez par Salaire décroissant.",
+  "difficulty": 2,
+  "hasSecondTable": false,
+  "hint": "Remplissez les Departements vides par 'General' puis triez par Salaire décroissant.",
+  "optimalSteps": 2
+}

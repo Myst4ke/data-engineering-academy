@@ -4,5 +4,6 @@
   "description": "Supprimez les lignes en double dans la liste des produits.",
   "difficulty": 1,
   "hasSecondTable": false,
-  "hint": "Utilisez la carte 'Supprimer Doublons' pour retirer les lignes identiques."
+  "hint": "Utilisez la carte 'Supprimer Doublons' pour retirer les lignes identiques.",
+  "optimalSteps": 1
 }

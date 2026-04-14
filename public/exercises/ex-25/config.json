@@ -1,0 +1,9 @@
+{
+  "id": "ex-25",
+  "title": "PipeClean",
+  "description": "Supprimez les vides, les doublons, puis triez par Prix croissant.",
+  "difficulty": 3,
+  "hasSecondTable": false,
+  "hint": "Supprimez les vides, les doublons, puis triez par Prix croissant.",
+  "optimalSteps": 3
+}

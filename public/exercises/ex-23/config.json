@@ -1,0 +1,9 @@
+{
+  "id": "ex-23",
+  "title": "Doub+Select",
+  "description": "Supprimez les doublons puis sélectionnez Code, Libelle et Prix.",
+  "difficulty": 2,
+  "hasSecondTable": false,
+  "hint": "Supprimez les doublons puis sélectionnez Code, Libelle et Prix.",
+  "optimalSteps": 2
+}

@@ -1,0 +1,9 @@
+{
+  "id": "ex-21",
+  "title": "Select+Ren",
+  "description": "Sélectionnez ID, Nom et Email puis renommez Nom en NomFamille.",
+  "difficulty": 2,
+  "hasSecondTable": false,
+  "hint": "Sélectionnez ID, Nom et Email puis renommez Nom en NomFamille.",
+  "optimalSteps": 2
+}

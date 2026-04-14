@@ -20,9 +20,10 @@ export default function Card({
   onClick,
   isInPipeline = false,
   onRemove = null,
+  onEdit = null,
   disabled = false,
-  size = 'normal', // 'small', 'medium', 'normal'
-  small = false, // deprecated, use size='small'
+  size = 'normal',
+  small = false,
 }) {
   const [showInfo, setShowInfo] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -31,12 +32,19 @@ export default function Card({
 
   const colors = CARD_COLORS[cardInfo.type] || CARD_COLORS.filter;
 
-  // Handle deprecated small prop
   const effectiveSize = small ? 'small' : size;
 
   const handleClick = (e) => {
     e.stopPropagation();
-    if (disabled || isInPipeline) return;
+    if (disabled) return;
+
+    // If in pipeline and onEdit is available, open edit popup
+    if (isInPipeline && onEdit) {
+      onEdit(cardInfo);
+      return;
+    }
+
+    if (isInPipeline) return;
 
     setIsSelecting(true);
     setTimeout(() => {
@@ -55,7 +63,6 @@ export default function Card({
     if (onRemove) onRemove(cardInfo);
   };
 
-  // Card sizes based on size prop
   const sizes = {
     small: {
       card: 'w-20 h-28',
@@ -146,7 +153,7 @@ export default function Card({
                   className={`${s.button} rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 font-bold shadow-md transition-colors`}
                   title="Retirer"
                 >
-                  ×
+                  x
                 </button>
               ) : (
                 <div className={s.button} />

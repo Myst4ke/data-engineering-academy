@@ -1,0 +1,9 @@
+{
+  "id": "ex-36",
+  "title": "Grand Master",
+  "description": "Fusionnez deux inventaires, nettoyez les données manquantes, et préparez un rapport des articles informatiques.",
+  "difficulty": 4,
+  "hasSecondTable": true,
+  "hint": "Concaténez → Remplissez les catégories vides par Info → Supprimez les vides → Supprimez les doublons → Filtrez categorie=Info → Renommez stock en quantite → Triez par quantite décroissant → Sélectionnez article/quantite/entrepot.",
+  "optimalSteps": 8
+}

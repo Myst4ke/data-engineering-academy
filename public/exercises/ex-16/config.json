@@ -4,5 +4,6 @@
   "description": "Supprimez les vides, les doublons, filtrez Priorite=Haute, puis retirez la colonne Notes.",
   "difficulty": 3,
   "hasSecondTable": false,
-  "hint": "Suppr. Vides → Supprimer Doublons → Filtrer Priorite=Haute → Suppr. Colonne Notes."
+  "hint": "Suppr. Vides → Supprimer Doublons → Filtrer Priorite=Haute → Suppr. Colonne Notes.",
+  "optimalSteps": 4
 }

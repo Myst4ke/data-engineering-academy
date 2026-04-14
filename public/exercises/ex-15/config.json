@@ -4,5 +4,6 @@
   "description": "Sélectionnez Code et Valeur, renommez Code en Reference, remplissez les Valeur vides avec '0', puis triez.",
   "difficulty": 3,
   "hasSecondTable": false,
-  "hint": "Sélectionner Code+Valeur → Renommer Code→Reference → Remplir Vides Valeur=0 → Trier par Reference."
+  "hint": "Sélectionner Code+Valeur → Renommer Code→Reference → Remplir Vides Valeur=0 → Trier par Reference.",
+  "optimalSteps": 4
 }

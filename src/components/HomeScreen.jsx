@@ -16,7 +16,7 @@ const TIER_OFFSETS = {
   expert: 30,
 };
 
-export default function HomeScreen({ exercises, onSelectExercise, onSandbox }) {
+export default function HomeScreen({ exercises, onSelectExercise, onSandbox, onBackToHub }) {
   const [unlockAll, setUnlockAllState] = useState(false);
   const [completedExercises, setCompletedExercises] = useState([]);
   const [hoveredExercise, setHoveredExercise] = useState(null);
@@ -51,8 +51,8 @@ export default function HomeScreen({ exercises, onSelectExercise, onSandbox }) {
 
   const handleExerciseHover = (exercise, e) => {
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    const rect = e.currentTarget.getBoundingClientRect();
     hoverTimerRef.current = setTimeout(() => {
-      const rect = e.currentTarget.getBoundingClientRect();
       setHoveredExercise(exercise.id);
       setHoverRect(rect);
     }, 300);
@@ -70,6 +70,14 @@ export default function HomeScreen({ exercises, onSelectExercise, onSandbox }) {
   return (
     <div className="home-view min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6 pb-12">
       <div className="max-w-4xl mx-auto">
+        {/* Back to hub */}
+        {onBackToHub && (
+          <div className="mb-4">
+            <button onClick={onBackToHub} className="game-btn px-3 py-1.5 text-sm font-semibold flex items-center gap-1">
+              ← Modules
+            </button>
+          </div>
+        )}
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">

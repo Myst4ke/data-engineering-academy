@@ -31,7 +31,7 @@ function DraggableHandCard({ card, children }) {
   );
 }
 
-function App() {
+function App({ onBackToHub }) {
   const [view, setView] = useState('home'); // 'home', 'game', 'sandbox'
   const [exercises, setExercises] = useState([]);
   const [currentExerciseId, setCurrentExerciseId] = useState(null);
@@ -506,6 +506,7 @@ function App() {
         exercises={exercises}
         onSelectExercise={handleSelectExercise}
         onSandbox={handleSandbox}
+        onBackToHub={onBackToHub}
       />
     );
   }

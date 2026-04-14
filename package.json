@@ -17,7 +17,7 @@
     "appId": "com.datadojo.app",
     "productName": "Data Dojo",
     "directories": {
-      "output": "build-output"
+      "output": "Data-Dojo-Build"
     },
     "files": [
       "dist/**/*",

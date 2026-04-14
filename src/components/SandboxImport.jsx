@@ -35,6 +35,12 @@ David,28,Marseille,78
 Alice,28,Paris,85
 Eve,31,,88`;
 
+  const sampleCSV2 = `Nom,Departement,Salaire
+Alice,IT,3500
+Bob,RH,2800
+Frank,IT,4200
+Clara,Finance,3100`;
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="game-panel p-6">
@@ -74,10 +80,15 @@ Eve,31,,88`;
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-semibold text-slate-600">Table secondaire</label>
-              <label className="game-btn px-3 py-1 text-xs cursor-pointer">
-                Fichier CSV
-                <input type="file" accept=".csv,.txt" className="hidden" onChange={(e) => handleFileUpload(e, setCsvText2)} />
-              </label>
+              <div className="flex gap-2">
+                <label className="game-btn px-3 py-1 text-xs cursor-pointer">
+                  Fichier CSV
+                  <input type="file" accept=".csv,.txt" className="hidden" onChange={(e) => handleFileUpload(e, setCsvText2)} />
+                </label>
+                <button onClick={() => setCsvText2(sampleCSV2)} className="game-btn px-3 py-1 text-xs text-indigo-500">
+                  Exemple
+                </button>
+              </div>
             </div>
             <textarea
               value={csvText2}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import App from './App';
 import PipelineDojo from './pipeline/PipelineDojo';
+import BiDojo from './bi/BiDojo';
 
 const MODULES = [
   {
@@ -19,6 +20,14 @@ const MODULES = [
     description: 'Concevez des pipelines de données en connectant des sources, transformations et destinations.',
     color: 'from-cyan-500 to-blue-600',
   },
+  {
+    id: 'bi-dojo',
+    name: 'BI Dojo',
+    subtitle: 'Visualisation de données',
+    icon: '📊',
+    description: 'Créez des tableaux de bord interactifs avec des graphiques pour analyser vos données.',
+    color: 'from-emerald-500 to-teal-600',
+  },
 ];
 
 export default function Hub() {
@@ -30,6 +39,10 @@ export default function Hub() {
 
   if (activeModule === 'pipeline-dojo') {
     return <PipelineDojo onBackToHub={() => setActiveModule(null)} />;
+  }
+
+  if (activeModule === 'bi-dojo') {
+    return <BiDojo onBackToHub={() => setActiveModule(null)} />;
   }
 
   return (

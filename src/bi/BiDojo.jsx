@@ -6,81 +6,100 @@ import ChartConfig from './ChartConfig';
 function aggregateData(data, xCol, yCol, aggFunc) {
   if (aggFunc === 'none' || !aggFunc) return data;
   const groups = new Map();
-  data.forEach(row => {
-    const key = String(row[xCol] ?? '');
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(parseFloat(row[yCol]) || 0);
-  });
+  data.forEach(row => { const k = String(row[xCol] ?? ''); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(parseFloat(row[yCol]) || 0); });
   return [...groups.entries()].map(([key, vals]) => {
-    let r;
-    switch (aggFunc) {
-      case 'sum': r = vals.reduce((s, v) => s + v, 0); break;
-      case 'count': r = vals.length; break;
-      case 'avg': r = vals.reduce((s, v) => s + v, 0) / vals.length; break;
-      case 'min': r = Math.min(...vals); break;
-      case 'max': r = Math.max(...vals); break;
-      default: r = vals[0];
-    }
+    let r; switch (aggFunc) { case 'sum': r = vals.reduce((s, v) => s + v, 0); break; case 'count': r = vals.length; break; case 'avg': r = vals.reduce((s, v) => s + v, 0) / vals.length; break; case 'min': r = Math.min(...vals); break; case 'max': r = Math.max(...vals); break; default: r = vals[0]; }
     return { [xCol]: key, [yCol]: String(Math.round(r * 100) / 100) };
   });
 }
 
 function useSize(ref) {
   const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    if (!ref.current) return;
-    const measure = () => { const { width, height } = ref.current.getBoundingClientRect(); setSize({ width: Math.floor(width), height: Math.floor(height) }); };
-    measure();
-    const obs = new ResizeObserver(measure);
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
+  useEffect(() => { if (!ref.current) return; const m = () => { const r = ref.current.getBoundingClientRect(); setSize({ width: Math.floor(r.width), height: Math.floor(r.height) }); }; m(); const o = new ResizeObserver(m); o.observe(ref.current); return () => o.disconnect(); }, []);
   return size;
 }
 
-const SNAP_THRESHOLD = 8;
-const MIN_W = 150;
-const MIN_H = 100;
-const DEFAULT_SIZES = { bar: { w: 420, h: 280 }, line: { w: 420, h: 280 }, pie: { w: 320, h: 300 }, kpi: { w: 200, h: 130 }, scatter: { w: 400, h: 280 }, table: { w: 500, h: 300 } };
+// Grid config
+const COLS = 12;
+const ROW_H = 50;
+const GAP = 8;
+const DEFAULTS = { bar: { gw: 6, gh: 5 }, line: { gw: 6, gh: 5 }, pie: { gw: 4, gh: 6 }, kpi: { gw: 3, gh: 3 }, scatter: { gw: 6, gh: 5 }, table: { gw: 8, gh: 6 } };
 
-function computeSnap(dragging, others) {
-  const guides = [];
-  let sx = dragging.x, sy = dragging.y;
-  const dEdges = { l: dragging.x, r: dragging.x + dragging.w, t: dragging.y, b: dragging.y + dragging.h, cx: dragging.x + dragging.w / 2, cy: dragging.y + dragging.h / 2 };
+function gridToPixel(gx, gy, gw, gh, colW) {
+  return { x: gx * (colW + GAP), y: gy * (ROW_H + GAP), w: gw * colW + (gw - 1) * GAP, h: gh * ROW_H + (gh - 1) * GAP };
+}
 
-  for (const o of others) {
-    const oEdges = { l: o.x, r: o.x + o.w, t: o.y, b: o.y + o.h, cx: o.x + o.w / 2, cy: o.y + o.h / 2 };
-    // Horizontal snaps
-    const hPairs = [
-      [dEdges.l, oEdges.l, 'l-l'], [dEdges.l, oEdges.r, 'l-r'], [dEdges.r, oEdges.l, 'r-l'], [dEdges.r, oEdges.r, 'r-r'], [dEdges.cx, oEdges.cx, 'c-c'],
-    ];
-    for (const [dv, ov, type] of hPairs) {
-      if (Math.abs(dv - ov) < SNAP_THRESHOLD) {
-        const offset = type[0] === 'l' ? ov - dragging.x : type[0] === 'r' ? ov - dragging.x - dragging.w : ov - dragging.x - dragging.w / 2;
-        sx = dragging.x + offset;
-        guides.push({ type: 'v', x: ov, y1: Math.min(dEdges.t, oEdges.t), y2: Math.max(dEdges.b, oEdges.b) });
-      }
+function pixelToGrid(px, py, colW) {
+  return { gx: Math.max(0, Math.round(px / (colW + GAP))), gy: Math.max(0, Math.round(py / (ROW_H + GAP))) };
+}
+
+function overlaps(a, b) {
+  return a.gx < b.gx + b.gw && a.gx + a.gw > b.gx && a.gy < b.gy + b.gh && a.gy + a.gh > b.gy;
+}
+
+// Compact widgets: up first, then left
+function compact(widgets) {
+  const result = widgets.map(w => ({ ...w }));
+  // Sort by position
+  result.sort((a, b) => a.gy - b.gy || a.gx - b.gx);
+  // Compact up
+  for (const w of result) {
+    while (w.gy > 0) {
+      const test = { ...w, gy: w.gy - 1 };
+      if (result.some(o => o.id !== w.id && overlaps(test, o))) break;
+      w.gy--;
     }
-    // Vertical snaps
-    const vPairs = [
-      [dEdges.t, oEdges.t, 't-t'], [dEdges.t, oEdges.b, 't-b'], [dEdges.b, oEdges.t, 'b-t'], [dEdges.b, oEdges.b, 'b-b'], [dEdges.cy, oEdges.cy, 'c-c'],
-    ];
-    for (const [dv, ov, type] of vPairs) {
-      if (Math.abs(dv - ov) < SNAP_THRESHOLD) {
-        const offset = type[0] === 't' ? ov - dragging.y : type[0] === 'b' ? ov - dragging.y - dragging.h : ov - dragging.y - dragging.h / 2;
-        sy = dragging.y + offset;
-        guides.push({ type: 'h', y: ov, x1: Math.min(dEdges.l, oEdges.l), x2: Math.max(dEdges.r, oEdges.r) });
+  }
+  // Compact left
+  for (const w of result) {
+    while (w.gx > 0) {
+      const test = { ...w, gx: w.gx - 1 };
+      if (result.some(o => o.id !== w.id && overlaps(test, o))) break;
+      w.gx--;
+    }
+  }
+  return result;
+}
+
+// Find first available grid slot for a widget of size gw x gh
+function findSlot(widgets, gw, gh) {
+  for (let gy = 0; gy < 100; gy++) {
+    for (let gx = 0; gx <= COLS - gw; gx++) {
+      const test = { gx, gy, gw, gh, id: '__test__' };
+      if (!widgets.some(w => overlaps(test, w))) return { gx, gy };
+    }
+  }
+  return { gx: 0, gy: widgets.length > 0 ? Math.max(...widgets.map(w => w.gy + w.gh)) : 0 };
+}
+
+// Push overlapping widgets down
+function resolveAndCompact(widgets, movedId) {
+  const result = widgets.map(w => ({ ...w }));
+  const moved = result.find(w => w.id === movedId);
+  if (!moved) return compact(result);
+  // Push others down
+  let changed = true, iter = 0;
+  while (changed && iter < 100) { changed = false; iter++;
+    for (const w of result) { if (w.id === movedId) continue;
+      if (overlaps(moved, w)) { w.gy = moved.gy + moved.gh; changed = true; }
+    }
+    // Cascading
+    for (let i = 0; i < result.length; i++) for (let j = i + 1; j < result.length; j++) {
+      if (overlaps(result[i], result[j])) {
+        const [upper, lower] = result[i].gy <= result[j].gy ? [result[i], result[j]] : [result[j], result[i]];
+        lower.gy = upper.gy + upper.gh; changed = true;
       }
     }
   }
-  return { x: sx, y: sy, guides };
+  return compact(result);
 }
 
-function Widget({ widget, data, onConfig, onRemove, onMove, onResize, isDragging, snapGuides }) {
+function GridWidget({ widget, data, colW, onConfig, onRemove, onDragStart, onResizeStart, isDragging }) {
   const chartRef = useRef(null);
   const { width: cw, height: ch } = useSize(chartRef);
   const config = widget.config;
   const chartData = config?.aggFunc && config.aggFunc !== 'none' ? aggregateData(data, config.xCol, config.yCol, config.aggFunc) : data;
+  const pos = gridToPixel(widget.gx, widget.gy, widget.gw, widget.gh, colW);
 
   const renderChart = () => {
     if (cw < 20 || ch < 20) return null;
@@ -96,25 +115,21 @@ function Widget({ widget, data, onConfig, onRemove, onMove, onResize, isDragging
   };
 
   return (
-    <div style={{ position: 'absolute', left: widget.x, top: widget.y, width: widget.w, height: widget.h, opacity: isDragging ? 0.6 : 1, zIndex: isDragging ? 50 : 1, transition: isDragging ? 'none' : 'box-shadow 0.2s' }}
-      className={`bg-white rounded-xl border shadow-sm flex flex-col ${isDragging ? 'border-indigo-400 shadow-lg' : 'border-slate-200'}`}
+    <div style={{ position: 'absolute', left: pos.x, top: pos.y, width: pos.w, height: pos.h, zIndex: isDragging ? 50 : 1, transition: isDragging ? 'none' : 'all 0.2s ease' }}
+      className={`bg-white rounded-xl border shadow-sm flex flex-col ${isDragging ? 'border-indigo-400 shadow-xl opacity-80' : 'border-slate-200'}`}
       onContextMenu={e => { e.preventDefault(); onConfig(widget.id); }}>
-      {/* Drag header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-100 shrink-0 cursor-grab active:cursor-grabbing select-none"
-        onMouseDown={e => { if (e.button === 0) { e.preventDefault(); onMove(widget.id, e); } }}>
-        <span className="text-xs font-semibold text-slate-700 truncate">{config?.title || 'Nouveau graphique'}</span>
-        <div className="flex items-center gap-1" onMouseDown={e => e.stopPropagation()}>
+      <div className="flex items-center justify-between px-3 py-1 border-b border-slate-100 shrink-0 cursor-grab active:cursor-grabbing select-none"
+        onMouseDown={e => { if (e.button === 0) { e.preventDefault(); onDragStart(widget.id, e); } }}>
+        <span className="text-[11px] font-semibold text-slate-700 truncate">{config?.title || 'Nouveau graphique'}</span>
+        <div className="flex items-center gap-0.5" onMouseDown={e => e.stopPropagation()}>
           <button onClick={() => onConfig(widget.id)} className="text-[10px] text-slate-400 hover:text-indigo-500 p-0.5">⚙️</button>
           <button onClick={() => onRemove(widget.id)} className="text-[10px] text-slate-400 hover:text-red-500 p-0.5">✕</button>
         </div>
       </div>
-      <div ref={chartRef} className="flex-1 p-1" style={{ minHeight: 0, overflow: 'hidden' }}>
-        {renderChart()}
-      </div>
-      {/* Resize handle */}
-      <div onMouseDown={e => { if (e.button === 0) { e.preventDefault(); e.stopPropagation(); onResize(widget.id, e); } }}
-        style={{ position: 'absolute', right: 0, bottom: 0, width: 16, height: 16, cursor: 'nwse-resize' }}>
-        <svg width="16" height="16" viewBox="0 0 16 16"><line x1="14" y1="6" x2="6" y2="14" stroke="#CBD5E1" strokeWidth="1.5" /><line x1="14" y1="10" x2="10" y2="14" stroke="#CBD5E1" strokeWidth="1.5" /></svg>
+      <div ref={chartRef} className="flex-1 p-1" style={{ minHeight: 0, overflow: 'hidden' }}>{renderChart()}</div>
+      <div onMouseDown={e => { if (e.button === 0) { e.preventDefault(); e.stopPropagation(); onResizeStart(widget.id, e); } }}
+        style={{ position: 'absolute', right: 0, bottom: 0, width: 18, height: 18, cursor: 'nwse-resize' }}>
+        <svg width="18" height="18" viewBox="0 0 18 18"><line x1="16" y1="6" x2="6" y2="16" stroke="#CBD5E1" strokeWidth="1.5"/><line x1="16" y1="11" x2="11" y2="16" stroke="#CBD5E1" strokeWidth="1.5"/></svg>
       </div>
     </div>
   );
@@ -125,11 +140,21 @@ export default function BiDojo({ onBackToHub }) {
   const [selectedTableId, setSelectedTableId] = useState(allTables[0]?.id || '');
   const [widgets, setWidgets] = useState([]);
   const [configWidgetId, setConfigWidgetId] = useState(null);
-  const [dragState, setDragState] = useState(null); // { id, startX, startY, origX, origY }
-  const [resizeState, setResizeState] = useState(null);
-  const [snapGuides, setSnapGuides] = useState([]);
+  const [activeId, setActiveId] = useState(null);
+  const [placeholder, setPlaceholder] = useState(null);
+  const actionRef = useRef(null);
+  const gridRef = useRef(null);
   const nextId = useRef(1);
-  const canvasRef = useRef(null);
+  const [gridWidth, setGridWidth] = useState(800);
+
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const obs = new ResizeObserver(entries => setGridWidth(entries[0].contentRect.width));
+    obs.observe(gridRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const colW = useMemo(() => (gridWidth - (COLS - 1) * GAP) / COLS, [gridWidth]);
 
   const selectedTable = useMemo(() => allTables.find(t => t.id === selectedTableId), [allTables, selectedTableId]);
   const columns = selectedTable?.columns || [];
@@ -137,71 +162,70 @@ export default function BiDojo({ onBackToHub }) {
 
   const addWidget = (type) => {
     const id = `w-${nextId.current++}`;
-    const sz = DEFAULT_SIZES[type] || { w: 360, h: 260 };
-    // Place new widget in a smart position
-    const offset = (nextId.current - 1) * 20;
-    setWidgets(prev => [...prev, { id, x: 16 + offset, y: 16 + offset, w: sz.w, h: sz.h,
-      config: { chartType: type, title: '', xCol: columns[0] || '', yCol: columns[1] || columns[0] || '', aggFunc: 'none' } }]);
+    const d = DEFAULTS[type] || { gw: 6, gh: 5 };
+    const slot = findSlot(widgets, d.gw, d.gh);
+    const newW = { id, gx: slot.gx, gy: slot.gy, gw: d.gw, gh: d.gh,
+      config: { chartType: type, title: '', xCol: columns[0] || '', yCol: columns[1] || columns[0] || '', aggFunc: 'none' } };
+    setWidgets(prev => compact([...prev, newW]));
   };
 
-  const handleConfig = (params) => {
-    if (!configWidgetId) return;
-    setWidgets(prev => prev.map(w => w.id === configWidgetId ? { ...w, config: params } : w));
-    setConfigWidgetId(null);
-  };
+  const handleConfig = (params) => { if (!configWidgetId) return; setWidgets(prev => prev.map(w => w.id === configWidgetId ? { ...w, config: params } : w)); setConfigWidgetId(null); };
+  const removeWidget = (id) => setWidgets(prev => compact(prev.filter(w => w.id !== id)));
 
-  const removeWidget = (id) => setWidgets(prev => prev.filter(w => w.id !== id));
-
-  // Drag
-  const startMove = useCallback((id, e) => {
+  const startDrag = useCallback((id, e) => {
     const w = widgets.find(ww => ww.id === id);
     if (!w) return;
-    setDragState({ id, startX: e.clientX, startY: e.clientY, origX: w.x, origY: w.y });
+    const rect = gridRef.current?.getBoundingClientRect();
+    setActiveId(id);
+    actionRef.current = { type: 'drag', startX: e.clientX, startY: e.clientY, origGx: w.gx, origGy: w.gy, gridLeft: rect?.left || 0, gridTop: rect?.top || 0, scrollTop: gridRef.current?.scrollTop || 0 };
   }, [widgets]);
 
-  // Resize
   const startResize = useCallback((id, e) => {
     const w = widgets.find(ww => ww.id === id);
     if (!w) return;
-    setResizeState({ id, startX: e.clientX, startY: e.clientY, origW: w.w, origH: w.h });
+    setActiveId(id);
+    actionRef.current = { type: 'resize', startX: e.clientX, startY: e.clientY, origGw: w.gw, origGh: w.gh };
   }, [widgets]);
 
   useEffect(() => {
-    if (!dragState && !resizeState) return;
-
+    if (!activeId) return;
     const handleMove = (e) => {
-      if (dragState) {
-        const dx = e.clientX - dragState.startX;
-        const dy = e.clientY - dragState.startY;
-        const newX = Math.max(0, dragState.origX + dx);
-        const newY = Math.max(0, dragState.origY + dy);
-        const others = widgets.filter(w => w.id !== dragState.id);
-        const dragging = { ...widgets.find(w => w.id === dragState.id), x: newX, y: newY };
-        const snap = computeSnap(dragging, others);
-        setWidgets(prev => prev.map(w => w.id === dragState.id ? { ...w, x: snap.x, y: snap.y } : w));
-        setSnapGuides(snap.guides);
+      const a = actionRef.current;
+      if (!a) return;
+      if (a.type === 'drag') {
+        const scrollTop = gridRef.current?.scrollTop || 0;
+        const px = e.clientX - a.gridLeft;
+        const py = e.clientY - a.gridTop + scrollTop;
+        const g = pixelToGrid(px, py, colW);
+        const w = widgets.find(ww => ww.id === activeId);
+        if (!w) return;
+        const gx = Math.min(COLS - w.gw, Math.max(0, g.gx));
+        const gy = Math.max(0, g.gy);
+        setPlaceholder({ gx, gy, gw: w.gw, gh: w.gh });
+        setWidgets(prev => prev.map(ww => ww.id === activeId ? { ...ww, gx, gy } : ww));
       }
-      if (resizeState) {
-        const dw = e.clientX - resizeState.startX;
-        const dh = e.clientY - resizeState.startY;
-        const maxW = canvasRef.current ? canvasRef.current.clientWidth - 32 : 2000;
-        setWidgets(prev => prev.map(w => w.id === resizeState.id
-          ? { ...w, w: Math.min(maxW, Math.max(MIN_W, resizeState.origW + dw)), h: Math.max(MIN_H, resizeState.origH + dh) } : w));
+      if (a.type === 'resize') {
+        const dxCols = Math.round((e.clientX - a.startX) / (colW + GAP));
+        const dyRows = Math.round((e.clientY - a.startY) / (ROW_H + GAP));
+        const w = widgets.find(ww => ww.id === activeId);
+        if (!w) return;
+        const gw = Math.min(COLS - w.gx, Math.max(1, a.origGw + dxCols));
+        const gh = Math.max(1, a.origGh + dyRows);
+        setWidgets(prev => prev.map(ww => ww.id === activeId ? { ...ww, gw, gh } : ww));
       }
     };
-    const handleUp = () => { setDragState(null); setResizeState(null); setSnapGuides([]); };
+    const handleUp = () => {
+      if (activeId) setWidgets(prev => resolveAndCompact(prev, activeId));
+      setActiveId(null);
+      setPlaceholder(null);
+      actionRef.current = null;
+    };
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
     return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); };
-  }, [dragState, resizeState, widgets]);
+  }, [activeId, widgets, colW]);
 
-  // Canvas size = bounding box of all widgets + padding
-  const canvasSize = useMemo(() => {
-    if (widgets.length === 0) return { w: '100%', h: '100%' };
-    const maxR = Math.max(...widgets.map(w => w.x + w.w)) + 40;
-    const maxB = Math.max(...widgets.map(w => w.y + w.h)) + 40;
-    return { w: maxR, h: maxB };
-  }, [widgets]);
+  const totalRows = useMemo(() => widgets.length > 0 ? Math.max(...widgets.map(w => w.gy + w.gh)) + 4 : 6, [widgets]);
 
   return (
     <div className="h-screen flex flex-col bg-slate-50">
@@ -241,35 +265,38 @@ export default function BiDojo({ onBackToHub }) {
           </div>
         </div>
 
-        {/* Free-form canvas */}
-        <div ref={canvasRef} className="flex-1 overflow-auto relative">
-          <div style={{ position: 'relative', minWidth: canvasSize.w, minHeight: canvasSize.h, width: '100%', height: '100%' }}>
+        <div ref={gridRef} className="flex-1 overflow-auto p-4">
+          <div style={{ position: 'relative', height: totalRows * (ROW_H + GAP), minHeight: '100%' }}>
+            {/* Grid lines (subtle) */}
+            <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.3 }}>
+              {Array.from({ length: totalRows }).map((_, r) => (
+                <div key={r} className="absolute left-0 right-0 border-t border-dashed border-slate-200" style={{ top: r * (ROW_H + GAP) }} />
+              ))}
+            </div>
+
+            {/* Placeholder */}
+            {placeholder && (() => {
+              const p = gridToPixel(placeholder.gx, placeholder.gy, placeholder.gw, placeholder.gh, colW);
+              return <div className="absolute rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/30 pointer-events-none" style={{ left: p.x, top: p.y, width: p.w, height: p.h, transition: 'all 0.15s' }} />;
+            })()}
+
+            {/* Widgets */}
+            {widgets.map(w => (
+              <GridWidget key={w.id} widget={w} data={data} colW={colW}
+                onConfig={setConfigWidgetId} onRemove={removeWidget}
+                onDragStart={startDrag} onResizeStart={startResize}
+                isDragging={activeId === w.id} />
+            ))}
+
             {widgets.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-4xl mb-3">📊</p>
                   <p className="text-slate-400 text-sm font-medium">Ajoutez des widgets depuis le panneau de gauche</p>
-                  <p className="text-slate-300 text-xs mt-1">Glissez le header pour déplacer · Coin bas-droit pour redimensionner</p>
+                  <p className="text-slate-300 text-xs mt-1">Glissez pour positionner · Coin bas-droit pour redimensionner</p>
                 </div>
               </div>
             )}
-
-            {/* Snap guides */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 100 }}>
-              {snapGuides.map((g, i) => g.type === 'v'
-                ? <line key={i} x1={g.x} y1={g.y1} x2={g.x} y2={g.y2} stroke="#6366F1" strokeWidth={1} strokeDasharray="4 2" />
-                : <line key={i} x1={g.x1} y1={g.y} x2={g.x2} y2={g.y} stroke="#6366F1" strokeWidth={1} strokeDasharray="4 2" />
-              )}
-            </svg>
-
-            {/* Widgets */}
-            {widgets.map(w => (
-              <Widget key={w.id} widget={w} data={data}
-                onConfig={setConfigWidgetId} onRemove={removeWidget}
-                onMove={startMove} onResize={startResize}
-                isDragging={dragState?.id === w.id}
-                snapGuides={snapGuides} />
-            ))}
           </div>
         </div>
       </div>

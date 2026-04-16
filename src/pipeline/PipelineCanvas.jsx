@@ -28,6 +28,22 @@ const PORT_RADIUS = 8;
 const NODE_W = 180;
 const NODE_H = 72;
 
+// Lakehouse container dimensions
+const LAKE_W = 240;
+const LAKE_HEADER_H = 36;
+const LAKE_TABLE_H = 52;
+const LAKE_TABLE_GAP = 8;
+const LAKE_PAD = 8;
+
+function getLakehouseHeight(childCount, showDrop = false) {
+  const items = childCount + (showDrop ? 1 : 0);
+  const body = LAKE_PAD + (items > 0 ? items * LAKE_TABLE_H + (items - 1) * LAKE_TABLE_GAP : 0) + LAKE_PAD;
+  return Math.max(LAKE_HEADER_H + body, LAKE_HEADER_H + 40);
+}
+function getLakehouseChildY(parentNode, index) {
+  return parentNode.y + LAKE_HEADER_H + LAKE_PAD + index * (LAKE_TABLE_H + LAKE_TABLE_GAP);
+}
+
 function getInputPortPos(node, portIndex = 0) {
   return { x: node.x, y: node.y + NODE_H / 2 + (portIndex > 0 ? 24 : 0) };
 }
@@ -57,13 +73,11 @@ function ConnectionLine({ from, to, isTemp, isSelected, onClick }) {
 
 function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, onPortMouseDown, onPortMouseUp, connectingFrom, onContextMenu, onPreview, outputRowCount, outputData, label }) {
   const isSource = typeDef.category === 'source';
-  const isStorage = typeDef.category === 'storage';
   const isTable = node.type === 'table_output';
-  const showPreview = !isSource && !isStorage;
+  const showPreview = !isSource && typeDef.category !== 'storage';
   const bgColor = isTable ? '#F0FDF4' : 'white';
   return (
     <g>
-      {/* Node body */}
       <foreignObject x={node.x} y={node.y} width={NODE_W} height={NODE_H}>
         <div
           onMouseDown={(e) => { e.stopPropagation(); onMouseDown(e, node.id); }}
@@ -91,8 +105,8 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
             ) : null;
           })()}
           {!isTable && label && label !== '__foreach_emojis__' && <span className="text-[8px] text-indigo-500 font-medium">{label}</span>}
-          {!isTable && !label && (isSource || isStorage) && <span className="text-[8px] text-amber-500 font-medium">Clic droit: configurer</span>}
-          {!isTable && !label && !isSource && !isStorage && <span className="text-[8px] text-slate-400 font-medium">Clic droit: configurer</span>}
+          {!isTable && !label && isSource && <span className="text-[8px] text-amber-500 font-medium">Clic droit: configurer</span>}
+          {!isTable && !label && !isSource && <span className="text-[8px] text-slate-400 font-medium">Clic droit: configurer</span>}
           {isTable && outputRowCount > 0 && (() => {
             const colCount = outputData && outputData.length > 0 ? Object.keys(outputData[0]).length : 0;
             return <span className="text-[8px] text-slate-400">{colCount} col × {outputRowCount} lignes</span>;
@@ -100,7 +114,6 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
         </div>
       </foreignObject>
 
-      {/* Dimensions badge - rendered in SVG outside foreignObject to avoid clipping */}
       {!isTable && outputRowCount > 0 && (() => {
         const colCount = outputData && outputData.length > 0 ? Object.keys(outputData[0]).length : 0;
         const txt = `${colCount}x${outputRowCount}`;
@@ -113,14 +126,10 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
         );
       })()}
 
-      {/* Preview button - rendered in SVG, not selectable */}
       {showPreview && (
-        <g
-          className="cursor-pointer"
-          style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+        <g className="cursor-pointer" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
           onClick={(e) => { e.stopPropagation(); onPreview(node.id); }}
-          onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-        >
+          onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}>
           <circle cx={node.x + NODE_W - 10} cy={node.y + NODE_H + 2} r={10} fill="white" stroke="#CBD5E1" strokeWidth={1.5} />
           <text x={node.x + NODE_W - 10} y={node.y + NODE_H + 6} textAnchor="middle" fontSize="10" style={{ pointerEvents: 'none' }}>🔍</text>
         </g>
@@ -147,6 +156,81 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
             onMouseDown={(e) => { e.stopPropagation(); onPortMouseDown(e, node.id); }}
             onMouseUp={(e) => e.stopPropagation()}
           />
+        );
+      })}
+    </g>
+  );
+}
+
+// ── Lakehouse container node ──
+function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, isSelected, connectingFrom, showDropZone, onMouseDown, onNodeMouseUp, onPortMouseDown, onPortMouseUp, onContextMenu }) {
+  const childCount = childNodes.length;
+  const height = getLakehouseHeight(childCount, showDropZone);
+
+  return (
+    <g>
+      {/* Container body via foreignObject — styled like global site */}
+      <foreignObject x={node.x} y={node.y} width={LAKE_W} height={height}>
+        <div
+          onMouseDown={(e) => { e.stopPropagation(); onMouseDown(e, node.id); }}
+          onMouseUp={(e) => { e.stopPropagation(); onNodeMouseUp(node.id); }}
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu?.(e, node.id); }}
+          className={`w-full h-full rounded-xl border-2 flex flex-col cursor-grab active:cursor-grabbing select-none overflow-hidden ${
+            isSelected ? 'shadow-lg ring-2 ring-indigo-400' : 'shadow-md hover:shadow-lg'
+          }`}
+          style={{ background: 'white', borderColor: typeDef.color, borderLeftWidth: '4px' }}
+        >
+          {/* Header */}
+          <div className="shrink-0 flex items-center justify-center gap-1.5" style={{ height: LAKE_HEADER_H, background: typeDef.color }}>
+            <span className="text-base">{typeDef.icon}</span>
+            <span className="text-xs font-bold" style={{ color: typeDef.color === '#FFD700' ? '#1E293B' : 'white' }}>
+              {typeDef.name.toUpperCase()}
+            </span>
+          </div>
+
+          {/* Body with child tables */}
+          <div style={{ padding: LAKE_PAD, display: 'flex', flexDirection: 'column', gap: LAKE_TABLE_GAP, flex: 1, background: '#F8FAFC' }}>
+            {childNodes.map(child => {
+              const cfg = nodeConfigs[child.id];
+              const output = nodeOutputs[child.id];
+              const rowCount = output?.length || 0;
+              const colCount = output?.length > 0 ? Object.keys(output[0]).length : 0;
+              return (
+                <div key={child.id} className="rounded-lg border-2 border-emerald-400 flex flex-col items-center justify-center"
+                  style={{ height: LAKE_TABLE_H, background: '#F0FDF4', flexShrink: 0 }}>
+                  <span className="text-[10px] font-bold text-slate-700 leading-tight">{cfg?.tableName || 'Table'}</span>
+                  {rowCount > 0 && <span className="text-[7px] text-slate-400">{colCount}×{rowCount}</span>}
+                </div>
+              );
+            })}
+            {showDropZone && (
+              <div className="rounded-lg border-2 border-dashed border-indigo-300 flex items-center justify-center"
+                style={{ height: LAKE_TABLE_H, background: 'rgba(238,242,255,0.5)', flexShrink: 0 }}>
+                <span className="text-sm font-bold text-indigo-400">+</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </foreignObject>
+
+      {/* Ports in SVG on top of foreignObject */}
+      {childNodes.map((child, i) => {
+        const cy = getLakehouseChildY(node, i);
+        return (
+          <g key={`ports-${child.id}`}>
+            <circle cx={node.x} cy={cy + LAKE_TABLE_H / 2} r={PORT_RADIUS}
+              fill={connectingFrom ? '#E0E7FF' : 'white'} stroke={typeDef.color} strokeWidth={2}
+              className="cursor-pointer"
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => { e.stopPropagation(); onPortMouseUp(child.id, 0); }}
+            />
+            <circle cx={node.x + LAKE_W} cy={cy + LAKE_TABLE_H / 2} r={PORT_RADIUS}
+              fill={connectingFrom === child.id ? typeDef.color : 'white'} stroke={typeDef.color} strokeWidth={2}
+              className="cursor-pointer"
+              onMouseDown={(e) => { e.stopPropagation(); onPortMouseDown(e, child.id); }}
+              onMouseUp={(e) => e.stopPropagation()}
+            />
+          </g>
         );
       })}
     </g>
@@ -189,22 +273,18 @@ export default function PipelineCanvas({ onBack }) {
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Multi-selection
   const [selectedNodes, setSelectedNodes] = useState(new Set());
   const [selectedConns, setSelectedConns] = useState(new Set());
   const [selectionRect, setSelectionRect] = useState(null);
   const [isSelecting, setIsSelecting] = useState(false);
 
-  // Node configs: { [nodeId]: { tableId, tableName, data, params } }
   const [nodeConfigs, setNodeConfigs] = useState({});
 
-  // Popups
   const [explorerForNode, setExplorerForNode] = useState(null);
   const [previewNodeId, setPreviewNodeId] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [configNodeId, setConfigNodeId] = useState(null);
   const [mappingNodeId, setMappingNodeId] = useState(null);
-  const [lakehouseNodeId, setLakehouseNodeId] = useState(null);
   const [forEachNodeId, setForEachNodeId] = useState(null);
   const [lookupNodeId, setLookupNodeId] = useState(null);
   const [forEachRowNodeId, setForEachRowNodeId] = useState(null);
@@ -214,7 +294,9 @@ export default function PipelineCanvas({ onBack }) {
   const [logNodeId, setLogNodeId] = useState(null);
   const [ifNodeId, setIfNodeId] = useState(null);
   const [logs, setLogs] = useState([]);
-  const [lakehouseTables, setLakehouseTables] = useState([]); // tables available in the lakehouse for the explorer
+  const [tableRenameDialog, setTableRenameDialog] = useState(null); // { lakehouseId, sourceId, sourceName, name }
+  const [dragOverLakehouse, setDragOverLakehouse] = useState(null);
+  const [lakehouseRenameMenu, setLakehouseRenameMenu] = useState(null); // { lakehouseId, editingChildId?, editingName? }
 
   const canvasRef = useRef(null);
   const nextId = useRef(1);
@@ -227,6 +309,57 @@ export default function PipelineCanvas({ onBack }) {
     return { x: (e.clientX - rect.left - pan.x) / zoom, y: (e.clientY - rect.top - pan.y) / zoom };
   }, [pan, zoom]);
 
+  // ── Port position helpers that handle lakehouse child nodes ──
+  const getEffectiveOutputPortPos = useCallback((node) => {
+    const cfg = nodeConfigs[node.id];
+    if (cfg?.parentId) {
+      const parent = nodes.find(n => n.id === cfg.parentId);
+      if (parent) return { x: parent.x + LAKE_W, y: node.y + LAKE_TABLE_H / 2 };
+    }
+    return getOutputPortPos(node);
+  }, [nodeConfigs, nodes]);
+
+  const getEffectiveInputPortPos = useCallback((node, portIndex = 0) => {
+    const cfg = nodeConfigs[node.id];
+    if (cfg?.parentId) {
+      const parent = nodes.find(n => n.id === cfg.parentId);
+      if (parent) return { x: parent.x, y: node.y + LAKE_TABLE_H / 2 };
+    }
+    return getInputPortPos(node, portIndex);
+  }, [nodeConfigs, nodes]);
+
+  // ── Get children of a lakehouse ──
+  const getLakehouseChildren = useCallback((lakehouseId) => {
+    return nodes.filter(n => nodeConfigs[n.id]?.parentId === lakehouseId).sort((a, b) => a.y - b.y);
+  }, [nodes, nodeConfigs]);
+
+  // ── Sync child positions whenever lakehouse moves ──
+  const syncLakehouseChildren = useCallback((updatedNodes) => {
+    const result = [...updatedNodes];
+    const lakehouseNodes = result.filter(n => NODE_TYPES[n.type]?.category === 'storage');
+    lakehouseNodes.forEach(lh => {
+      const children = result.filter(n => nodeConfigs[n.id]?.parentId === lh.id).sort((a, b) => a.y - b.y);
+      children.forEach((child, i) => {
+        const idx = result.findIndex(n => n.id === child.id);
+        if (idx >= 0) {
+          result[idx] = { ...result[idx], x: lh.x, y: getLakehouseChildY(lh, i) };
+        }
+      });
+    });
+    return result;
+  }, [nodeConfigs]);
+
+  // ── Absorb a table_output node into a lakehouse ──
+  const absorbIntoLakehouse = useCallback((nodeId, lakehouseId) => {
+    const lhNode = nodes.find(n => n.id === lakehouseId);
+    if (!lhNode) return;
+    const children = getLakehouseChildren(lakehouseId);
+    const childIndex = children.length;
+    const childY = getLakehouseChildY(lhNode, childIndex);
+    setNodeConfigs(prev => ({ ...prev, [nodeId]: { ...prev[nodeId], parentId: lakehouseId } }));
+    setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, x: lhNode.x, y: childY } : n));
+  }, [nodes, getLakehouseChildren]);
+
   const handleAddNode = useCallback((typeId) => {
     const id = `node-${nextId.current++}`;
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -236,23 +369,19 @@ export default function PipelineCanvas({ onBack }) {
     setNodes(prev => [...prev, { id, type: typeId, x: cx + offset, y: cy + offset }]);
     setSelectedNodes(new Set([id]));
     setSelectedConns(new Set());
-    // Auto-open explorer for source nodes
     const typeDef = NODE_TYPES[typeId];
     if (typeDef?.category === 'source') {
       setExplorerForNode(id);
     }
   }, [pan]);
 
-  // Try to connect to a node's first free input port
   const tryConnect = useCallback((sourceId, targetId) => {
     if (sourceId === targetId) return false;
     const targetNode = nodes.find(n => n.id === targetId);
     const targetType = targetNode && NODE_TYPES[targetNode.type];
     if (!targetType || targetType.inputs === 0) return false;
-    // No duplicate connection from same source to same target
     const dup = connections.some(c => c.from === sourceId && c.to === targetId);
     if (dup) return false;
-    // Find a free input port, or use port 0 if multiInput
     for (let i = 0; i < targetType.inputs; i++) {
       const taken = connections.some(c => c.to === targetId && c.toPort === i);
       if (!taken || targetType.multiInput) {
@@ -263,17 +392,21 @@ export default function PipelineCanvas({ onBack }) {
     return false;
   }, [nodes, connections]);
 
-  // Delete all selected
+  // ── Delete ──
   const handleDelete = useCallback(() => {
     if (selectedNodes.size > 0) {
-      // Find all table_output children connected from deleted nodes (cascade delete)
       const toDelete = new Set(selectedNodes);
+      // Cascade: delete table_output children connected from deleted nodes
       connections.forEach(c => {
         if (toDelete.has(c.from)) {
           const targetNode = nodes.find(n => n.id === c.to);
-          if (targetNode?.type === 'table_output') {
-            toDelete.add(c.to);
-          }
+          if (targetNode?.type === 'table_output') toDelete.add(c.to);
+        }
+      });
+      // Cascade: delete children of deleted lakehouse containers
+      nodes.forEach(n => {
+        if (nodeConfigs[n.id]?.parentId && toDelete.has(nodeConfigs[n.id].parentId)) {
+          toDelete.add(n.id);
         }
       });
 
@@ -289,7 +422,7 @@ export default function PipelineCanvas({ onBack }) {
       setConnections(prev => prev.filter((_, i) => !selectedConns.has(i)));
     }
     clearSelection();
-  }, [selectedNodes, selectedConns, connections, nodes]);
+  }, [selectedNodes, selectedConns, connections, nodes, nodeConfigs]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -302,7 +435,6 @@ export default function PipelineCanvas({ onBack }) {
     return () => window.removeEventListener('keydown', handler);
   }, [handleDelete]);
 
-  // Compute selection rect in normalized form
   const getNormalizedRect = () => {
     if (!selectionRect) return null;
     return {
@@ -321,7 +453,7 @@ export default function PipelineCanvas({ onBack }) {
       return;
     }
     if (e.button === 0 && !connectingFrom) {
-      setContextMenu(null); // close context menu
+      setContextMenu(null);
       const coords = getCanvasCoords(e);
       setIsSelecting(true);
       setSelectionRect({ startX: coords.x, startY: coords.y, currentX: coords.x, currentY: coords.y });
@@ -332,6 +464,9 @@ export default function PipelineCanvas({ onBack }) {
     }
   };
 
+  const pendingDragRef = useRef(null);
+  const DRAG_THRESHOLD = 4;
+
   const handleCanvasMouseMove = (e) => {
     const coords = getCanvasCoords(e);
     setMousePos(coords);
@@ -341,17 +476,14 @@ export default function PipelineCanvas({ onBack }) {
       return;
     }
 
-    // Check pending drag threshold
     const pd = pendingDragRef.current;
     if (pd && !pd.activated) {
       const dx = Math.abs(e.clientX - pd.startX);
       const dy = Math.abs(e.clientY - pd.startY);
       if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
         pd.activated = true;
-        // Now actually start dragging
         setDragging(pd.nodeId);
         setDragStart({ x: pd.startX, y: pd.startY, nodeX: pd.nodeX, nodeY: pd.nodeY, origPositions: pd.origPositions });
-        // Select this node if not already selected
         if (!selectedNodes.has(pd.nodeId)) {
           setSelectedNodes(new Set([pd.nodeId]));
           setSelectedConns(new Set());
@@ -363,16 +495,43 @@ export default function PipelineCanvas({ onBack }) {
     if (dragging && dragStart) {
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
-      if (selectedNodes.has(dragging)) {
-        setNodes(prev => prev.map(n =>
-          selectedNodes.has(n.id)
-            ? { ...n, x: (dragStart.origPositions?.[n.id]?.x ?? n.x) + dx, y: (dragStart.origPositions?.[n.id]?.y ?? n.y) + dy }
-            : n
-        ));
+
+      // Collect lakehouse children that should move with their parent
+      const extraIds = new Set();
+      const draggedIds = selectedNodes.has(dragging) ? selectedNodes : new Set([dragging]);
+      draggedIds.forEach(nid => {
+        const n = nodes.find(nn => nn.id === nid);
+        if (n && NODE_TYPES[n.type]?.category === 'storage') {
+          nodes.filter(nn => nodeConfigs[nn.id]?.parentId === nid).forEach(ch => extraIds.add(ch.id));
+        }
+      });
+
+      setNodes(prev => prev.map(n => {
+        if (draggedIds.has(n.id) || extraIds.has(n.id)) {
+          return { ...n, x: (dragStart.origPositions?.[n.id]?.x ?? n.x) + dx, y: (dragStart.origPositions?.[n.id]?.y ?? n.y) + dy };
+        }
+        return n;
+      }));
+
+      // Detect if dragged node hovers over a lakehouse (for drop zone)
+      const draggedNode = nodes.find(n => n.id === dragging);
+      if (draggedNode && draggedNode.type === 'table_output' && !nodeConfigs[dragging]?.parentId) {
+        const dragX = (dragStart.origPositions?.[dragging]?.x ?? 0) + dx;
+        const dragY = (dragStart.origPositions?.[dragging]?.y ?? 0) + dy;
+        const cx = dragX + NODE_W / 2;
+        const cy = dragY + NODE_H / 2;
+        let overLH = null;
+        nodes.forEach(n => {
+          if (n.id === dragging) return;
+          const td = NODE_TYPES[n.type];
+          if (td?.category !== 'storage') return;
+          const children = getLakehouseChildren(n.id);
+          const lhH = getLakehouseHeight(children.length, true);
+          if (cx > n.x && cx < n.x + LAKE_W && cy > n.y && cy < n.y + lhH) overLH = n.id;
+        });
+        setDragOverLakehouse(overLH);
       } else {
-        setNodes(prev => prev.map(n =>
-          n.id === dragging ? { ...n, x: dragStart.nodeX + dx, y: dragStart.nodeY + dy } : n
-        ));
+        setDragOverLakehouse(null);
       }
       return;
     }
@@ -382,9 +541,20 @@ export default function PipelineCanvas({ onBack }) {
   };
 
   const handleCanvasMouseUp = () => {
-    // If pending drag was never activated → was a click on canvas or nothing
+    // Check if a table_output was dropped over a lakehouse
+    if (dragging && dragOverLakehouse) {
+      const draggedNode = nodes.find(n => n.id === dragging);
+      if (draggedNode?.type === 'table_output' && !nodeConfigs[dragging]?.parentId) {
+        absorbIntoLakehouse(dragging, dragOverLakehouse);
+        setDragOverLakehouse(null);
+        pendingDragRef.current = null;
+        setDragging(null); setDragStart(null); setIsPanning(false); setPanStart(null); setIsSelecting(false); setSelectionRect(null);
+        return;
+      }
+    }
+    setDragOverLakehouse(null);
+
     if (pendingDragRef.current && !pendingDragRef.current.activated) {
-      // Click on node but released on canvas → select the node
       const nodeId = pendingDragRef.current.nodeId;
       setSelectedNodes(new Set([nodeId]));
       setSelectedConns(new Set());
@@ -395,20 +565,23 @@ export default function PipelineCanvas({ onBack }) {
       setConnectingFrom(null);
     }
     if (isSelecting && selectionRect) {
-      // Compute what's in the selection rectangle
       const r = getNormalizedRect();
       if (r && Math.abs(r.x2 - r.x1) > 5 && Math.abs(r.y2 - r.y1) > 5) {
         const selNodes = new Set();
         const selConns = new Set();
         nodes.forEach(n => {
-          if (rectIntersects(r, n.x, n.y, NODE_W, NODE_H)) selNodes.add(n.id);
+          // Skip lakehouse children in rectangle selection
+          if (nodeConfigs[n.id]?.parentId) return;
+          const nw = NODE_TYPES[n.type]?.category === 'storage' ? LAKE_W : NODE_W;
+          const nh = NODE_TYPES[n.type]?.category === 'storage' ? getLakehouseHeight(getLakehouseChildren(n.id).length) : NODE_H;
+          if (rectIntersects(r, n.x, n.y, nw, nh)) selNodes.add(n.id);
         });
         connections.forEach((c, i) => {
           const fromN = nodes.find(n => n.id === c.from);
           const toN = nodes.find(n => n.id === c.to);
           if (fromN && toN) {
-            const fp = getOutputPortPos(fromN);
-            const tp = getInputPortPos(toN, c.toPort || 0);
+            const fp = getEffectiveOutputPortPos(fromN);
+            const tp = getEffectiveInputPortPos(toN, c.toPort || 0);
             const mid = { x: (fp.x + tp.x) / 2, y: (fp.y + tp.y) / 2 };
             if (pointInRect(r, mid.x, mid.y)) selConns.add(i);
           }
@@ -425,10 +598,6 @@ export default function PipelineCanvas({ onBack }) {
     setDragStart(null);
   };
 
-  // pendingDrag: mouseDown recorded but drag not yet started (waiting for threshold)
-  const pendingDragRef = useRef(null);
-  const DRAG_THRESHOLD = 4;
-
   const handleNodeMouseDown = (e, nodeId) => {
     if (e.button !== 0) return;
     setIsSelecting(false);
@@ -440,7 +609,6 @@ export default function PipelineCanvas({ onBack }) {
     const origPositions = {};
     nodes.forEach(n => { origPositions[n.id] = { x: n.x, y: n.y }; });
 
-    // Don't start dragging yet — wait for threshold
     pendingDragRef.current = {
       nodeId,
       startX: e.clientX,
@@ -452,15 +620,51 @@ export default function PipelineCanvas({ onBack }) {
     };
   };
 
-  // Drop connection on node body → auto-connect to first free input
-  // Also always clear drag/pending state
+  // ── Connection drop on node (including lakehouse) ──
   const handleNodeMouseUp = (nodeId) => {
-    if (connectingFrom && connectingFrom !== nodeId) {
-      tryConnect(connectingFrom, nodeId);
-      setConnectingFrom(null);
+    // Drag-and-drop: if we're dragging a table and hovering over ANY lakehouse, absorb it
+    // This handles the case where mouseUp fires on the dragged node itself (z-order on top)
+    if (dragging && dragOverLakehouse) {
+      const draggedNode = nodes.find(n => n.id === dragging);
+      if (draggedNode?.type === 'table_output' && !nodeConfigs[dragging]?.parentId) {
+        absorbIntoLakehouse(dragging, dragOverLakehouse);
+        setDragOverLakehouse(null);
+        pendingDragRef.current = null;
+        setDragging(null); setDragStart(null); setIsSelecting(false); setSelectionRect(null);
+        return;
+      }
     }
 
-    // If pending drag was never activated → it was a click → select this node
+    // Drag-and-drop directly onto a lakehouse node
+    if (dragging && dragging !== nodeId) {
+      const targetNode = nodes.find(n => n.id === nodeId);
+      const targetType = targetNode && NODE_TYPES[targetNode.type];
+      const draggedNode = nodes.find(n => n.id === dragging);
+      if (targetType?.category === 'storage' && draggedNode?.type === 'table_output' && !nodeConfigs[dragging]?.parentId) {
+        absorbIntoLakehouse(dragging, nodeId);
+        setDragOverLakehouse(null);
+        pendingDragRef.current = null;
+        setDragging(null); setDragStart(null); setIsSelecting(false); setSelectionRect(null);
+        return;
+      }
+    }
+
+    if (connectingFrom && connectingFrom !== nodeId) {
+      const targetNode = nodes.find(n => n.id === nodeId);
+      const targetType = targetNode && NODE_TYPES[targetNode.type];
+
+      if (targetType?.category === 'storage') {
+        const sourceNode = nodes.find(n => n.id === connectingFrom);
+        const sourceCfg = nodeConfigs[connectingFrom];
+        const defaultName = sourceCfg?.tableName || (sourceNode ? NODE_TYPES[sourceNode.type]?.name : '') || 'table';
+        setTableRenameDialog({ lakehouseId: nodeId, sourceId: connectingFrom, sourceName: defaultName, name: defaultName });
+        setConnectingFrom(null);
+      } else {
+        tryConnect(connectingFrom, nodeId);
+        setConnectingFrom(null);
+      }
+    }
+
     if (pendingDragRef.current && !pendingDragRef.current.activated) {
       setSelectedNodes(new Set([nodeId]));
       setSelectedConns(new Set());
@@ -469,6 +673,7 @@ export default function PipelineCanvas({ onBack }) {
     pendingDragRef.current = null;
     setDragging(null);
     setDragStart(null);
+    setDragOverLakehouse(null);
     setIsSelecting(false);
     setSelectionRect(null);
   };
@@ -482,6 +687,7 @@ export default function PipelineCanvas({ onBack }) {
 
   const handlePortMouseUp = (nodeId, portIndex) => {
     if (connectingFrom && connectingFrom !== nodeId) {
+      // Check if this is a lakehouse child → normal connection to the child
       const targetNode = nodes.find(n => n.id === nodeId);
       const targetType = targetNode && NODE_TYPES[targetNode.type];
       const dup = connections.some(c => c.from === connectingFrom && c.to === nodeId);
@@ -496,6 +702,27 @@ export default function PipelineCanvas({ onBack }) {
     setDragStart(null);
   };
 
+  // ── Confirm table rename → create child table inside lakehouse ──
+  const confirmTableRename = useCallback(() => {
+    if (!tableRenameDialog) return;
+    const { lakehouseId, sourceId, name } = tableRenameDialog;
+    const lhNode = nodes.find(n => n.id === lakehouseId);
+    if (!lhNode) { setTableRenameDialog(null); return; }
+
+    const childId = `node-${nextId.current++}`;
+    const existingChildren = getLakehouseChildren(lakehouseId);
+    const childIndex = existingChildren.length;
+    const childY = getLakehouseChildY(lhNode, childIndex);
+
+    setNodes(prev => [...prev, { id: childId, type: 'table_output', x: lhNode.x, y: childY }]);
+    setConnections(prev => [...prev, { from: sourceId, to: childId, toPort: 0 }]);
+    setNodeConfigs(prev => ({
+      ...prev,
+      [childId]: { tableName: name.trim() || 'table', parentId: lakehouseId },
+    }));
+    setTableRenameDialog(null);
+  }, [tableRenameDialog, nodes, getLakehouseChildren]);
+
   const handleConnectionClick = (index) => {
     setSelectedConns(new Set([index]));
     setSelectedNodes(new Set());
@@ -505,9 +732,9 @@ export default function PipelineCanvas({ onBack }) {
     setNodes([]); setConnections([]); clearSelection(); setConnectingFrom(null); setNodeConfigs({});
   };
 
-  // ── Pipeline execution engine (real-time) ──
+  // ── Pipeline execution engine ──
   const nodeOutputs = useMemo(() => {
-    const outputs = {}; // { nodeId: data[] }
+    const outputs = {};
 
     // Topological order
     const inDeg = {};
@@ -529,10 +756,8 @@ export default function PipelineCanvas({ onBack }) {
         if (inDeg[kid] <= 0) queue.push(kid);
       });
     }
-    // Add any remaining (disconnected nodes)
     nodes.forEach(n => { if (!visited.has(n.id)) order.push(n.id); });
 
-    // Execute in order
     for (const nodeId of order) {
       const node = nodes.find(n => n.id === nodeId);
       if (!node) continue;
@@ -543,21 +768,21 @@ export default function PipelineCanvas({ onBack }) {
       if (typeDef.category === 'source') {
         outputs[nodeId] = config?.data || [];
       } else if (node.type === 'table_output') {
-        // Table node: use configured data if available (from source explorer),
-        // otherwise get from lakehouse via sourceInputNodeId
+        // Table node: data from config, sourceInputNodeId, or incoming connection
         if (config?.data) {
           outputs[nodeId] = config.data;
         } else if (config?.sourceInputNodeId) {
           outputs[nodeId] = outputs[config.sourceInputNodeId] || [];
         } else {
-          outputs[nodeId] = [];
+          // Lakehouse child: get data from incoming connection
+          const incoming = connections.filter(c => c.to === nodeId);
+          outputs[nodeId] = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         }
       } else if (node.type === 'if_condition') {
         const incoming = connections.filter(c => c.to === nodeId);
         const data = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const p = config?.params;
         let condResult = false;
-
         if (p) {
           switch (p.condition) {
             case 'table_empty': condResult = data.length === 0; break;
@@ -571,48 +796,32 @@ export default function PipelineCanvas({ onBack }) {
             default: condResult = false;
           }
         }
-
         outputs[nodeId] = data;
         outputs[`${nodeId}_true`] = condResult ? data : [];
         outputs[`${nodeId}_false`] = condResult ? [] : data;
       } else if (node.type === 'lookup') {
-        // Lookup: split main table into match/no match based on reference
         const incoming = connections.filter(c => c.to === nodeId);
         const mainData = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const refData = incoming.length > 1 ? (outputs[incoming[1].from] || []) : [];
         const col = config?.params?.column;
-
         if (col && refData.length > 0) {
           const refValues = new Set(refData.map(r => String(r[col] ?? '').trim()));
           const match = mainData.filter(r => refValues.has(String(r[col] ?? '').trim()));
           const noMatch = mainData.filter(r => !refValues.has(String(r[col] ?? '').trim()));
           outputs[nodeId] = [...match, ...noMatch];
-          // Store match/no match directly accessible by table_output nodes
           outputs[`${nodeId}_match`] = match;
           outputs[`${nodeId}_nomatch`] = noMatch;
-          if (!outputs._lakehouseTables) outputs._lakehouseTables = {};
-          outputs._lakehouseTables[nodeId] = [
-            { id: `${nodeId}_match`, name: 'Match', data: match },
-            { id: `${nodeId}_nomatch`, name: 'No Match', data: noMatch },
-          ];
         } else {
           outputs[nodeId] = mainData;
         }
       } else if (node.type === 'aggregate') {
-        // Aggregate: GROUP BY + agg functions
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const groupBy = config?.params?.groupBy || [];
         const aggs = config?.params?.aggs || [];
-
         if (aggs.length > 0) {
           const groups = new Map();
-          upstream.forEach(row => {
-            const key = groupBy.map(c => row[c] ?? '').join('|||');
-            if (!groups.has(key)) groups.set(key, []);
-            groups.get(key).push(row);
-          });
-
+          upstream.forEach(row => { const key = groupBy.map(c => row[c] ?? '').join('|||'); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(row); });
           outputs[nodeId] = [...groups.entries()].map(([, rows]) => {
             const result = {};
             groupBy.forEach(c => { result[c] = rows[0][c]; });
@@ -630,29 +839,15 @@ export default function PipelineCanvas({ onBack }) {
             });
             return result;
           });
-        } else {
-          outputs[nodeId] = upstream;
-        }
+        } else { outputs[nodeId] = upstream; }
       } else if (node.type === 'window_func') {
-        // Window function
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const p = config?.params;
-
         if (p?.func && p?.orderBy) {
-          const sorted = [...upstream].sort((a, b) => {
-            const va = parseFloat(a[p.orderBy]) || 0, vb = parseFloat(b[p.orderBy]) || 0;
-            return p.orderDir === 'desc' ? vb - va : va - vb;
-          });
-
-          // Partition
+          const sorted = [...upstream].sort((a, b) => { const va = parseFloat(a[p.orderBy]) || 0, vb = parseFloat(b[p.orderBy]) || 0; return p.orderDir === 'desc' ? vb - va : va - vb; });
           const partitions = new Map();
-          sorted.forEach(row => {
-            const key = p.partitionBy ? String(row[p.partitionBy] ?? '') : '__all__';
-            if (!partitions.has(key)) partitions.set(key, []);
-            partitions.get(key).push(row);
-          });
-
+          sorted.forEach(row => { const key = p.partitionBy ? String(row[p.partitionBy] ?? '') : '__all__'; if (!partitions.has(key)) partitions.set(key, []); partitions.get(key).push(row); });
           const result = [];
           partitions.forEach(rows => {
             let cumSum = 0, cumCount = 0;
@@ -662,21 +857,8 @@ export default function PipelineCanvas({ onBack }) {
               cumSum += val; cumCount++;
               switch (p.func) {
                 case 'row_number': newRow[p.alias] = String(i + 1); break;
-                case 'rank': {
-                  const prevVal = i > 0 ? (parseFloat(rows[i - 1][p.orderBy]) || 0) : null;
-                  const curVal = parseFloat(row[p.orderBy]) || 0;
-                  newRow[p.alias] = (i === 0 || curVal !== prevVal) ? String(i + 1) : rows[i - 1][p.alias] || String(i + 1);
-                  break;
-                }
-                case 'dense_rank': {
-                  if (i === 0) { newRow[p.alias] = '1'; }
-                  else {
-                    const prev = parseFloat(rows[i - 1][p.orderBy]) || 0;
-                    const cur = parseFloat(row[p.orderBy]) || 0;
-                    newRow[p.alias] = cur === prev ? (rows[i - 1][p.alias] || '1') : String(parseInt(rows[i - 1][p.alias] || '0') + 1);
-                  }
-                  break;
-                }
+                case 'rank': { const prevVal = i > 0 ? (parseFloat(rows[i - 1][p.orderBy]) || 0) : null; const curVal = parseFloat(row[p.orderBy]) || 0; newRow[p.alias] = (i === 0 || curVal !== prevVal) ? String(i + 1) : rows[i - 1][p.alias] || String(i + 1); break; }
+                case 'dense_rank': { if (i === 0) { newRow[p.alias] = '1'; } else { const prev = parseFloat(rows[i - 1][p.orderBy]) || 0; const cur = parseFloat(row[p.orderBy]) || 0; newRow[p.alias] = cur === prev ? (rows[i - 1][p.alias] || '1') : String(parseInt(rows[i - 1][p.alias] || '0') + 1); } break; }
                 case 'sum_cum': newRow[p.alias] = String(cumSum); break;
                 case 'avg_cum': newRow[p.alias] = String(Math.round((cumSum / cumCount) * 100) / 100); break;
                 case 'lag': newRow[p.alias] = i > 0 ? String(rows[i - 1][p.valueCol] ?? '') : ''; break;
@@ -687,45 +869,28 @@ export default function PipelineCanvas({ onBack }) {
             });
           });
           outputs[nodeId] = result;
-        } else {
-          outputs[nodeId] = upstream;
-        }
+        } else { outputs[nodeId] = upstream; }
       } else if (node.type === 'sample') {
-        // Sample
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const p = config?.params;
-
         if (p?.mode) {
           const n = p.value || 10;
           switch (p.mode) {
             case 'top_n': outputs[nodeId] = upstream.slice(0, n); break;
             case 'last_n': outputs[nodeId] = upstream.slice(-n); break;
             case 'every_nth': outputs[nodeId] = upstream.filter((_, i) => i % n === 0); break;
-            case 'percentage': {
-              const count = Math.max(1, Math.round(upstream.length * n / 100));
-              const shuffled = [...upstream].sort(() => Math.random() - 0.5);
-              outputs[nodeId] = shuffled.slice(0, count);
-              break;
-            }
+            case 'percentage': { const count = Math.max(1, Math.round(upstream.length * n / 100)); outputs[nodeId] = [...upstream].sort(() => Math.random() - 0.5).slice(0, count); break; }
             default: outputs[nodeId] = upstream;
           }
-        } else {
-          outputs[nodeId] = upstream;
-        }
+        } else { outputs[nodeId] = upstream; }
       } else if (node.type === 'log') {
-        // Log: pass-through data but generate a log entry
         const incoming = connections.filter(c => c.to === nodeId);
-        const allData = incoming.map(c => outputs[c.from] || []);
-        const merged = allData.flat();
-        outputs[nodeId] = merged;
-        // Log entry will be generated after execution
+        outputs[nodeId] = incoming.map(c => outputs[c.from] || []).flat();
       } else if (node.type === 'foreach_row') {
-        // ForEachRow: add computed columns to each row
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const computedCols = config?.params?.computedCols || [];
-
         if (computedCols.length > 0) {
           outputs[nodeId] = upstream.map(row => {
             const newRow = { ...row };
@@ -743,17 +908,9 @@ export default function PipelineCanvas({ onBack }) {
                   case 'ifthen': {
                     const val = String(row[a.col] ?? '').trim();
                     const cmp = String(a.value ?? '').trim();
-                    let result = false;
-                    switch (a.operator) {
-                      case '=': result = val === cmp; break;
-                      case '!=': result = val !== cmp; break;
-                      case '>': result = parseFloat(val) > parseFloat(cmp); break;
-                      case '<': result = parseFloat(val) < parseFloat(cmp); break;
-                      case '>=': result = parseFloat(val) >= parseFloat(cmp); break;
-                      case '<=': result = parseFloat(val) <= parseFloat(cmp); break;
-                      case 'contient': result = val.toLowerCase().includes(cmp.toLowerCase()); break;
-                    }
-                    newRow[cc.name] = result ? (a.then || 'true') : (a.else || 'false');
+                    let res = false;
+                    switch (a.operator) { case '=': res = val === cmp; break; case '!=': res = val !== cmp; break; case '>': res = parseFloat(val) > parseFloat(cmp); break; case '<': res = parseFloat(val) < parseFloat(cmp); break; case '>=': res = parseFloat(val) >= parseFloat(cmp); break; case '<=': res = parseFloat(val) <= parseFloat(cmp); break; case 'contient': res = val.toLowerCase().includes(cmp.toLowerCase()); break; }
+                    newRow[cc.name] = res ? (a.then || 'true') : (a.else || 'false');
                     break;
                   }
                   default: newRow[cc.name] = '';
@@ -762,129 +919,73 @@ export default function PipelineCanvas({ onBack }) {
             }
             return newRow;
           });
-        } else {
-          outputs[nodeId] = upstream;
-        }
+        } else { outputs[nodeId] = upstream; }
       } else if (node.type === 'foreach') {
-        // ForEach: apply transformation chain to each input table
         const incoming = connections.filter(c => c.to === nodeId);
         const forEachSteps = config?.params?.steps || [];
-        if (!outputs._lakehouseTables) outputs._lakehouseTables = {};
         const results = [];
         const tableEntries = [];
-
         incoming.forEach(c => {
           let data = outputs[c.from] || [];
           const srcNode = nodes.find(n => n.id === c.from);
           const srcCfg = nodeConfigs[c.from];
           const tableName = srcCfg?.tableName || srcNode?.type || 'table';
-
-          // Apply each step
           for (const step of forEachSteps) {
             try {
-              const transformType = {
-                filter: 'filter', sort: 'sort', select_cols: 'select', delete_col: 'delete',
-                rename_col: 'rename', deduplicate: 'drop_duplicates', clean_na: 'delete_na', fill_na: 'fill_na',
-              }[step.nodeType] || step.nodeType;
-
+              const transformType = { filter: 'filter', sort: 'sort', select_cols: 'select', delete_col: 'delete', rename_col: 'rename', deduplicate: 'drop_duplicates', clean_na: 'delete_na', fill_na: 'fill_na' }[step.nodeType] || step.nodeType;
               if (step.nodeType === 'mapping' && step.params?.mappings) {
-                data = data.map(row => {
-                  const newRow = {};
-                  step.params.mappings.forEach(m => {
-                    let val = row[m.source];
-                    if (m.targetType === 'integer') val = String(parseInt(val) || 0);
-                    else if (m.targetType === 'float') val = String(parseFloat(val) || 0);
-                    else val = String(val ?? '');
-                    newRow[m.target] = val;
-                  });
-                  return newRow;
-                });
+                data = data.map(row => { const newRow = {}; step.params.mappings.forEach(m => { let val = row[m.source]; if (m.targetType === 'integer') val = String(parseInt(val) || 0); else if (m.targetType === 'float') val = String(parseFloat(val) || 0); else val = String(val ?? ''); newRow[m.target] = val; }); return newRow; });
               } else if (step.params) {
                 data = applyTransformation(data, { type: transformType, params: step.params });
               } else if (['clean_na', 'deduplicate'].includes(step.nodeType)) {
                 data = applyTransformation(data, { type: transformType, params: {} });
               }
-            } catch { /* skip failed step */ }
+            } catch { /* skip */ }
           }
-
           results.push(...data);
           tableEntries.push({ id: c.from, name: tableName, data });
         });
-
         outputs[nodeId] = results;
-        // Store each transformed table accessible by sourceInputNodeId
         tableEntries.forEach(t => { outputs[`${nodeId}_${t.id}`] = t.data; });
-        outputs._lakehouseTables[nodeId] = tableEntries;
       } else if (typeDef.category === 'storage') {
-        // Lakehouse: store all incoming tables, output merged for pass-through
-        const incoming = connections.filter(c => c.to === nodeId);
-        const allData = incoming.map(c => outputs[c.from] || []);
-        // Store individual tables indexed by source node id (for the picker)
-        outputs[nodeId] = allData.flat(); // merged output for badge display
-        // Store individual tables in a special property
-        if (!outputs._lakehouseTables) outputs._lakehouseTables = {};
-        outputs._lakehouseTables[nodeId] = incoming.map(c => ({
-          id: c.from,
-          name: (() => {
-            const srcNode = nodes.find(n => n.id === c.from);
-            const srcCfg = nodeConfigs[c.from];
-            return srcCfg?.tableName || srcNode?.type || 'table';
-          })(),
-          data: outputs[c.from] || [],
-        }));
+        // Lakehouse: output = merge of all children's data (computed in post-pass)
+        outputs[nodeId] = [];
       } else {
-        // Get input data from connected upstream nodes
         const incoming = connections.filter(c => c.to === nodeId);
         if (incoming.length === 0) {
           outputs[nodeId] = [];
         } else if (incoming.length === 1) {
           const upstream = outputs[incoming[0].from] || [];
-          // Apply transformation if configured
           try {
             if (node.type === 'mapping' && config?.params?.mappings) {
-              // Mapping: rename columns + type casting
-              outputs[nodeId] = upstream.map(row => {
-                const newRow = {};
-                config.params.mappings.forEach(m => {
-                  let val = row[m.source];
-                  // Type casting
-                  if (m.targetType === 'integer') val = String(parseInt(val) || 0);
-                  else if (m.targetType === 'float') val = String(parseFloat(val) || 0);
-                  else if (m.targetType === 'boolean') val = (val === 'true' || val === '1') ? 'true' : 'false';
-                  else val = String(val ?? '');
-                  newRow[m.target] = val;
-                });
-                return newRow;
-              });
+              outputs[nodeId] = upstream.map(row => { const newRow = {}; config.params.mappings.forEach(m => { let val = row[m.source]; if (m.targetType === 'integer') val = String(parseInt(val) || 0); else if (m.targetType === 'float') val = String(parseFloat(val) || 0); else if (m.targetType === 'boolean') val = (val === 'true' || val === '1') ? 'true' : 'false'; else val = String(val ?? ''); newRow[m.target] = val; }); return newRow; });
             } else if (config?.params) {
               outputs[nodeId] = applyTransformation(upstream, { type: mapNodeTypeToTransform(node.type), params: config.params });
-            } else {
-              outputs[nodeId] = upstream;
-            }
-          } catch {
-            outputs[nodeId] = upstream;
-          }
+            } else { outputs[nodeId] = upstream; }
+          } catch { outputs[nodeId] = upstream; }
         } else {
-          // Multiple inputs (join, concat, destinations)
           const tables = incoming.map(c => outputs[c.from] || []);
           if (node.type === 'join' && config?.params) {
-            try {
-              outputs[nodeId] = applyTransformation(tables[0], { type: 'join', params: config.params }, tables[1]);
-            } catch { outputs[nodeId] = tables[0]; }
-          } else if (node.type === 'concat') {
-            outputs[nodeId] = tables.flat();
-          } else {
-            // Destinations: merge all inputs
-            outputs[nodeId] = tables.flat();
-          }
+            try { outputs[nodeId] = applyTransformation(tables[0], { type: 'join', params: config.params }, tables[1]); } catch { outputs[nodeId] = tables[0]; }
+          } else if (node.type === 'concat') { outputs[nodeId] = tables.flat(); }
+          else { outputs[nodeId] = tables.flat(); }
         }
       }
     }
 
+    // Post-pass: compute lakehouse outputs from children
+    nodes.forEach(node => {
+      const typeDef = NODE_TYPES[node.type];
+      if (typeDef?.category === 'storage') {
+        const childIds = nodes.filter(n => nodeConfigs[n.id]?.parentId === node.id).map(n => n.id);
+        outputs[node.id] = childIds.flatMap(cid => outputs[cid] || []);
+      }
+    });
+
     return outputs;
   }, [nodes, connections, nodeConfigs]);
 
-  // Generate logs from log nodes
+  // Generate logs
   useEffect(() => {
     const logNodes = nodes.filter(n => n.type === 'log');
     const newLogs = [];
@@ -903,7 +1004,7 @@ export default function PipelineCanvas({ onBack }) {
     if (newLogs.length > 0) setLogs(newLogs);
   }, [nodeOutputs, nodes, nodeConfigs]);
 
-  // Context menu handlers
+  // ── Context menu ──
   const handleNodeContextMenu = (e, nodeId) => {
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
@@ -911,44 +1012,22 @@ export default function PipelineCanvas({ onBack }) {
     if (typeDef?.category === 'source') {
       setExplorerForNode(nodeId);
     } else if (typeDef?.category === 'storage') {
-      // Build table list from incoming connections for the explorer
-      const lhTables = (nodeOutputs._lakehouseTables?.[nodeId] || []).map(t => ({
-        id: `lh-${nodeId}-${t.id}`,
-        dbId: nodeId,
-        dbName: typeDef.name,
-        dbIcon: typeDef.icon,
-        tableId: t.id,
-        tableName: t.name,
-        columns: t.data.length > 0 ? Object.keys(t.data[0]) : [],
-        rowCount: t.data.length,
-        rows: t.data,
-        _sourceInputNodeId: t.id, // track the upstream node for table_output config
-      }));
-      setLakehouseTables(lhTables);
-      setLakehouseNodeId(nodeId);
-    } else if (node.type === 'foreach') {
-      setForEachNodeId(nodeId);
-    } else if (node.type === 'if_condition') {
-      setIfNodeId(nodeId);
-    } else if (node.type === 'lookup') {
-      setLookupNodeId(nodeId);
-    } else if (node.type === 'foreach_row') {
-      setForEachRowNodeId(nodeId);
-    } else if (node.type === 'aggregate') {
-      setAggregateNodeId(nodeId);
-    } else if (node.type === 'window_func') {
-      setWindowNodeId(nodeId);
-    } else if (node.type === 'sample') {
-      setSampleNodeId(nodeId);
-    } else if (node.type === 'log') {
-      setLogNodeId(nodeId);
-    } else if (node.type === 'mapping') {
-      setMappingNodeId(nodeId);
-    } else if (typeDef?.category === 'transform') {
-      setConfigNodeId(nodeId);
-    } else {
-      handlePreview(nodeId);
-    }
+      const children = getLakehouseChildren(nodeId);
+      if (children.length > 0) {
+        setLakehouseRenameMenu({ lakehouseId: nodeId, editingChildId: null, editingName: '' });
+      }
+      return;
+    } else if (node.type === 'foreach') { setForEachNodeId(nodeId); }
+    else if (node.type === 'if_condition') { setIfNodeId(nodeId); }
+    else if (node.type === 'lookup') { setLookupNodeId(nodeId); }
+    else if (node.type === 'foreach_row') { setForEachRowNodeId(nodeId); }
+    else if (node.type === 'aggregate') { setAggregateNodeId(nodeId); }
+    else if (node.type === 'window_func') { setWindowNodeId(nodeId); }
+    else if (node.type === 'sample') { setSampleNodeId(nodeId); }
+    else if (node.type === 'log') { setLogNodeId(nodeId); }
+    else if (node.type === 'mapping') { setMappingNodeId(nodeId); }
+    else if (typeDef?.category === 'transform') { setConfigNodeId(nodeId); }
+    else { handlePreview(nodeId); }
   };
 
   const handleTransformConfig = (params) => {
@@ -960,56 +1039,39 @@ export default function PipelineCanvas({ onBack }) {
   const handleForEachConfig = (params) => {
     if (!forEachNodeId) return;
     setNodeConfigs(prev => ({ ...prev, [forEachNodeId]: { ...prev[forEachNodeId], params } }));
-
-    // Auto-create table_output nodes for each input table (like sources)
     const feNode = nodes.find(n => n.id === forEachNodeId);
     if (!feNode) { setForEachNodeId(null); return; }
-
     const incoming = connections.filter(c => c.to === forEachNodeId);
-    // Check which outputs already exist
     const existingOutputNodeIds = connections.filter(c => c.from === forEachNodeId).map(c => c.to);
     const existingSourceIds = new Set(existingOutputNodeIds.map(id => nodeConfigs[id]?.sourceInputNodeId).filter(Boolean));
-
     const newInputs = incoming.filter(c => !existingSourceIds.has(c.from));
     if (newInputs.length > 0) {
       const existingChildNodes = nodes.filter(n => existingOutputNodeIds.includes(n.id));
-      const maxY = existingChildNodes.length > 0
-        ? Math.max(...existingChildNodes.map(n => n.y)) + 100
-        : feNode.y - ((newInputs.length - 1) * 100) / 2;
-
-      const newNodes = [];
-      const newConns = [];
-      const newCfgs = {};
-
+      const maxY = existingChildNodes.length > 0 ? Math.max(...existingChildNodes.map(n => n.y)) + 100 : feNode.y - ((newInputs.length - 1) * 100) / 2;
+      const newNodes = [], newConns = [], newCfgs = {};
       newInputs.forEach((c, i) => {
         const id = `node-${nextId.current++}`;
-        const srcCfg = nodeConfigs[c.from];
-        const srcNode = nodes.find(n => n.id === c.from);
+        const srcCfg = nodeConfigs[c.from]; const srcNode = nodes.find(n => n.id === c.from);
         const tName = srcCfg?.tableName || NODE_TYPES[srcNode?.type]?.name || 'table';
         newNodes.push({ id, type: 'table_output', x: feNode.x + 260, y: maxY + i * 100 });
         newConns.push({ from: forEachNodeId, to: id, toPort: 0 });
         newCfgs[id] = { tableName: tName, sourceInputNodeId: `${forEachNodeId}_${c.from}` };
       });
-
       setNodes(prev => [...prev, ...newNodes]);
       setConnections(prev => [...prev, ...newConns]);
       setNodeConfigs(prev => ({ ...prev, ...newCfgs }));
     }
-
     setForEachNodeId(null);
   };
 
   const handleIfConfig = (params) => {
     if (!ifNodeId) return;
     setNodeConfigs(prev => ({ ...prev, [ifNodeId]: { ...prev[ifNodeId], params } }));
-
     const ifNode = nodes.find(n => n.id === ifNodeId);
     if (ifNode) {
       const existingOutputs = connections.filter(c => c.from === ifNodeId).map(c => c.to);
       if (existingOutputs.length === 0) {
-        const newNodes = [];
-        const newConns = [];
-        const newCfgs = {};
+        const newNodes = [], newConns = [], newCfgs = {};
         ['Vrai', 'Faux'].forEach((name, i) => {
           const id = `node-${nextId.current++}`;
           newNodes.push({ id, type: 'table_output', x: ifNode.x + 260, y: ifNode.y + (i - 0.5) * 100 });
@@ -1027,15 +1089,11 @@ export default function PipelineCanvas({ onBack }) {
   const handleLookupConfig = (params) => {
     if (!lookupNodeId) return;
     setNodeConfigs(prev => ({ ...prev, [lookupNodeId]: { ...prev[lookupNodeId], params } }));
-
-    // Auto-create Match and No Match table_output nodes
     const lkNode = nodes.find(n => n.id === lookupNodeId);
     if (lkNode) {
       const existingOutputs = connections.filter(c => c.from === lookupNodeId).map(c => c.to);
       if (existingOutputs.length === 0) {
-        const newNodes = [];
-        const newConns = [];
-        const newCfgs = {};
+        const newNodes = [], newConns = [], newCfgs = {};
         ['Match', 'No Match'].forEach((name, i) => {
           const id = `node-${nextId.current++}`;
           newNodes.push({ id, type: 'table_output', x: lkNode.x + 260, y: lkNode.y + (i - 0.5) * 100 });
@@ -1068,194 +1126,95 @@ export default function PipelineCanvas({ onBack }) {
     setMappingNodeId(null);
   };
 
-  // Lakehouse: get tables already exposed as outputs
-  const getLakehouseExposedIds = useCallback((lhNodeId) => {
-    const childIds = connections.filter(c => c.from === lhNodeId).map(c => c.to);
-    const ids = new Set();
-    childIds.forEach(cid => {
-      const cfg = nodeConfigs[cid];
-      if (cfg?.sourceInputNodeId) ids.add(cfg.sourceInputNodeId);
-    });
-    return ids;
-  }, [connections, nodeConfigs]);
-
-  const handleLakehouseSelect = (tables) => {
-    if (!lakehouseNodeId) return;
-    const lhNode = nodes.find(n => n.id === lakehouseNodeId);
-    if (!lhNode) { setLakehouseNodeId(null); setLakehouseTables([]); return; }
-
-    const alreadyExposed = getLakehouseExposedIds(lakehouseNodeId);
-    const newTables = tables.filter(t => !alreadyExposed.has(t.id));
-    if (newTables.length === 0) { setLakehouseNodeId(null); setLakehouseTables([]); return; }
-
-    const existingChildIds = connections.filter(c => c.from === lakehouseNodeId).map(c => c.to);
-    const existingChildNodes = nodes.filter(n => existingChildIds.includes(n.id));
-    const maxY = existingChildNodes.length > 0
-      ? Math.max(...existingChildNodes.map(n => n.y)) + 100
-      : lhNode.y;
-
-    const newNodes = [];
-    const newConns = [];
-    const newConfigs = {};
-
-    newTables.forEach((table, i) => {
-      const id = `node-${nextId.current++}`;
-      newNodes.push({ id, type: 'table_output', x: lhNode.x + 260, y: maxY + i * 100 });
-      newConns.push({ from: lakehouseNodeId, to: id, toPort: 0 });
-      newConfigs[id] = { tableName: table.tableName, sourceInputNodeId: table._sourceInputNodeId || table.tableId };
-    });
-
-    setNodes(prev => [...prev, ...newNodes]);
-    setConnections(prev => [...prev, ...newConns]);
-    setNodeConfigs(prev => ({ ...prev, ...newConfigs }));
-    setLakehouseNodeId(null);
-    setLakehouseTables([]);
-  };
-
-  // Get table IDs already loaded for a source node
   const getLoadedTableIds = useCallback((sourceNodeId) => {
     const childIds = connections.filter(c => c.from === sourceNodeId).map(c => c.to);
     const ids = new Set();
-    childIds.forEach(cid => {
-      const cfg = nodeConfigs[cid];
-      if (cfg?.tableId) ids.add(cfg.tableId);
-    });
+    childIds.forEach(cid => { const cfg = nodeConfigs[cid]; if (cfg?.tableId) ids.add(cfg.tableId); });
     return ids;
   }, [connections, nodeConfigs]);
 
-  // Called with an array of tables from the explorer
   const handleTableSelect = (tables) => {
     if (!explorerForNode) return;
     const sourceNode = nodes.find(n => n.id === explorerForNode);
     if (!sourceNode) { setExplorerForNode(null); return; }
-
-    // Only add tables that aren't already loaded
     const alreadyLoaded = getLoadedTableIds(explorerForNode);
     const newTables = tables.filter(t => !alreadyLoaded.has(t.id));
     if (newTables.length === 0) { setExplorerForNode(null); return; }
-
-    // Find existing table nodes to position new ones below
     const existingChildIds = connections.filter(c => c.from === explorerForNode).map(c => c.to);
     const existingChildNodes = nodes.filter(n => existingChildIds.includes(n.id));
-    const maxY = existingChildNodes.length > 0
-      ? Math.max(...existingChildNodes.map(n => n.y)) + 100
-      : sourceNode.y - ((newTables.length - 1) * 100) / 2;
-
-    const newNodes = [];
-    const newConnections = [];
-    const newConfigs = {};
-    const OFFSET_X = 260;
-
+    const maxY = existingChildNodes.length > 0 ? Math.max(...existingChildNodes.map(n => n.y)) + 100 : sourceNode.y - ((newTables.length - 1) * 100) / 2;
+    const newNodes = [], newConnections = [], newConfigs = {};
     newTables.forEach((table, i) => {
       const id = `node-${nextId.current++}`;
-      newNodes.push({
-        id,
-        type: 'table_output',
-        x: sourceNode.x + OFFSET_X,
-        y: (existingChildNodes.length > 0 ? maxY + i * 100 : maxY + i * 100),
-      });
+      newNodes.push({ id, type: 'table_output', x: sourceNode.x + 260, y: maxY + i * 100 });
       newConnections.push({ from: explorerForNode, to: id, toPort: 0 });
-      newConfigs[id] = {
-        tableId: table.id,
-        tableName: table.tableName,
-        data: [...table.rows],
-      };
+      newConfigs[id] = { tableId: table.id, tableName: table.tableName, data: [...table.rows] };
     });
-
     setNodes(prev => [...prev, ...newNodes]);
     setConnections(prev => [...prev, ...newConnections]);
     setNodeConfigs(prev => ({ ...prev, ...newConfigs }));
     setExplorerForNode(null);
   };
 
-  const handlePreview = (nodeId) => {
-    setPreviewNodeId(nodeId);
-  };
+  const handlePreview = (nodeId) => { setPreviewNodeId(nodeId); };
 
-  // Auto-layout: topological layering (BFS from roots)
   const handleAutoLayout = useCallback(() => {
     if (nodes.length === 0) return;
-
-    // Build adjacency: who feeds into whom
     const inDegree = {};
     const children = {};
-    nodes.forEach(n => { inDegree[n.id] = 0; children[n.id] = []; });
+    // Skip lakehouse children for layout
+    const layoutNodes = nodes.filter(n => !nodeConfigs[n.id]?.parentId);
+    layoutNodes.forEach(n => { inDegree[n.id] = 0; children[n.id] = []; });
     connections.forEach(c => {
-      inDegree[c.to] = (inDegree[c.to] || 0) + 1;
+      if (inDegree[c.to] !== undefined) inDegree[c.to] = (inDegree[c.to] || 0) + 1;
       if (children[c.from]) children[c.from].push(c.to);
     });
-
-    // BFS layering
     const layers = [];
     const assigned = new Set();
-    let queue = nodes.filter(n => inDegree[n.id] === 0).map(n => n.id);
-    if (queue.length === 0) queue = [nodes[0].id]; // cycle fallback
-
+    let queue = layoutNodes.filter(n => inDegree[n.id] === 0).map(n => n.id);
+    if (queue.length === 0 && layoutNodes.length > 0) queue = [layoutNodes[0].id];
     while (queue.length > 0) {
       layers.push([...queue]);
       queue.forEach(id => assigned.add(id));
       const next = [];
       queue.forEach(id => {
         (children[id] || []).forEach(childId => {
-          if (!assigned.has(childId) && !next.includes(childId)) {
-            // Check all parents are assigned
-            const allParentsAssigned = connections
-              .filter(c => c.to === childId)
-              .every(c => assigned.has(c.from));
+          if (!assigned.has(childId) && !next.includes(childId) && inDegree[childId] !== undefined) {
+            const allParentsAssigned = connections.filter(c => c.to === childId).every(c => assigned.has(c.from));
             if (allParentsAssigned) next.push(childId);
           }
         });
       });
-      // Add any remaining unassigned nodes if we're stuck
-      if (next.length === 0) {
-        const remaining = nodes.filter(n => !assigned.has(n.id));
-        if (remaining.length > 0) next.push(remaining[0].id);
-      }
+      if (next.length === 0) { const remaining = layoutNodes.filter(n => !assigned.has(n.id)); if (remaining.length > 0) next.push(remaining[0].id); }
       queue = next;
-      if (layers.length > nodes.length) break; // safety
+      if (layers.length > layoutNodes.length) break;
     }
-
-    // Place nodes: each layer is a column, nodes spaced vertically
-    const GAP_X = 240;
+    const GAP_X = 280;
     const GAP_Y = 120;
     const newPositions = {};
-
     layers.forEach((layer, colIdx) => {
       const totalHeight = (layer.length - 1) * GAP_Y;
-      layer.forEach((nodeId, rowIdx) => {
-        newPositions[nodeId] = {
-          x: colIdx * GAP_X,
-          y: rowIdx * GAP_Y - totalHeight / 2,
-        };
-      });
+      layer.forEach((nodeId, rowIdx) => { newPositions[nodeId] = { x: colIdx * GAP_X, y: rowIdx * GAP_Y - totalHeight / 2 }; });
     });
-
-    // Center in viewport
     const rect = canvasRef.current?.getBoundingClientRect();
     const vw = rect ? rect.width : 800;
     const vh = rect ? rect.height : 600;
     const allX = Object.values(newPositions).map(p => p.x);
     const allY = Object.values(newPositions).map(p => p.y);
-    const minX = Math.min(...allX);
-    const maxX = Math.max(...allX) + NODE_W;
-    const minY = Math.min(...allY);
-    const maxY = Math.max(...allY) + NODE_H;
-    const contentW = maxX - minX;
-    const contentH = maxY - minY;
-    const offsetX = (vw - contentW) / 2 - minX;
-    const offsetY = (vh - contentH) / 2 - minY;
+    const minX = Math.min(...allX); const maxX = Math.max(...allX) + LAKE_W;
+    const minY = Math.min(...allY); const maxY = Math.max(...allY) + NODE_H;
+    const offsetX = (vw - (maxX - minX)) / 2 - minX;
+    const offsetY = (vh - (maxY - minY)) / 2 - minY;
 
-    setNodes(prev => prev.map(n => {
-      const pos = newPositions[n.id];
-      return pos ? { ...n, x: pos.x, y: pos.y } : n;
-    }));
+    setNodes(prev => {
+      let updated = prev.map(n => { const pos = newPositions[n.id]; return pos ? { ...n, x: pos.x, y: pos.y } : n; });
+      return syncLakehouseChildren(updated);
+    });
     setPan({ x: offsetX, y: offsetY });
-  }, [nodes, connections]);
+  }, [nodes, connections, nodeConfigs, syncLakehouseChildren]);
 
   const totalSelected = selectedNodes.size + selectedConns.size;
   const cursorStyle = isPanning ? 'grabbing' : connectingFrom ? 'crosshair' : isSelecting ? 'crosshair' : 'default';
-
-  // Normalized selection rect for rendering
   const selRect = getNormalizedRect();
 
   return (
@@ -1266,14 +1225,8 @@ export default function PipelineCanvas({ onBack }) {
           <h1 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">Pipeline Dojo</h1>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">
-            {nodes.length} noeud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}
-          </span>
-          {totalSelected > 0 && (
-            <button onClick={handleDelete} className="game-btn px-3 py-1 text-xs text-red-500 font-semibold">
-              Supprimer ({totalSelected})
-            </button>
-          )}
+          <span className="text-xs text-slate-400">{nodes.length} noeud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
+          {totalSelected > 0 && <button onClick={handleDelete} className="game-btn px-3 py-1 text-xs text-red-500 font-semibold">Supprimer ({totalSelected})</button>}
           <button onClick={handleClear} className="game-btn px-3 py-1 text-xs text-slate-500 font-semibold">Tout effacer</button>
         </div>
       </div>
@@ -1281,52 +1234,38 @@ export default function PipelineCanvas({ onBack }) {
       <div className="flex-1 flex overflow-hidden">
         <NodePalette onAddNode={handleAddNode} />
 
-        <div
-          ref={canvasRef}
-          className="flex-1 relative overflow-hidden"
-          style={{ cursor: cursorStyle }}
-          onMouseDown={handleCanvasMouseDown}
-          onMouseMove={handleCanvasMouseMove}
-          onMouseUp={handleCanvasMouseUp}
-          onMouseLeave={handleCanvasMouseUp}
+        <div ref={canvasRef} className="flex-1 relative overflow-hidden" style={{ cursor: cursorStyle }}
+          onMouseDown={handleCanvasMouseDown} onMouseMove={handleCanvasMouseMove} onMouseUp={handleCanvasMouseUp} onMouseLeave={handleCanvasMouseUp}
           onContextMenu={(e) => e.preventDefault()}
           onWheel={(e) => {
             e.preventDefault();
             const rect = canvasRef.current?.getBoundingClientRect();
-            const mx = e.clientX - (rect?.left || 0);
-            const my = e.clientY - (rect?.top || 0);
+            const mx = e.clientX - (rect?.left || 0); const my = e.clientY - (rect?.top || 0);
             const delta = e.deltaY > 0 ? -0.08 : 0.08;
             const newZoom = Math.min(2, Math.max(0.2, zoom + delta));
-            // Zoom toward cursor
             const scale = newZoom / zoom;
             setPan(p => ({ x: mx - scale * (mx - p.x), y: my - scale * (my - p.y) }));
             setZoom(newZoom);
-          }}
-        >
-          {/* Grid */}
+          }}>
+
           <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-            {zoom >= 0.35 && (
-              <>
-                <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${pan.x % 40} ${pan.y % 40})`}>
-                    <circle cx="1" cy="1" r="1" fill="#CBD5E1" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-              </>
-            )}
+            {zoom >= 0.35 && (<>
+              <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${pan.x % 40} ${pan.y % 40})`}><circle cx="1" cy="1" r="1" fill="#CBD5E1" /></pattern></defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </>)}
           </svg>
 
           <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }}>
             <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
+              {/* Connections */}
               {connections.map((conn, i) => {
                 const fromNode = nodes.find(n => n.id === conn.from);
                 const toNode = nodes.find(n => n.id === conn.to);
                 if (!fromNode || !toNode) return null;
                 return (
                   <ConnectionLine key={`c-${i}`}
-                    from={getOutputPortPos(fromNode)}
-                    to={getInputPortPos(toNode, conn.toPort || 0)}
+                    from={getEffectiveOutputPortPos(fromNode)}
+                    to={getEffectiveInputPortPos(toNode, conn.toPort || 0)}
                     isSelected={selectedConns.has(i)}
                     onClick={() => handleConnectionClick(i)}
                   />
@@ -1335,79 +1274,79 @@ export default function PipelineCanvas({ onBack }) {
 
               {connectingFrom && (() => {
                 const fn = nodes.find(n => n.id === connectingFrom);
-                return fn ? <ConnectionLine from={getOutputPortPos(fn)} to={mousePos} isTemp /> : null;
+                return fn ? <ConnectionLine from={getEffectiveOutputPortPos(fn)} to={mousePos} isTemp /> : null;
               })()}
 
-              {nodes.map(node => {
+              {/* Nodes — render in two passes: non-dragged first, dragged last (z-order) */}
+              {[false, true].map(pass => nodes.map(node => {
                 const typeDef = NODE_TYPES[node.type];
                 if (!typeDef) return null;
+                const isDragged = dragging && (selectedNodes.has(node.id) || node.id === dragging);
+                if (pass === false && isDragged) return null; // skip dragged on first pass
+                if (pass === true && !isDragged) return null; // skip non-dragged on second pass
+
+                // Skip lakehouse children — rendered inside their parent container
+                if (nodeConfigs[node.id]?.parentId) return null;
+
+                // Lakehouse container rendering
+                if (typeDef.category === 'storage') {
+                  const children = getLakehouseChildren(node.id);
+                  return (
+                    <LakehouseNode key={node.id} node={node} typeDef={typeDef}
+                      childNodes={children} nodeConfigs={nodeConfigs} nodeOutputs={nodeOutputs}
+                      isSelected={selectedNodes.has(node.id)}
+                      connectingFrom={connectingFrom}
+                      showDropZone={dragOverLakehouse === node.id}
+                      onMouseDown={handleNodeMouseDown}
+                      onNodeMouseUp={handleNodeMouseUp}
+                      onPortMouseDown={handlePortMouseDown}
+                      onPortMouseUp={handlePortMouseUp}
+                      onContextMenu={handleNodeContextMenu}
+                    />
+                  );
+                }
+
+                // Regular node rendering
                 const config = nodeConfigs[node.id];
                 const output = nodeOutputs[node.id];
                 let label = null;
-                if (config?.tableName) {
-                  label = config.tableName;
-                } else if (node.type === 'foreach' && config?.params?.steps?.length > 0) {
-                  label = '__foreach_emojis__';
-                } else if (node.type === 'foreach_row' && config?.params?.computedCols?.length > 0) {
-                  label = config.params.computedCols.map(c => c.name).join(', ');
-                } else if (node.type === 'if_condition' && config?.params?.condition) {
+                if (config?.tableName) { label = config.tableName; }
+                else if (node.type === 'foreach' && config?.params?.steps?.length > 0) { label = '__foreach_emojis__'; }
+                else if (node.type === 'foreach_row' && config?.params?.computedCols?.length > 0) { label = config.params.computedCols.map(c => c.name).join(', '); }
+                else if (node.type === 'if_condition' && config?.params?.condition) {
                   const cond = config.params.condition;
                   const condLabels = { table_empty: 'vide?', table_not_empty: 'non vide?', row_count_gt: `> ${config.params.value}`, row_count_lt: `< ${config.params.value}`, col_has_nulls: `${config.params.column} vides?`, col_no_nulls: `${config.params.column} complet?`, col_all_unique: `${config.params.column} unique?`, col_contains_value: `${config.params.column} = ${config.params.value}?` };
                   label = condLabels[cond] || cond;
-                } else if (node.type === 'lookup' && config?.params?.column) {
-                  label = `sur ${config.params.column}`;
-                } else if (node.type === 'aggregate' && config?.params?.aggs?.length) {
-                  label = config.params.aggs.map(a => `${a.func}(${a.column})`).join(', ').slice(0, 30);
-                } else if (node.type === 'window_func' && config?.params?.func) {
-                  label = `${config.params.func}(${config.params.alias || ''})`;
-                } else if (node.type === 'sample' && config?.params?.mode) {
+                } else if (node.type === 'lookup' && config?.params?.column) { label = `sur ${config.params.column}`; }
+                else if (node.type === 'aggregate' && config?.params?.aggs?.length) { label = config.params.aggs.map(a => `${a.func}(${a.column})`).join(', ').slice(0, 30); }
+                else if (node.type === 'window_func' && config?.params?.func) { label = `${config.params.func}(${config.params.alias || ''})`; }
+                else if (node.type === 'sample' && config?.params?.mode) { const p = config.params; label = p.mode === 'top_n' ? `Top ${p.value}` : p.mode === 'last_n' ? `Last ${p.value}` : p.mode === 'percentage' ? `${p.value}%` : `1/${p.value}`; }
+                else if (node.type === 'log' && config?.params?.level) { label = `${config.params.level.toUpperCase()}`; }
+                else if (config?.params) {
                   const p = config.params;
-                  label = p.mode === 'top_n' ? `Top ${p.value}` : p.mode === 'last_n' ? `Last ${p.value}` : p.mode === 'percentage' ? `${p.value}%` : `1/${p.value}`;
-                } else if (node.type === 'log' && config?.params?.level) {
-                  label = `${config.params.level.toUpperCase()}`;
-                } else if (config?.params) {
-                  const p = config.params;
-                  if (p.mappings) {
-                    const renamed = p.mappings.filter(m => m.source !== m.target);
-                    label = renamed.length > 0 ? renamed.map(m => `${m.source}→${m.target}`).join(', ').slice(0, 25) : 'configuré';
-                  } else if (p.column && p.value) label = `${p.column} = ${p.value}`;
+                  if (p.mappings) { const renamed = p.mappings.filter(m => m.source !== m.target); label = renamed.length > 0 ? renamed.map(m => `${m.source}→${m.target}`).join(', ').slice(0, 25) : 'configuré'; }
+                  else if (p.column && p.value) label = `${p.column} = ${p.value}`;
                   else if (p.column && p.order) label = `${p.column} ${p.order === 'desc' ? '↓' : '↑'}`;
                   else if (p.oldName && p.newName) label = `${p.oldName} → ${p.newName}`;
                   else if (p.column) label = p.column;
                   else if (p.columns) label = p.columns.join(', ');
                   else label = 'configuré';
                 }
-                // Attach foreach steps to node for rendering
-                const renderNode = node.type === 'foreach' && config?.params?.steps
-                  ? { ...node, _foreachSteps: config.params.steps } : node;
+                const renderNode = node.type === 'foreach' && config?.params?.steps ? { ...node, _foreachSteps: config.params.steps } : node;
                 return (
                   <PipelineNode key={node.id} node={renderNode} typeDef={typeDef}
                     isSelected={selectedNodes.has(node.id)}
-                    onMouseDown={handleNodeMouseDown}
-                    onNodeMouseUp={handleNodeMouseUp}
-                    onPortMouseDown={handlePortMouseDown}
-                    onPortMouseUp={handlePortMouseUp}
-                    connectingFrom={connectingFrom}
-                    onContextMenu={handleNodeContextMenu}
-                    onPreview={handlePreview}
-                    outputRowCount={output?.length}
-                    outputData={output}
-                    label={label}
+                    onMouseDown={handleNodeMouseDown} onNodeMouseUp={handleNodeMouseUp}
+                    onPortMouseDown={handlePortMouseDown} onPortMouseUp={handlePortMouseUp}
+                    connectingFrom={connectingFrom} onContextMenu={handleNodeContextMenu}
+                    onPreview={handlePreview} outputRowCount={output?.length} outputData={output} label={label}
                   />
                 );
-              })}
+              }))}
 
-              {/* Selection rectangle */}
               {isSelecting && selRect && (
-                <rect
-                  x={selRect.x1} y={selRect.y1}
-                  width={selRect.x2 - selRect.x1} height={selRect.y2 - selRect.y1}
-                  fill="rgba(99, 102, 241, 0.08)"
-                  stroke="#6366F1"
-                  strokeWidth={1}
-                  strokeDasharray="4 2"
-                  rx={4}
-                />
+                <rect x={selRect.x1} y={selRect.y1} width={selRect.x2 - selRect.x1} height={selRect.y2 - selRect.y1}
+                  fill="rgba(99, 102, 241, 0.08)" stroke="#6366F1" strokeWidth={1} strokeDasharray="4 2" rx={4} />
               )}
             </g>
           </svg>
@@ -1416,12 +1355,11 @@ export default function PipelineCanvas({ onBack }) {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
               <div className="text-center">
                 <p className="text-slate-400 text-sm font-medium">Cliquez sur une activité à gauche pour l'ajouter</p>
-                <p className="text-slate-300 text-xs mt-1">Clic droit pour naviguer · Glissez entre les ports pour connecter · Clic gauche pour sélectionner</p>
+                <p className="text-slate-300 text-xs mt-1">Clic droit pour configurer · Glissez entre les ports pour connecter</p>
               </div>
             </div>
           )}
 
-          {/* Log panel */}
           {logs.length > 0 && (
             <div className="absolute bottom-4 left-4 bg-white border border-slate-200 rounded-xl shadow-lg max-w-sm max-h-[120px] overflow-y-auto" style={{ zIndex: 3 }}>
               <div className="px-3 py-1.5 border-b border-slate-100 flex items-center justify-between">
@@ -1430,9 +1368,7 @@ export default function PipelineCanvas({ onBack }) {
               </div>
               {logs.map((log, i) => (
                 <div key={i} className="px-3 py-1 border-b border-slate-50 flex items-start gap-2">
-                  <span className="text-[10px]">
-                    {log.level === 'error' ? '❌' : log.level === 'warn' ? '⚠️' : log.level === 'success' ? '✅' : 'ℹ️'}
-                  </span>
+                  <span className="text-[10px]">{log.level === 'error' ? '❌' : log.level === 'warn' ? '⚠️' : log.level === 'success' ? '✅' : 'ℹ️'}</span>
                   <span className="text-[10px] text-slate-600 flex-1">{log.message}</span>
                   <span className="text-[9px] text-slate-400">{log.time}</span>
                 </div>
@@ -1440,37 +1376,20 @@ export default function PipelineCanvas({ onBack }) {
             </div>
           )}
 
-          {/* Zoom controls */}
           <div className="absolute bottom-16 right-4 flex flex-col gap-1" style={{ zIndex: 3 }}>
-            <button
-              onClick={() => { const nz = Math.min(2, zoom + 0.15); const rect = canvasRef.current?.getBoundingClientRect(); const cx = (rect?.width || 0) / 2; const cy = (rect?.height || 0) / 2; const s = nz / zoom; setPan(p => ({ x: cx - s * (cx - p.x), y: cy - s * (cy - p.y) })); setZoom(nz); }}
-              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center"
-              title="Zoom in"
-            >+</button>
+            <button onClick={() => { const nz = Math.min(2, zoom + 0.15); const rect = canvasRef.current?.getBoundingClientRect(); const cx = (rect?.width || 0) / 2; const cy = (rect?.height || 0) / 2; const s = nz / zoom; setPan(p => ({ x: cx - s * (cx - p.x), y: cy - s * (cy - p.y) })); setZoom(nz); }}
+              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center" title="Zoom in">+</button>
             <span className="text-[9px] text-slate-400 text-center font-medium">{Math.round(zoom * 100)}%</span>
-            <button
-              onClick={() => { const nz = Math.max(0.2, zoom - 0.15); const rect = canvasRef.current?.getBoundingClientRect(); const cx = (rect?.width || 0) / 2; const cy = (rect?.height || 0) / 2; const s = nz / zoom; setPan(p => ({ x: cx - s * (cx - p.x), y: cy - s * (cy - p.y) })); setZoom(nz); }}
-              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center"
-              title="Zoom out"
-            >−</button>
-            <button
-              onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-[10px] font-bold text-slate-500 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center"
-              title="Reset zoom"
-            >1:1</button>
+            <button onClick={() => { const nz = Math.max(0.2, zoom - 0.15); const rect = canvasRef.current?.getBoundingClientRect(); const cx = (rect?.width || 0) / 2; const cy = (rect?.height || 0) / 2; const s = nz / zoom; setPan(p => ({ x: cx - s * (cx - p.x), y: cy - s * (cy - p.y) })); setZoom(nz); }}
+              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center" title="Zoom out">−</button>
+            <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-[10px] font-bold text-slate-500 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center" title="Reset zoom">1:1</button>
           </div>
 
-          {/* Auto-layout button */}
           {nodes.length >= 2 && (
-            <button
-              onClick={handleAutoLayout}
-              className="absolute bottom-4 right-4 bg-white border border-slate-200 shadow-lg rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center gap-1.5"
-              style={{ zIndex: 3 }}
-              title="Réorganiser automatiquement"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-              </svg>
+            <button onClick={handleAutoLayout}
+              className="absolute bottom-4 right-4 bg-white border border-slate-200 shadow-lg rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center gap-1.5" style={{ zIndex: 3 }} title="Réorganiser automatiquement">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
               Réorganiser
             </button>
           )}
@@ -1491,25 +1410,14 @@ export default function PipelineCanvas({ onBack }) {
 
       {/* Table Explorer for source nodes */}
       {explorerForNode && (
-        <TableExplorer
-          onSelect={handleTableSelect}
-          onClose={() => setExplorerForNode(null)}
-          initialSelectedIds={getLoadedTableIds(explorerForNode)}
-        />
+        <TableExplorer onSelect={handleTableSelect} onClose={() => setExplorerForNode(null)} initialSelectedIds={getLoadedTableIds(explorerForNode)} />
       )}
 
       {/* Data Preview popup */}
       {previewNodeId && (
-        <DataPreview
-          data={nodeOutputs[previewNodeId] || []}
-          title={(() => {
-            const n = nodes.find(nd => nd.id === previewNodeId);
-            const t = n ? NODE_TYPES[n.type] : null;
-            const cfg = nodeConfigs[previewNodeId];
-            return `${t?.icon || ''} ${t?.name || ''} ${cfg?.tableName ? '— ' + cfg.tableName : ''}`;
-          })()}
-          onClose={() => setPreviewNodeId(null)}
-        />
+        <DataPreview data={nodeOutputs[previewNodeId] || []}
+          title={(() => { const n = nodes.find(nd => nd.id === previewNodeId); const t = n ? NODE_TYPES[n.type] : null; const cfg = nodeConfigs[previewNodeId]; return `${t?.icon || ''} ${t?.name || ''} ${cfg?.tableName ? '— ' + cfg.tableName : ''}`; })()}
+          onClose={() => setPreviewNodeId(null)} />
       )}
 
       {/* Transform configuration popup */}
@@ -1518,144 +1426,146 @@ export default function PipelineCanvas({ onBack }) {
         const cfgType = cfgNode ? NODE_TYPES[cfgNode.type] : null;
         const transformType = cfgNode ? mapNodeTypeToTransform(cfgNode.type) : null;
         const existingParams = nodeConfigs[configNodeId]?.params || null;
-        // Get columns from upstream data
         const incoming = connections.filter(c => c.to === configNodeId);
         const upstreamData = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
         const columns = upstreamData.length > 0 ? Object.keys(upstreamData[0]) : [];
         if (!cfgType || !transformType) return null;
-        return (
-          <ParamInputPopup
-            cardType={transformType}
-            cardName={cfgType.name}
-            cardIcon={cfgType.icon}
-            columns={columns}
-            tableData={upstreamData}
-            onConfirm={handleTransformConfig}
-            onCancel={() => setConfigNodeId(null)}
-            initialParams={existingParams}
-          />
-        );
+        return <ParamInputPopup cardType={transformType} cardName={cfgType.name} cardIcon={cfgType.icon} columns={columns} tableData={upstreamData} onConfirm={handleTransformConfig} onCancel={() => setConfigNodeId(null)} initialParams={existingParams} />;
       })()}
 
-      {/* If config */}
       {ifNodeId && (() => {
-        const incoming = connections.filter(c => c.to === ifNodeId);
-        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
-        return <IfConfig columns={cols} rowCount={upstream.length} initialParams={nodeConfigs[ifNodeId]?.params}
-          onConfirm={handleIfConfig} onCancel={() => setIfNodeId(null)} />;
+        const incoming = connections.filter(c => c.to === ifNodeId); const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
+        return <IfConfig columns={cols} rowCount={upstream.length} initialParams={nodeConfigs[ifNodeId]?.params} onConfirm={handleIfConfig} onCancel={() => setIfNodeId(null)} />;
       })()}
 
-      {/* Lookup config */}
       {lookupNodeId && (() => {
-        const incoming = connections.filter(c => c.to === lookupNodeId);
-        const mainData = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const refData = incoming.length > 1 ? (nodeOutputs[incoming[1].from] || []) : [];
-        const mainCols = mainData.length > 0 ? Object.keys(mainData[0]) : [];
-        const refCols = refData.length > 0 ? Object.keys(refData[0]) : [];
-        return (
-          <LookupConfig
-            mainColumns={mainCols}
-            refColumns={refCols}
-            initialParams={nodeConfigs[lookupNodeId]?.params}
-            onConfirm={handleLookupConfig}
-            onCancel={() => setLookupNodeId(null)}
-          />
-        );
+        const incoming = connections.filter(c => c.to === lookupNodeId); const mainData = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const refData = incoming.length > 1 ? (nodeOutputs[incoming[1].from] || []) : [];
+        return <LookupConfig mainColumns={mainData.length > 0 ? Object.keys(mainData[0]) : []} refColumns={refData.length > 0 ? Object.keys(refData[0]) : []} initialParams={nodeConfigs[lookupNodeId]?.params} onConfirm={handleLookupConfig} onCancel={() => setLookupNodeId(null)} />;
       })()}
 
-      {/* Aggregate config */}
       {aggregateNodeId && (() => {
-        const incoming = connections.filter(c => c.to === aggregateNodeId);
-        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
-        return <AggregateConfig columns={cols} initialParams={nodeConfigs[aggregateNodeId]?.params}
-          onConfirm={handleSimpleConfig(aggregateNodeId, setAggregateNodeId)} onCancel={() => setAggregateNodeId(null)} />;
+        const incoming = connections.filter(c => c.to === aggregateNodeId); const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
+        return <AggregateConfig columns={cols} initialParams={nodeConfigs[aggregateNodeId]?.params} onConfirm={handleSimpleConfig(aggregateNodeId, setAggregateNodeId)} onCancel={() => setAggregateNodeId(null)} />;
       })()}
 
-      {/* Window config */}
       {windowNodeId && (() => {
-        const incoming = connections.filter(c => c.to === windowNodeId);
-        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
-        return <WindowConfig columns={cols} initialParams={nodeConfigs[windowNodeId]?.params}
-          onConfirm={handleSimpleConfig(windowNodeId, setWindowNodeId)} onCancel={() => setWindowNodeId(null)} />;
+        const incoming = connections.filter(c => c.to === windowNodeId); const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
+        return <WindowConfig columns={cols} initialParams={nodeConfigs[windowNodeId]?.params} onConfirm={handleSimpleConfig(windowNodeId, setWindowNodeId)} onCancel={() => setWindowNodeId(null)} />;
       })()}
 
-      {/* Sample config */}
       {sampleNodeId && (() => {
-        const incoming = connections.filter(c => c.to === sampleNodeId);
-        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        return <SampleConfig rowCount={upstream.length} initialParams={nodeConfigs[sampleNodeId]?.params}
-          onConfirm={handleSimpleConfig(sampleNodeId, setSampleNodeId)} onCancel={() => setSampleNodeId(null)} />;
+        const incoming = connections.filter(c => c.to === sampleNodeId); const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
+        return <SampleConfig rowCount={upstream.length} initialParams={nodeConfigs[sampleNodeId]?.params} onConfirm={handleSimpleConfig(sampleNodeId, setSampleNodeId)} onCancel={() => setSampleNodeId(null)} />;
       })()}
 
-      {/* Log config */}
       {logNodeId && (() => {
-        const incoming = connections.filter(c => c.to === logNodeId);
-        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
-        return <LogConfig columns={cols} initialParams={nodeConfigs[logNodeId]?.params}
-          onConfirm={handleSimpleConfig(logNodeId, setLogNodeId)} onCancel={() => setLogNodeId(null)} />;
+        const incoming = connections.filter(c => c.to === logNodeId); const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
+        return <LogConfig columns={cols} initialParams={nodeConfigs[logNodeId]?.params} onConfirm={handleSimpleConfig(logNodeId, setLogNodeId)} onCancel={() => setLogNodeId(null)} />;
       })()}
 
-      {/* ForEachRow config */}
       {forEachRowNodeId && (() => {
-        const incoming = connections.filter(c => c.to === forEachRowNodeId);
-        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
-        return (
-          <ForEachRowConfig
-            columns={cols}
-            sampleData={upstream}
-            initialParams={nodeConfigs[forEachRowNodeId]?.params}
-            onConfirm={handleForEachRowConfig}
-            onCancel={() => setForEachRowNodeId(null)}
-          />
-        );
+        const incoming = connections.filter(c => c.to === forEachRowNodeId); const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const cols = upstream.length > 0 ? Object.keys(upstream[0]) : [];
+        return <ForEachRowConfig columns={cols} sampleData={upstream} initialParams={nodeConfigs[forEachRowNodeId]?.params} onConfirm={handleForEachRowConfig} onCancel={() => setForEachRowNodeId(null)} />;
       })()}
 
-      {/* ForEach config */}
       {forEachNodeId && (() => {
-        const incoming = connections.filter(c => c.to === forEachNodeId);
-        const firstUpstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const cols = firstUpstream.length > 0 ? Object.keys(firstUpstream[0]) : [];
-        const existingParams = nodeConfigs[forEachNodeId]?.params || null;
-        return (
-          <ForEachConfig
-            initialSteps={existingParams?.steps || []}
-            sampleColumns={cols}
-            sampleData={firstUpstream}
-            onConfirm={handleForEachConfig}
-            onCancel={() => setForEachNodeId(null)}
-          />
-        );
+        const incoming = connections.filter(c => c.to === forEachNodeId); const firstUpstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const cols = firstUpstream.length > 0 ? Object.keys(firstUpstream[0]) : [];
+        return <ForEachConfig initialSteps={nodeConfigs[forEachNodeId]?.params?.steps || []} sampleColumns={cols} sampleData={firstUpstream} onConfirm={handleForEachConfig} onCancel={() => setForEachNodeId(null)} />;
       })()}
 
-      {/* Lakehouse table explorer */}
-      {lakehouseNodeId && (
-        <TableExplorer
-          customTables={lakehouseTables}
-          initialSelectedIds={getLakehouseExposedIds(lakehouseNodeId)}
-          onSelect={handleLakehouseSelect}
-          onClose={() => { setLakehouseNodeId(null); setLakehouseTables([]); }}
-        />
+      {mappingNodeId && (() => {
+        const incoming = connections.filter(c => c.to === mappingNodeId); const upstreamData = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : []; const columns = upstreamData.length > 0 ? Object.keys(upstreamData[0]) : [];
+        return <MappingConfig columns={columns} tableData={upstreamData} initialParams={nodeConfigs[mappingNodeId]?.params || null} onConfirm={handleMappingConfig} onCancel={() => setMappingNodeId(null)} />;
+      })()}
+
+      {/* Table rename dialog (connection-based add) */}
+      {tableRenameDialog && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setTableRenameDialog(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-5 w-80" onClick={e => e.stopPropagation()}>
+            <h3 className="text-sm font-bold text-slate-800 mb-3">Nom de la table dans le lakehouse</h3>
+            <input type="text" value={tableRenameDialog.name}
+              onChange={e => setTableRenameDialog(prev => ({ ...prev, name: e.target.value }))}
+              onKeyDown={e => { if (e.key === 'Enter') confirmTableRename(); }}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm mb-4 focus:border-indigo-400 focus:outline-none"
+              autoFocus placeholder="Nom de la table" />
+            <div className="flex gap-2">
+              <button onClick={() => setTableRenameDialog(null)} className="flex-1 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">Annuler</button>
+              <button onClick={confirmTableRename} className="flex-1 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600">Ajouter</button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Mapping configuration popup */}
-      {mappingNodeId && (() => {
-        const incoming = connections.filter(c => c.to === mappingNodeId);
-        const upstreamData = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const columns = upstreamData.length > 0 ? Object.keys(upstreamData[0]) : [];
-        const existingParams = nodeConfigs[mappingNodeId]?.params || null;
+      {/* Lakehouse right-click: rename tables menu */}
+      {lakehouseRenameMenu && (() => {
+        const lhNode = nodes.find(n => n.id === lakehouseRenameMenu.lakehouseId);
+        const lhType = lhNode ? NODE_TYPES[lhNode.type] : null;
+        const children = getLakehouseChildren(lakehouseRenameMenu.lakehouseId);
         return (
-          <MappingConfig
-            columns={columns}
-            tableData={upstreamData}
-            initialParams={existingParams}
-            onConfirm={handleMappingConfig}
-            onCancel={() => setMappingNodeId(null)}
-          />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setLakehouseRenameMenu(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl p-5 w-96 max-h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">{lhType?.icon}</span>
+                <h3 className="text-sm font-bold text-slate-800">Tables dans {lhType?.name}</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto space-y-2">
+                {children.map(child => {
+                  const cfg = nodeConfigs[child.id];
+                  const isEditing = lakehouseRenameMenu.editingChildId === child.id;
+                  const output = nodeOutputs[child.id];
+                  const rowCount = output?.length || 0;
+                  const colCount = output?.length > 0 ? Object.keys(output[0]).length : 0;
+                  return (
+                    <div key={child.id} className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 hover:bg-slate-50">
+                      <span className="text-sm">📋</span>
+                      {isEditing ? (
+                        <input type="text" value={lakehouseRenameMenu.editingName}
+                          onChange={e => setLakehouseRenameMenu(prev => ({ ...prev, editingName: e.target.value }))}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              const newName = lakehouseRenameMenu.editingName.trim();
+                              if (newName) setNodeConfigs(prev => ({ ...prev, [child.id]: { ...prev[child.id], tableName: newName } }));
+                              setLakehouseRenameMenu(prev => ({ ...prev, editingChildId: null, editingName: '' }));
+                            }
+                            if (e.key === 'Escape') setLakehouseRenameMenu(prev => ({ ...prev, editingChildId: null }));
+                          }}
+                          onBlur={() => {
+                            const newName = lakehouseRenameMenu.editingName.trim();
+                            if (newName) setNodeConfigs(prev => ({ ...prev, [child.id]: { ...prev[child.id], tableName: newName } }));
+                            setLakehouseRenameMenu(prev => ({ ...prev, editingChildId: null, editingName: '' }));
+                          }}
+                          className="flex-1 px-2 py-1 rounded border border-indigo-300 text-sm outline-none focus:border-indigo-500"
+                          autoFocus />
+                      ) : (
+                        <div className="flex-1 flex items-center justify-between">
+                          <div>
+                            <span className="text-sm font-medium text-slate-700">{cfg?.tableName || 'Table'}</span>
+                            {rowCount > 0 && <span className="text-[10px] text-slate-400 ml-2">{colCount}×{rowCount}</span>}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => setLakehouseRenameMenu(prev => ({ ...prev, editingChildId: child.id, editingName: cfg?.tableName || '' }))}
+                              className="text-xs text-indigo-500 hover:text-indigo-700 font-medium px-2 py-0.5 rounded hover:bg-indigo-50">
+                              ✏️ Renommer
+                            </button>
+                            <button onClick={() => {
+                              setNodes(prev => prev.filter(n => n.id !== child.id));
+                              setConnections(prev => prev.filter(c => c.from !== child.id && c.to !== child.id));
+                              setNodeConfigs(prev => { const next = { ...prev }; delete next[child.id]; return next; });
+                            }}
+                              className="text-xs text-red-400 hover:text-red-600 font-medium px-2 py-0.5 rounded hover:bg-red-50">
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {children.length === 0 && <p className="text-sm text-slate-400 text-center py-4">Aucune table dans ce lakehouse</p>}
+              </div>
+              <button onClick={() => setLakehouseRenameMenu(null)} className="mt-4 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 w-full hover:bg-slate-50">Fermer</button>
+            </div>
+          </div>
         );
       })()}
     </div>

@@ -28,6 +28,15 @@ const MODULES = [
     description: 'Créez des tableaux de bord interactifs avec des graphiques pour analyser vos données.',
     color: 'from-emerald-500 to-teal-600',
   },
+  {
+    id: 'git-dojo',
+    name: 'Git Dojo',
+    subtitle: 'Gestion de versions',
+    icon: '🌿',
+    description: 'Apprenez les bases de Git : branches, commits, merges et workflows collaboratifs.',
+    color: 'from-orange-500 to-red-600',
+    disabled: true,
+  },
 ];
 
 export default function Hub() {
@@ -61,16 +70,21 @@ export default function Hub() {
         {MODULES.map((mod) => (
           <button
             key={mod.id}
-            onClick={() => setActiveModule(mod.id)}
-            className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-6 text-left transition-all hover:scale-[1.03] hover:shadow-xl hover:border-indigo-300"
+            onClick={() => !mod.disabled && setActiveModule(mod.id)}
+            disabled={mod.disabled}
+            className={`group relative overflow-hidden rounded-2xl border-2 p-6 text-left transition-all ${
+              mod.disabled
+                ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-60'
+                : 'border-slate-200 bg-white hover:scale-[1.03] hover:shadow-xl hover:border-indigo-300'
+            }`}
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${mod.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${mod.color} opacity-0 ${!mod.disabled ? 'group-hover:opacity-5' : ''} transition-opacity`} />
             <div className="text-4xl mb-3">{mod.icon}</div>
             <h3 className="text-xl font-bold text-slate-800 mb-1">{mod.name}</h3>
-            <p className="text-sm font-medium text-indigo-500 mb-2">{mod.subtitle}</p>
+            <p className={`text-sm font-medium mb-2 ${mod.disabled ? 'text-slate-400' : 'text-indigo-500'}`}>{mod.subtitle}</p>
             <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
-            <div className="mt-4 text-xs font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
-              Commencer →
+            <div className={`mt-4 text-xs font-semibold ${mod.disabled ? 'text-orange-400' : 'text-indigo-600 group-hover:translate-x-1'} transition-transform`}>
+              {mod.disabled ? '🚧 Bientot disponible' : 'Commencer →'}
             </div>
           </button>
         ))}

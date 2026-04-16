@@ -239,7 +239,7 @@ function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, is
 
 function NodePalette({ onAddNode }) {
   return (
-    <div className="w-48 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
+    <div data-tutorial="palette" className="w-48 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
       <div className="p-3 border-b border-slate-200 shrink-0">
         <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Activités</h3>
       </div>
@@ -261,7 +261,7 @@ function NodePalette({ onAddNode }) {
   );
 }
 
-export default function PipelineCanvas({ onBack }) {
+export default function PipelineCanvas({ onBack, exercise, onExerciseValidate }) {
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -961,6 +961,9 @@ export default function PipelineCanvas({ onBack }) {
               outputs[nodeId] = upstream.map(row => { const newRow = {}; config.params.mappings.forEach(m => { let val = row[m.source]; if (m.targetType === 'integer') val = String(parseInt(val) || 0); else if (m.targetType === 'float') val = String(parseFloat(val) || 0); else if (m.targetType === 'boolean') val = (val === 'true' || val === '1') ? 'true' : 'false'; else val = String(val ?? ''); newRow[m.target] = val; }); return newRow; });
             } else if (config?.params) {
               outputs[nodeId] = applyTransformation(upstream, { type: mapNodeTypeToTransform(node.type), params: config.params });
+            } else if (['clean_na', 'deduplicate'].includes(node.type)) {
+              // These transforms work without params
+              outputs[nodeId] = applyTransformation(upstream, { type: mapNodeTypeToTransform(node.type), params: {} });
             } else { outputs[nodeId] = upstream; }
           } catch { outputs[nodeId] = upstream; }
         } else {
@@ -1228,13 +1231,19 @@ export default function PipelineCanvas({ onBack }) {
           <span className="text-xs text-slate-400">{nodes.length} noeud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
           {totalSelected > 0 && <button onClick={handleDelete} className="game-btn px-3 py-1 text-xs text-red-500 font-semibold">Supprimer ({totalSelected})</button>}
           <button onClick={handleClear} className="game-btn px-3 py-1 text-xs text-slate-500 font-semibold">Tout effacer</button>
+          {exercise && onExerciseValidate && (
+            <button onClick={() => onExerciseValidate(nodeOutputs, nodes, connections, nodeConfigs)}
+              className="px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors shadow">
+              Valider
+            </button>
+          )}
         </div>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
         <NodePalette onAddNode={handleAddNode} />
 
-        <div ref={canvasRef} className="flex-1 relative overflow-hidden" style={{ cursor: cursorStyle }}
+        <div ref={canvasRef} data-tutorial="canvas" className="flex-1 relative overflow-hidden" style={{ cursor: cursorStyle }}
           onMouseDown={handleCanvasMouseDown} onMouseMove={handleCanvasMouseMove} onMouseUp={handleCanvasMouseUp} onMouseLeave={handleCanvasMouseUp}
           onContextMenu={(e) => e.preventDefault()}
           onWheel={(e) => {
@@ -1409,9 +1418,25 @@ export default function PipelineCanvas({ onBack }) {
       </div>
 
       {/* Table Explorer for source nodes */}
-      {explorerForNode && (
-        <TableExplorer onSelect={handleTableSelect} onClose={() => setExplorerForNode(null)} initialSelectedIds={getLoadedTableIds(explorerForNode)} />
-      )}
+      {explorerForNode && (() => {
+        // In exercise mode, show ALL exercise tables regardless of source type
+        let customTables = null;
+        if (exercise?.sources) {
+          const sourceNode = nodes.find(n => n.id === explorerForNode);
+          const sourceType = sourceNode ? NODE_TYPES[sourceNode.type] : null;
+          // First try exact match by source type, then fall back to collecting all exercise tables
+          const exactMatch = exercise.sources[sourceNode?.type];
+          const allExTables = exactMatch || Object.values(exercise.sources).flat();
+          if (allExTables.length > 0) {
+            customTables = allExTables.map((t, i) => ({
+              id: `ex-${explorerForNode}-${i}`, dbId: 'exercise', dbName: sourceType?.name || 'Source', dbIcon: sourceType?.icon || '📄',
+              tableId: `ex-t-${i}`, tableName: t.name, columns: t.data.length > 0 ? Object.keys(t.data[0]) : [],
+              rowCount: t.data.length, rows: t.data,
+            }));
+          }
+        }
+        return <TableExplorer onSelect={handleTableSelect} onClose={() => setExplorerForNode(null)} initialSelectedIds={getLoadedTableIds(explorerForNode)} customTables={customTables} />;
+      })()}
 
       {/* Data Preview popup */}
       {previewNodeId && (

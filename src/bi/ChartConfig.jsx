@@ -18,9 +18,16 @@ const CHART_TYPES = [
   { id: 'slicer', label: 'Slicer', icon: '🔘' },
 ];
 
-export default function ChartConfig({ columns, data, initialConfig, onConfirm, onCancel }) {
+export default function ChartConfig({ columns: defaultColumns, data: defaultData, initialConfig, onConfirm, onCancel, allTables, defaultTableId }) {
+  const [tableId, setTableId] = useState(initialConfig?.tableId || defaultTableId || (allTables?.[0]?.id || ''));
   const [chartType, setChartType] = useState(initialConfig?.chartType || 'bar');
   const [title, setTitle] = useState(initialConfig?.title || '');
+
+  // Resolve columns from selected table
+  const selectedTable = allTables?.find(t => t.id === tableId);
+  const columns = selectedTable?.columns || defaultColumns;
+  const data = selectedTable?.rows || defaultData;
+
   const [xCol, setXCol] = useState(initialConfig?.xCol || (columns[0] || ''));
   const [yCol, setYCol] = useState(initialConfig?.yCol || (columns[1] || columns[0] || ''));
   const [aggFunc, setAggFunc] = useState(initialConfig?.aggFunc || 'none');
@@ -48,6 +55,15 @@ export default function ChartConfig({ columns, data, initialConfig, onConfirm, o
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {allTables && allTables.length > 1 && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Source de donnees</label>
+              <select value={tableId} onChange={e => { setTableId(e.target.value); const t = allTables.find(tt => tt.id === e.target.value); if (t?.columns?.[0]) { setXCol(t.columns[0]); setYCol(t.columns[1] || t.columns[0]); } }}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-indigo-400 focus:outline-none">
+                {allTables.map(t => <option key={t.id} value={t.id}>{t.dbIcon} {t.tableName} ({t.rowCount})</option>)}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
             <div className="grid grid-cols-4 gap-1.5">
@@ -163,7 +179,7 @@ export default function ChartConfig({ columns, data, initialConfig, onConfirm, o
 
         <div className="flex gap-3 p-4 border-t border-slate-200">
           <button onClick={onCancel} className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50">Annuler</button>
-          <button onClick={() => onConfirm({ chartType, title, xCol, yCol, aggFunc, groupCol, barMode, gaugeMin, gaugeMax, text, sepColor, donut })}
+          <button onClick={() => onConfirm({ chartType, title, xCol, yCol, aggFunc, groupCol, barMode, gaugeMin, gaugeMax, text, sepColor, donut, tableId })}
             className="flex-1 py-2 rounded-lg text-sm font-semibold bg-indigo-500 text-white hover:bg-indigo-600">Appliquer</button>
         </div>
       </div>

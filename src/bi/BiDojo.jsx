@@ -52,10 +52,18 @@ const TEMPLATES = [
 ];
 
 // ── GridWidget ──
-function GridWidget({ widget, data, rawData, colW, onConfig, onRemove, onDuplicate, onDragStart, onResizeStart, isDragging, isSelected, onSelect, onCrossFilter, crossFilters }) {
+function GridWidget({ widget, data: defaultData, rawData: defaultRawData, allTables, colW, onConfig, onRemove, onDuplicate, onDragStart, onResizeStart, isDragging, isSelected, onSelect, onCrossFilter, crossFilters }) {
   const chartRef = useRef(null);
   const { width: cw, height: ch } = useSize(chartRef);
   const config = widget.config;
+  // Per-widget table: use widget's tableId if set, otherwise fall back to default (global) data
+  const widgetTable = config?.tableId ? allTables?.find(t => t.id === config.tableId) : null;
+  const rawData = widgetTable?.rows || defaultRawData;
+  const data = useMemo(() => {
+    let d = rawData;
+    crossFilters.forEach(f => { if (d.length > 0 && f.col in d[0]) d = d.filter(r => String(r[f.col] ?? '').trim() === f.val); });
+    return d;
+  }, [rawData, crossFilters]);
   const chartData = config?.aggFunc && config.aggFunc !== 'none' ? aggregateData(data, config.xCol, config.yCol, config.aggFunc) : data;
   const pos = gridToPixel(widget.gx, widget.gy, widget.gw, widget.gh, colW);
   const handleClick = (col, val) => onCrossFilter?.(col, val);
@@ -127,7 +135,14 @@ const WIDGET_TYPES = [
 export default function BiDojo({ onBackToHub }) {
   const defaultTables = useMemo(() => getAllTables(), []);
   const [customTables, setCustomTables] = useState([]);
-  const allTables = useMemo(() => [...defaultTables, ...customTables], [defaultTables, customTables]);
+  // Load pipeline-exported tables from localStorage
+  const pipelineTables = useMemo(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('biDojo_pipelineTables') || '[]');
+      return saved.map(t => ({ id: `pipe-${t.name}`, dbId: 'pipeline', dbName: 'Pipeline', dbIcon: '🔧', tableId: t.name, tableName: t.name, columns: t.columns || [], rowCount: t.rows?.length || 0, rows: t.rows || [] }));
+    } catch { return []; }
+  }, []);
+  const allTables = useMemo(() => [...defaultTables, ...customTables, ...pipelineTables], [defaultTables, customTables, pipelineTables]);
   const [selectedTableId, setSelectedTableId] = useState(defaultTables[0]?.id || '');
 
   // ── Pages state ──
@@ -613,7 +628,7 @@ export default function BiDojo({ onBackToHub }) {
                 {Array.from({ length: totalRows }).map((_, r) => <div key={r} className="absolute left-0 right-0 border-t border-dashed border-slate-200" style={{ top: r * (ROW_H + GAP) }} />)}
               </div>}
               {placeholder && (() => { const p = gridToPixel(placeholder.gx, placeholder.gy, placeholder.gw, placeholder.gh, colW); return <div className="absolute rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/30 pointer-events-none" style={{ left: p.x, top: p.y, width: p.w, height: p.h, transition: 'all 0.15s' }} />; })()}
-              {widgets.map(w => <GridWidget key={w.id} widget={w} data={data} rawData={rawData} colW={colW}
+              {widgets.map(w => <GridWidget key={w.id} widget={w} data={data} rawData={rawData} allTables={allTables} colW={colW}
                 onConfig={setConfigWidgetId} onRemove={removeWidget} onDuplicate={duplicateWidget}
                 onDragStart={startDrag} onResizeStart={startResize} isDragging={activeId === w.id}
                 isSelected={selectedIds.includes(w.id)} onSelect={toggleSelect}
@@ -651,7 +666,7 @@ export default function BiDojo({ onBackToHub }) {
       </div>
 
       {/* Config popup */}
-      {configWidgetId && <ChartConfig columns={columns} data={rawData} initialConfig={widgets.find(w => w.id === configWidgetId)?.config} onConfirm={handleConfig} onCancel={() => setConfigWidgetId(null)} />}
+      {configWidgetId && <ChartConfig columns={columns} data={rawData} initialConfig={widgets.find(w => w.id === configWidgetId)?.config} onConfirm={handleConfig} onCancel={() => setConfigWidgetId(null)} allTables={allTables} defaultTableId={selectedTableId} />}
 
       {/* Save dialog */}
       {showSaveDialog && (

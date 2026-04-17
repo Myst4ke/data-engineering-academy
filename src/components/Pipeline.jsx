@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { SortableContext, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
@@ -86,6 +88,7 @@ function MiniTable({ data }) {
 
 function SortableCard({ card, index, onRemove, onEditCard, isHovered, intermediateTable, onHoverCard, onLeaveCard }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id });
+  const cardRef = useRef(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -94,20 +97,35 @@ function SortableCard({ card, index, onRemove, onEditCard, isHovered, intermedia
     zIndex: isDragging ? 50 : 1,
   };
 
+  // Compute fixed position for the tooltip based on card's bounding rect
+  const getTooltipStyle = () => {
+    if (!cardRef.current) return { top: 0, left: 0 };
+    const rect = cardRef.current.getBoundingClientRect();
+    return {
+      position: 'fixed',
+      left: rect.left + rect.width / 2,
+      top: rect.top - 8,
+      transform: 'translate(-50%, -100%)',
+      zIndex: 9999,
+      pointerEvents: 'none',
+    };
+  };
+
   return (
     <div className="flex items-center shrink-0 relative" ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {/* Hover preview tooltip */}
-      {isHovered && intermediateTable && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 pointer-events-none">
+      {/* Hover preview tooltip — rendered via portal to avoid clipping */}
+      {isHovered && intermediateTable && createPortal(
+        <div style={getTooltipStyle()}>
           <MiniTable data={intermediateTable} />
-        </div>
+        </div>,
+        document.body
       )}
 
       <div
+        ref={cardRef}
         onMouseEnter={() => onHoverCard && onHoverCard(index)}
         onMouseLeave={() => onLeaveCard && onLeaveCard()}
       >
-        {/* Small cards on mobile, medium on desktop */}
         <div className="block md:hidden">
           <Card
             cardInfo={card}
@@ -127,7 +145,6 @@ function SortableCard({ card, index, onRemove, onEditCard, isHovered, intermedia
           />
         </div>
       </div>
-      {/* Arrow separator is handled by parent */}
     </div>
   );
 }

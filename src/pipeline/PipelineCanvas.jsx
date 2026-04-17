@@ -296,6 +296,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
   const [logs, setLogs] = useState([]);
   const [tableRenameDialog, setTableRenameDialog] = useState(null); // { lakehouseId, sourceId, sourceName, name }
   const [dragOverLakehouse, setDragOverLakehouse] = useState(null);
+  const [biSaveDialog, setBiSaveDialog] = useState(null); // { nodeId, data, name }
   const [lakehouseRenameMenu, setLakehouseRenameMenu] = useState(null); // { lakehouseId, editingChildId?, editingName? }
 
   const canvasRef = useRef(null);
@@ -1030,6 +1031,13 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     else if (node.type === 'log') { setLogNodeId(nodeId); }
     else if (node.type === 'mapping') { setMappingNodeId(nodeId); }
     else if (typeDef?.category === 'transform') { setConfigNodeId(nodeId); }
+    else if (typeDef?.category === 'destination') {
+      // Show save-to-BI dialog for destination nodes
+      const destData = nodeOutputs[nodeId] || [];
+      if (destData.length > 0) {
+        setBiSaveDialog({ nodeId, data: destData, name: '' });
+      } else { handlePreview(nodeId); }
+    }
     else { handlePreview(nodeId); }
   };
 
@@ -1593,6 +1601,41 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
           </div>
         );
       })()}
+
+      {/* Save to BI Dojo dialog */}
+      {biSaveDialog && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setBiSaveDialog(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-5 w-80" onClick={e => e.stopPropagation()}>
+            <h3 className="text-sm font-bold text-slate-800 mb-1">Exporter vers BI Dojo</h3>
+            <p className="text-[10px] text-slate-400 mb-3">{biSaveDialog.data.length} lignes · {biSaveDialog.data.length > 0 ? Object.keys(biSaveDialog.data[0]).length : 0} colonnes</p>
+            <input type="text" value={biSaveDialog.name}
+              onChange={e => setBiSaveDialog(prev => ({ ...prev, name: e.target.value }))}
+              onKeyDown={e => { if (e.key === 'Enter' && biSaveDialog.name.trim()) {
+                const saved = JSON.parse(localStorage.getItem('biDojo_pipelineTables') || '[]');
+                const entry = { name: biSaveDialog.name.trim(), columns: Object.keys(biSaveDialog.data[0] || {}), rows: biSaveDialog.data, date: new Date().toISOString() };
+                const updated = [...saved.filter(t => t.name !== entry.name), entry];
+                localStorage.setItem('biDojo_pipelineTables', JSON.stringify(updated));
+                setBiSaveDialog(null);
+              }}}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm mb-4 focus:border-emerald-400 focus:outline-none"
+              autoFocus placeholder="Nom de la table" />
+            <div className="flex gap-2">
+              <button onClick={() => setBiSaveDialog(null)} className="flex-1 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">Annuler</button>
+              <button onClick={() => {
+                if (!biSaveDialog.name.trim()) return;
+                const saved = JSON.parse(localStorage.getItem('biDojo_pipelineTables') || '[]');
+                const entry = { name: biSaveDialog.name.trim(), columns: Object.keys(biSaveDialog.data[0] || {}), rows: biSaveDialog.data, date: new Date().toISOString() };
+                const updated = [...saved.filter(t => t.name !== entry.name), entry];
+                localStorage.setItem('biDojo_pipelineTables', JSON.stringify(updated));
+                setBiSaveDialog(null);
+              }} disabled={!biSaveDialog.name.trim()}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold ${biSaveDialog.name.trim() ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-200 text-slate-400'}`}>
+                Sauvegarder
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

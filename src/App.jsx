@@ -12,6 +12,7 @@ import ParamInputPopup from './components/ParamInputPopup';
 import HomeScreen from './components/HomeScreen';
 import SandboxImport from './components/SandboxImport';
 import Tutorial from './components/Tutorial';
+import DojoIntro, { useDojoIntro, DATA_DOJO_INTRO } from './components/DojoIntro';
 import { loadExercise, getExerciseList } from './utils/csvParser';
 import { getAllCards, getCardDisplayInfo } from './utils/cardDefinitions';
 import { applyPipeline, tablesEqual } from './transformations';
@@ -32,6 +33,7 @@ function DraggableHandCard({ card, children }) {
 }
 
 function App({ onBackToHub }) {
+  const [showDojoIntro, setShowDojoIntro, DojoIntroButton] = useDojoIntro('data-dojo');
   const [view, setView] = useState('home'); // 'home', 'game', 'sandbox'
   const [exercises, setExercises] = useState([]);
   const [currentExerciseId, setCurrentExerciseId] = useState(null);
@@ -501,14 +503,16 @@ function App({ onBackToHub }) {
 
   // Home screen
   if (view === 'home') {
-    return (
+    return (<>
       <HomeScreen
         exercises={exercises}
         onSelectExercise={handleSelectExercise}
         onSandbox={handleSandbox}
         onBackToHub={onBackToHub}
+        introButton={<DojoIntroButton />}
       />
-    );
+      {showDojoIntro && <DojoIntro {...DATA_DOJO_INTRO} onClose={() => setShowDojoIntro(false)} />}
+    </>);
   }
 
   // Sandbox import screen

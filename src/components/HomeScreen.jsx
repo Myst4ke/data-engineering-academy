@@ -16,7 +16,7 @@ const TIER_OFFSETS = {
   expert: 30,
 };
 
-export default function HomeScreen({ exercises, onSelectExercise, onSandbox, onBackToHub }) {
+export default function HomeScreen({ exercises, onSelectExercise, onSandbox, onBackToHub, introButton }) {
   const [unlockAll, setUnlockAllState] = useState(false);
   const [completedExercises, setCompletedExercises] = useState([]);
   const [hoveredExercise, setHoveredExercise] = useState(null);
@@ -80,9 +80,12 @@ export default function HomeScreen({ exercises, onSelectExercise, onSandbox, onB
         )}
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
-            DATA DOJO
-          </h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
+              DATA DOJO
+            </h1>
+            {introButton}
+          </div>
           <p className="text-slate-500 text-sm sm:text-lg font-medium">
             L'art de la transformation de donnees
           </p>

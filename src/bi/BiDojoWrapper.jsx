@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import BiDojo from './BiDojo';
 import { BI_EXERCISES, BI_TIERS, getBiExercisesByTier, getBiProgress, saveBiProgress, isBiTierUnlocked, getBiTierProgress } from './biExercises';
+import DojoIntro, { useDojoIntro, BI_DOJO_INTRO } from '../components/DojoIntro';
 
 // ── Exercise popup ──
 function ExercisePopup({ exercise, onClose }) {
@@ -68,7 +69,7 @@ function ValidationPopup({ result, stars, onClose, onRetry }) {
 function Stars({ count }) { return <span className="text-sm">{'⭐'.repeat(count)}{'☆'.repeat(3 - count)}</span>; }
 
 // ── Exercise selector ──
-function ExerciseSelector({ onSelect, onSandbox, onBack }) {
+function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
   const [, forceUpdate] = useState(0);
   const progress = getBiProgress();
   const unlockAll = () => {
@@ -84,6 +85,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack }) {
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="game-btn px-3 py-1.5 text-sm font-semibold">← Accueil</button>
           <h1 className="text-lg font-bold text-emerald-600">📊 BI Dojo</h1>
+          {introButton}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={unlockAll} className="px-3 py-2 rounded-xl border border-slate-300 text-slate-500 text-xs font-medium hover:bg-slate-50">🔓 Tout debloquer</button>
@@ -141,6 +143,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack }) {
 // ── MAIN BI DOJO WRAPPER ──
 // ══════════════════════
 export default function BiDojoWrapper({ onBackToHub }) {
+  const [showDojoIntro, setShowDojoIntro, DojoIntroButton] = useDojoIntro('bi-dojo');
   const [mode, setMode] = useState('select');
   const [currentExercise, setCurrentExercise] = useState(null);
   const [showExercisePopup, setShowExercisePopup] = useState(false);
@@ -221,5 +224,8 @@ export default function BiDojoWrapper({ onBackToHub }) {
     );
   }
 
-  return <ExerciseSelector onSelect={handleSelect} onSandbox={handleSandbox} onBack={onBackToHub} />;
+  return (<>
+    <ExerciseSelector onSelect={handleSelect} onSandbox={handleSandbox} onBack={onBackToHub} introButton={<DojoIntroButton />} />
+    {showDojoIntro && <DojoIntro {...BI_DOJO_INTRO} onClose={() => setShowDojoIntro(false)} />}
+  </>);
 }

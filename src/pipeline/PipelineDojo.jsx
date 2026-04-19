@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PipelineCanvas from './PipelineCanvas';
 import { EXERCISES, TIERS, getExercisesByTier, getProgress, saveProgress, isTierUnlocked, getTierProgress } from './exercises';
+import DojoIntro, { useDojoIntro, PIPELINE_DOJO_INTRO } from '../components/DojoIntro';
 
 // ── Tutorial (5 steps, spotlight) ──
 const TUTORIAL_STEPS = [
@@ -133,7 +134,7 @@ function Stars({ count, max = 3 }) {
 // ═══════════════════════
 // ── EXERCISE SELECTOR ──
 // ═══════════════════════
-function ExerciseSelector({ onSelect, onSandbox, onBack }) {
+function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
   const [, forceUpdate] = useState(0);
   const progress = getProgress();
 
@@ -150,6 +151,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack }) {
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="game-btn px-3 py-1.5 text-sm font-semibold">← Accueil</button>
           <h1 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">🔧 Pipeline Dojo</h1>
+          {introButton}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={unlockAll} className="px-3 py-2 rounded-xl border border-slate-300 text-slate-500 text-xs font-medium hover:bg-slate-50 transition-all">
@@ -220,6 +222,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack }) {
 // ── MAIN PIPELINE DOJO ──
 // ══════════════════════════
 export default function PipelineDojo({ onBackToHub }) {
+  const [showDojoIntro, setShowDojoIntro, DojoIntroButton] = useDojoIntro('pipeline-dojo');
   const [mode, setMode] = useState('select'); // 'select' | 'exercise' | 'sandbox'
   const [currentExercise, setCurrentExercise] = useState(null);
   const [showExercisePopup, setShowExercisePopup] = useState(false);
@@ -339,5 +342,8 @@ export default function PipelineDojo({ onBackToHub }) {
     );
   }
 
-  return <ExerciseSelector onSelect={handleSelectExercise} onSandbox={handleSandbox} onBack={onBackToHub} />;
+  return (<>
+    <ExerciseSelector onSelect={handleSelectExercise} onSandbox={handleSandbox} onBack={onBackToHub} introButton={<DojoIntroButton />} />
+    {showDojoIntro && <DojoIntro {...PIPELINE_DOJO_INTRO} onClose={() => setShowDojoIntro(false)} />}
+  </>);
 }

@@ -64,10 +64,14 @@ export function deleteColumn(table, params) {
 
 /**
  * delete_na - Remove rows with empty/null cells
+ * @param {Object} params - Optional: { columns: ['col1', 'col2'] } to check only specific columns
+ *                          If no columns specified, checks ALL columns
  */
-export function deleteNa(table) {
+export function deleteNa(table, params) {
+  const cols = params?.columns?.length > 0 ? params.columns : null;
   return table.filter(row => {
-    return Object.values(row).every(value => {
+    const values = cols ? cols.map(c => row[c]) : Object.values(row);
+    return values.every(value => {
       if (value === null || value === undefined) return false;
       if (typeof value === 'string' && value.trim() === '') return false;
       return true;
@@ -185,7 +189,7 @@ export function applyTransformation(table, card, secondTable = null) {
     case 'delete':
       return deleteColumn(table, params);
     case 'delete_na':
-      return deleteNa(table);
+      return deleteNa(table, params);
     case 'filter':
       return filter(table, params);
     case 'join':

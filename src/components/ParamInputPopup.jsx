@@ -9,6 +9,8 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [dedupMode, setDedupMode] = useState('all');
   const [dedupColumns, setDedupColumns] = useState([]);
+  const [cleanNaMode, setCleanNaMode] = useState('all');
+  const [cleanNaColumns, setCleanNaColumns] = useState([]);
 
   // Pre-fill from initialParams when editing
   useEffect(() => {
@@ -25,6 +27,10 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
     if (cardType === 'drop_duplicates' && initialParams.columns) {
       setDedupMode('subset');
       setDedupColumns(initialParams.columns);
+    }
+    if (cardType === 'delete_na' && initialParams.columns) {
+      setCleanNaMode('subset');
+      setCleanNaColumns(initialParams.columns);
     }
   }, [initialParams, cardType]);
 
@@ -58,6 +64,9 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
     let params = {};
 
     switch (cardType) {
+      case 'delete_na':
+        params = cleanNaMode === 'subset' ? { columns: cleanNaColumns } : {};
+        break;
       case 'drop_duplicates':
         params = dedupMode === 'subset' ? { columns: dedupColumns } : {};
         break;
@@ -92,6 +101,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
 
   const isValid = () => {
     if (cardType === 'concat') return true;
+    if (cardType === 'delete_na') return cleanNaMode === 'all' || cleanNaColumns.length > 0;
     if (cardType === 'drop_duplicates') return dedupMode === 'all' || dedupColumns.length > 0;
     if (cardType === 'select') return selectedColumns.length > 0;
     if (!column) return false;
@@ -113,6 +123,8 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
 
   const getTitle = () => {
     switch (cardType) {
+      case 'delete_na':
+        return 'Supprimer les lignes vides';
       case 'drop_duplicates':
         return 'Supprimer les doublons';
       case 'delete':
@@ -199,6 +211,39 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Delete NA Mode */}
+        {cardType === 'delete_na' && (
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Colonnes a verifier
+            </label>
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setCleanNaMode('all')}
+                className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaMode === 'all' ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                Toutes les colonnes
+              </button>
+              <button onClick={() => setCleanNaMode('subset')}
+                className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaMode === 'subset' ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                Colonnes choisies
+              </button>
+            </div>
+            {cleanNaMode === 'subset' && (
+              <div className="flex flex-wrap gap-2">
+                {columns.map((col) => (
+                  <button key={col}
+                    onClick={() => setCleanNaColumns(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col])}
+                    className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaColumns.includes(col) ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                    {cleanNaColumns.includes(col) ? '+ ' : ''}{col}
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-[10px] text-slate-400 mt-2">
+              {cleanNaMode === 'all' ? 'Supprime les lignes ou n\'importe quelle cellule est vide.' : `Supprime les lignes vides dans : ${cleanNaColumns.join(', ') || '(aucune selectionnee)'}`}
+            </p>
           </div>
         )}
 

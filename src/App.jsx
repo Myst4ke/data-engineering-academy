@@ -266,7 +266,7 @@ function App({ onBackToHub }) {
   }, []);
 
   const handleAddCard = useCallback((cardInfo) => {
-    const needsParams = ['delete', 'filter', 'sort', 'join', 'rename', 'select', 'fill_na', 'concat', 'drop_duplicates'].includes(cardInfo.type);
+    const needsParams = ['delete', 'filter', 'sort', 'join', 'rename', 'select', 'fill_na', 'concat', 'drop_duplicates', 'delete_na'].includes(cardInfo.type);
 
     if (needsParams) {
       setPendingCard(cardInfo);
@@ -452,7 +452,7 @@ function App({ onBackToHub }) {
       const card = activeData.card;
       const insertIdx = handInsertIndex !== null ? handInsertIndex : pipeline.length;
 
-      const needsParams = ['delete', 'filter', 'sort', 'join', 'rename', 'select', 'fill_na', 'concat', 'drop_duplicates'].includes(card.type);
+      const needsParams = ['delete', 'filter', 'sort', 'join', 'rename', 'select', 'fill_na', 'concat', 'drop_duplicates', 'delete_na'].includes(card.type);
 
       if (needsParams) {
         setPendingCard(card);

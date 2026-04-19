@@ -164,14 +164,22 @@ export function PieChart({ data, labelCol, valueCol, width = 200, height = 200, 
 }
 
 // ── KPI CARD ──
-export function KpiCard({ data, valueCol, label, width = 200, height = 120 }) {
+export function KpiCard({ data, valueCol, label, aggFunc, width = 200, height = 120 }) {
   if (!data?.length || !valueCol) return <EmptyChart width={width} height={height} />;
   const values = data.map(r => parseFloat(r[valueCol]) || 0);
-  const total = values.reduce((s, v) => s + v, 0);
+  let total;
+  switch (aggFunc) {
+    case 'count': total = data.length; break;
+    case 'avg': total = values.reduce((s, v) => s + v, 0) / values.length; break;
+    case 'min': total = Math.min(...values); break;
+    case 'max': total = Math.max(...values); break;
+    default: total = values.reduce((s, v) => s + v, 0); break; // sum or none
+  }
   const fmt = total >= 1e6 ? `${(total / 1e6).toFixed(1)}M` : total >= 1e3 ? `${(total / 1e3).toFixed(1)}K` : String(Math.round(total * 100) / 100);
+  const aggLabel = aggFunc === 'count' ? 'COUNT' : aggFunc === 'avg' ? 'AVG' : aggFunc === 'min' ? 'MIN' : aggFunc === 'max' ? 'MAX' : '';
   return (<div style={{ width, height }} className="flex flex-col items-center justify-center">
     <span className="text-3xl font-black text-indigo-600">{fmt}</span>
-    <span className="text-xs text-slate-500 font-medium mt-1">{label || valueCol}</span>
+    <span className="text-xs text-slate-500 font-medium mt-1">{label || valueCol} {aggLabel && `(${aggLabel})`}</span>
     <span className="text-[10px] text-slate-400">{data.length} lignes</span>
   </div>);
 }

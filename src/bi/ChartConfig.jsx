@@ -129,11 +129,11 @@ export default function ChartConfig({ columns: defaultColumns, data: defaultData
             </div>
           )}
 
-          {(needsXY || needsLabelValue) && (
+          {(needsXY || needsLabelValue || needsValue) && (
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">Agrégation</label>
               <select value={aggFunc} onChange={e => setAggFunc(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-indigo-400 focus:outline-none">
-                <option value="none">Aucune</option><option value="sum">SUM</option><option value="count">COUNT</option><option value="avg">AVG</option><option value="min">MIN</option><option value="max">MAX</option>
+                <option value="none">Aucune (somme)</option><option value="sum">SUM</option><option value="count">COUNT</option><option value="avg">AVG</option><option value="min">MIN</option><option value="max">MAX</option>
               </select>
             </div>
           )}

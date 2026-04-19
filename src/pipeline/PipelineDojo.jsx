@@ -64,7 +64,9 @@ function ExercisePopup({ exercise, onClose }) {
               <p className="text-[10px] text-slate-400 font-medium">{TIERS[exercise.difficulty - 1]?.name}</p>
             </div>
           </div>
-          <p className="text-sm text-slate-600 leading-relaxed mb-4">{exercise.description}</p>
+          <div className="text-sm text-slate-600 leading-relaxed mb-4 space-y-2">
+            {exercise.description.split('\n').filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
+          </div>
 
           {showHint && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">

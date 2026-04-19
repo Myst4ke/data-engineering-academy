@@ -74,7 +74,7 @@ function GridWidget({ widget, data: defaultData, rawData: defaultRawData, allTab
       case 'bar': return <BarChart data={chartData} xCol={config.xCol} yCol={config.yCol} groupCol={config.groupCol} mode={config.barMode || 'simple'} width={cw} height={ch} onBarClick={handleClick} />;
       case 'line': return <LineChart data={chartData} xCol={config.xCol} yCol={config.yCol} width={cw} height={ch} onPointClick={handleClick} />;
       case 'pie': return <PieChart data={chartData} labelCol={config.xCol} valueCol={config.yCol} width={cw} height={ch} onSliceClick={handleClick} donut={config.donut} />;
-      case 'kpi': return <KpiCard data={data} valueCol={config.yCol} label={config.title} width={cw} height={ch} />;
+      case 'kpi': return <KpiCard data={data} valueCol={config.yCol} label={config.title} aggFunc={config.aggFunc} width={cw} height={ch} />;
       case 'scatter': return <ScatterPlot data={chartData} xCol={config.xCol} yCol={config.yCol} width={cw} height={ch} />;
       case 'gauge': return <Gauge data={data} valueCol={config.yCol} label={config.title} min={config.gaugeMin ?? 0} max={config.gaugeMax ?? 100} width={cw} height={ch} />;
       case 'treemap': return <Treemap data={chartData} labelCol={config.xCol} valueCol={config.yCol} width={cw} height={ch} onRectClick={handleClick} />;
@@ -132,7 +132,7 @@ const WIDGET_TYPES = [
 // ══════════════════════════════════════════
 // ── MAIN COMPONENT ──
 // ══════════════════════════════════════════
-export default function BiDojo({ onBackToHub }) {
+export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exerciseBar }) {
   const defaultTables = useMemo(() => getAllTables(), []);
   const [customTables, setCustomTables] = useState([]);
   // Load pipeline-exported tables from localStorage
@@ -142,8 +142,9 @@ export default function BiDojo({ onBackToHub }) {
       return saved.map(t => ({ id: `pipe-${t.name}`, dbId: 'pipeline', dbName: 'Pipeline', dbIcon: '🔧', tableId: t.name, tableName: t.name, columns: t.columns || [], rowCount: t.rows?.length || 0, rows: t.rows || [] }));
     } catch { return []; }
   }, []);
-  const allTables = useMemo(() => [...defaultTables, ...customTables, ...pipelineTables], [defaultTables, customTables, pipelineTables]);
-  const [selectedTableId, setSelectedTableId] = useState(defaultTables[0]?.id || '');
+  const exerciseTables = exercise?.tables || [];
+  const allTables = useMemo(() => exercise ? exerciseTables : [...defaultTables, ...customTables, ...pipelineTables], [exercise, exerciseTables, defaultTables, customTables, pipelineTables]);
+  const [selectedTableId, setSelectedTableId] = useState((exercise?.tables?.[0]?.id) || defaultTables[0]?.id || '');
 
   // ── Pages state ──
   const [pages, setPages] = useState([{ id: 'p-1', name: 'Page 1', widgets: [] }]);
@@ -415,11 +416,11 @@ export default function BiDojo({ onBackToHub }) {
   const startDrag = useCallback((id, e) => {
     const w = widgets.find(ww => ww.id === id);
     if (!w) return;
-    const rect = gridRef.current?.getBoundingClientRect();
     preDragRef.current = JSON.parse(JSON.stringify(pagesRef.current));
     setActiveId(id);
     setSelectedIds([]);
-    actionRef.current = { type: 'drag', startX: e.clientX, startY: e.clientY, origGx: w.gx, origGy: w.gy, gridLeft: rect?.left || 0, gridTop: rect?.top || 0 };
+    // Delta approach: track mouse start + widget start position, compute delta on move
+    actionRef.current = { type: 'drag', startMouseX: e.clientX, startMouseY: e.clientY, origGx: w.gx, origGy: w.gy };
   }, [widgets]);
 
   const startResize = useCallback((id, e) => {
@@ -436,11 +437,15 @@ export default function BiDojo({ onBackToHub }) {
       const a = actionRef.current;
       if (!a) return;
       if (a.type === 'drag') {
-        const st = gridRef.current?.scrollTop || 0;
-        const g = pixelToGrid(e.clientX - a.gridLeft, e.clientY - a.gridTop + st, colW);
+        // Delta-based drag: how many grid cells has the mouse moved since start?
+        const dxPx = e.clientX - a.startMouseX;
+        const dyPx = e.clientY - a.startMouseY;
+        const dCols = Math.round(dxPx / (colW + GAP));
+        const dRows = Math.round(dyPx / (ROW_H + GAP));
         const w = widgets.find(ww => ww.id === activeId);
         if (!w) return;
-        const gx = Math.min(COLS - w.gw, Math.max(0, g.gx)), gy = Math.max(0, g.gy);
+        const gx = Math.min(COLS - w.gw, Math.max(0, a.origGx + dCols));
+        const gy = Math.max(0, a.origGy + dRows);
         setPlaceholder({ gx, gy, gw: w.gw, gh: w.gh });
         updateWidgets(prev => prev.map(ww => ww.id === activeId ? { ...ww, gx, gy } : ww));
       }
@@ -540,9 +545,18 @@ export default function BiDojo({ onBackToHub }) {
             <button onClick={() => setShowLoadDialog(true)} className="game-btn px-2 py-1 text-xs font-medium" title="Charger">📂</button>
             <button onClick={() => setPresentationMode(true)} className="game-btn px-2 py-1 text-xs font-medium" title="Présentation">🖥️</button>
             <span className="text-xs text-slate-400 ml-1">{widgets.length} widget{widgets.length !== 1 ? 's' : ''}</span>
+            {exercise && onExerciseValidate && (
+              <button onClick={() => onExerciseValidate(widgets, pages)}
+                className="px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors shadow ml-1">
+                Valider
+              </button>
+            )}
           </div>
         </div>
       )}
+
+      {/* Exercise info bar (inside layout, not overlaid) */}
+      {exerciseBar}
 
       {/* Cross-filter banner */}
       {crossFilters.length > 0 && (

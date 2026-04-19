@@ -186,9 +186,9 @@ function getDestinationData(outputs, nodes, conns) {
 export const EXERCISES = [
   // ══════════ FACILE (6) ══════════
   {
-    id: 'pipe-01', title: 'Mon premier pipeline', difficulty: 1, isTutorial: true,
-    description: 'Connectez une source de donnees, chargez la table clients et exportez-la en CSV.',
-    hint: 'Ajoutez une Source CSV → clic droit pour charger la table clients → connectez a un Export CSV.',
+    id: 'pipe-01', title: 'Export clients', difficulty: 1, isTutorial: true,
+    description: 'Le service commercial lance une campagne emailing et a besoin de la liste complete des clients avec leurs coordonnees. La base contient une table "clients" prete a l\'emploi.\n\nMethodologie : Chargez la table depuis une source de donnees et envoyez-la vers un fichier d\'export.',
+    hint: 'Source CSV → clic droit pour charger clients → connectez a Export CSV.',
     hintNodes: ['csv_source', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }] },
     validate: (outputs, nodes, conns) => {
@@ -200,113 +200,101 @@ export const EXERCISES = [
     },
   },
   {
-    id: 'pipe-02', title: 'Nettoyage express', difficulty: 1,
-    description: 'Des commandes ont des cellules vides (montant ou statut manquant). Supprimez les lignes incompletes et exportez le resultat.',
-    hint: 'Source → Suppr. Vides → Export CSV. La carte "Suppr. Vides" retire toute ligne avec un champ vide.',
+    id: 'pipe-02', title: 'Commandes incompletes', difficulty: 1,
+    description: 'Le service comptabilite signale que certaines commandes ont des champs vides (montant ou statut manquant). Ces lignes faussent les rapports financiers et doivent etre retirees avant tout traitement.\n\nMethodologie : Identifiez et supprimez les lignes contenant des cellules vides, puis exportez les donnees propres.',
+    hint: 'Source → Suppr. Vides → Export CSV.',
     hintNodes: ['csv_source', 'clean_na', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       const clean = COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut);
       if (data.length === clean.length) return { ok: true, msg: 'Donnees nettoyees !' };
       return { ok: false, msg: `Attendu: ${clean.length} lignes sans vides. Recu: ${data.length}.` };
     },
   },
   {
-    id: 'pipe-03', title: 'Doublons clients', difficulty: 1,
-    description: 'Le catalogue clients a ete importe deux fois. Eliminez les doublons.',
+    id: 'pipe-03', title: 'Import en double', difficulty: 1,
+    description: 'Suite a un probleme technique, la table clients a ete importee deux fois dans le systeme. Le fichier contient donc des doublons exacts qu\'il faut eliminer avant de mettre a jour le CRM.\n\nMethodologie : Supprimez les lignes identiques pour ne garder qu\'un exemplaire de chaque client.',
     hint: 'Source → Dedoublonner → Export CSV.',
     hintNodes: ['csv_source', 'deduplicate', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLIENTS_WITH_DUPES }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length === 5) return { ok: true, msg: 'Doublons supprimes !' };
       return { ok: false, msg: `Attendu: 5 clients uniques. Recu: ${data.length}.` };
     },
   },
   {
-    id: 'pipe-04', title: 'Tri des salaires', difficulty: 1,
-    description: 'Triez les employes par salaire decroissant pour un rapport RH.',
-    hint: 'Source → Trier (colonne: salaire, ordre: decroissant) → Export CSV.',
+    id: 'pipe-04', title: 'Rapport salaires', difficulty: 1,
+    description: 'La direction demande un rapport des employes classes par salaire, du plus eleve au plus bas, pour preparer la revue annuelle des remunerations.\n\nMethodologie : Triez les employes et exportez la liste ordonnee.',
+    hint: 'Source → Trier (salaire, decroissant) → Export CSV.',
     hintNodes: ['csv_source', 'sort', 'csv_export'],
     sources: { 'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 8) return { ok: false, msg: `Attendu 8 employes, recu ${data.length}.` };
       for (let i = 1; i < data.length; i++) {
         if (parseFloat(data[i].salaire) > parseFloat(data[i - 1].salaire)) return { ok: false, msg: 'Les salaires ne sont pas tries par ordre decroissant.' };
       }
-      return { ok: true, msg: 'Employes tries par salaire !' };
+      return { ok: true, msg: 'Rapport salaires genere !' };
     },
   },
   {
-    id: 'pipe-05', title: 'Colonnes inutiles', difficulty: 1,
-    description: 'Le fichier clients contient des colonnes techniques (_hash, _internal_id). Gardez uniquement id, nom, email, ville.',
+    id: 'pipe-05', title: 'Nettoyage RGPD', difficulty: 1,
+    description: 'Le DPO (responsable protection des donnees) a identifie que le fichier clients contient des colonnes techniques internes (_hash, _internal_id) qui ne doivent pas etre exposees. Seules les colonnes id, nom, email et ville doivent etre conservees.\n\nMethodologie : Selectionnez uniquement les colonnes autorisees et exportez le resultat.',
     hint: 'Source → Selectionner colonnes (id, nom, email, ville) → Export CSV.',
     hintNodes: ['csv_source', 'select_cols', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLIENTS_WITH_EXTRA_COLS }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 5) return { ok: false, msg: `Attendu 5 lignes, recu ${data.length}.` };
       const cols = Object.keys(data[0] || {});
       if (cols.includes('_hash') || cols.includes('_internal_id')) return { ok: false, msg: 'Les colonnes techniques sont encore presentes.' };
       if (!cols.includes('nom') || !cols.includes('email')) return { ok: false, msg: 'Il manque des colonnes (nom, email...).' };
-      return { ok: true, msg: 'Colonnes nettoyees !' };
+      return { ok: true, msg: 'Donnees conformes RGPD !' };
     },
   },
   {
-    id: 'pipe-06', title: 'Renommer pour le metier', difficulty: 1,
-    description: 'Les colonnes des commandes ont des noms techniques (cmd_id, clt_id, dt_cmd, mnt, st). Renommez cmd_id→id et mnt→montant.',
-    hint: 'Source → Renommer (cmd_id → id) → Renommer (mnt → montant) → Export CSV.',
+    id: 'pipe-06', title: 'API partenaire', difficulty: 1,
+    description: 'Un partenaire logistique a besoin de recevoir nos commandes via son API, mais il attend des noms de colonnes specifiques : "id" (au lieu de cmd_id) et "montant" (au lieu de mnt). Les autres colonnes peuvent rester telles quelles.\n\nMethodologie : Renommez les colonnes pour respecter le format attendu par l\'API partenaire.',
+    hint: 'Source → Renommer (cmd_id→id) → Renommer (mnt→montant) → Export.',
     hintNodes: ['csv_source', 'rename_col', 'rename_col', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_TECH_NAMES }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 5) return { ok: false, msg: `Attendu 5 lignes.` };
       const cols = Object.keys(data[0] || {});
       if (cols.includes('cmd_id')) return { ok: false, msg: 'La colonne cmd_id n\'a pas ete renommee.' };
       if (cols.includes('mnt')) return { ok: false, msg: 'La colonne mnt n\'a pas ete renommee.' };
-      if (!cols.includes('id') || !cols.includes('montant')) return { ok: false, msg: 'Renommez cmd_id en id et mnt en montant.' };
-      return { ok: true, msg: 'Colonnes renommees !' };
+      if (!cols.includes('id') || !cols.includes('montant')) return { ok: false, msg: 'Renommez cmd_id→id et mnt→montant.' };
+      return { ok: true, msg: 'Format API respecte !' };
     },
   },
 
   // ══════════ INTERMEDIAIRE (10) ══════════
   {
-    id: 'pipe-07', title: 'Nettoyer puis filtrer', difficulty: 2,
-    description: 'Les commandes ont des vides. Supprimez les lignes incompletes PUIS filtrez uniquement les commandes "Livree".',
-    hint: 'Source → Suppr. Vides → Filtrer (statut = Livree) → Export CSV. L\'ordre est important !',
+    id: 'pipe-07', title: 'Commandes livrees', difficulty: 2,
+    description: 'Le service logistique veut un fichier contenant uniquement les commandes effectivement livrees, sans aucune donnee incomplete. Le fichier source contient des cellules vides et differents statuts.\n\nMethodologie : Commencez par retirer les lignes incompletes, puis isolez les commandes ayant le statut "Livree".',
+    hint: 'Source → Suppr. Vides → Filtrer (statut=Livree) → Export. L\'ordre est important !',
     hintNodes: ['csv_source', 'clean_na', 'filter', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       const expected = COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut).filter(r => r.statut === 'Livree');
-      if (data.length === expected.length && data.every(r => r.statut === 'Livree')) return { ok: true, msg: 'Pipeline correct !' };
-      return { ok: false, msg: `Attendu: ${expected.length} commandes livrees sans vides. Recu: ${data.length}.` };
+      if (data.length === expected.length && data.every(r => r.statut === 'Livree')) return { ok: true, msg: 'Commandes livrees extraites !' };
+      return { ok: false, msg: `Attendu: ${expected.length} commandes livrees. Recu: ${data.length}.` };
     },
   },
   {
     id: 'pipe-08', title: 'Enrichir les commandes', difficulty: 2,
-    description: 'Joignez les commandes avec les clients sur la colonne client_id pour ajouter le nom du client a chaque commande.',
-    hint: 'Source 1 (commandes) + Source 2 (clients) → Joindre (sur client_id) → Export CSV. Les deux tables ont une colonne client_id.',
+    description: 'Pour le reporting mensuel, le directeur commercial souhaite voir le nom et la ville du client directement sur chaque ligne de commande. Les commandes contiennent un "client_id" et la table clients utilise la meme cle.\n\nMethodologie : Combinez les deux tables sur leur colonne commune pour enrichir les commandes.',
+    hint: 'Source 1 (commandes) + Source 2 (clients) → Joindre (sur client_id) → Export.',
     hintNodes: ['csv_source', 'db_source', 'join', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'commandes', data: [
@@ -321,142 +309,129 @@ export const EXERCISES = [
       ]}],
     },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (!exp) return { ok: false, msg: 'Ajoutez une destination.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 3) return { ok: false, msg: `Attendu 3 lignes jointes. Recu: ${data.length}.` };
-      if (!data[0].nom) return { ok: false, msg: 'La colonne nom (du client) manque. Verifiez la jointure.' };
-      return { ok: true, msg: 'Commandes enrichies avec les clients !' };
+      if (!data[0].nom) return { ok: false, msg: 'La colonne nom du client est absente. Verifiez la jointure.' };
+      return { ok: true, msg: 'Commandes enrichies !' };
     },
   },
   {
-    id: 'pipe-09', title: 'Concatener les regions', difficulty: 2,
-    description: 'Deux fichiers de ventes (Nord et Sud). Fusionnez-les en un seul fichier.',
+    id: 'pipe-09', title: 'Consolidation regionale', difficulty: 2,
+    description: 'Les equipes Nord et Sud envoient chacune leurs ventes dans un fichier separe. La direction financiere a besoin d\'un fichier unique regroupant les ventes de toutes les regions pour le bilan trimestriel.\n\nMethodologie : Fusionnez les deux fichiers en un seul et exportez le resultat.',
     hint: 'Source 1 (Nord) + Source 2 (Sud) → Concatener → Export CSV.',
-    hintNodes: ['csv_source', 'csv_source', 'concat', 'csv_export'],
+    hintNodes: ['csv_source', 'db_source', 'concat', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'ventes_nord', data: VENTES_NORD }],
       'db_source': [{ name: 'ventes_sud', data: VENTES_SUD }],
     },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
-      if (data.length === 6) return { ok: true, msg: 'Tables fusionnees !' };
-      return { ok: false, msg: `Attendu 6 lignes (3 Nord + 3 Sud). Recu: ${data.length}.` };
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
+      if (data.length === 6) return { ok: true, msg: 'Ventes consolidees !' };
+      return { ok: false, msg: `Attendu 6 lignes (3+3). Recu: ${data.length}.` };
     },
   },
   {
     id: 'pipe-10', title: 'Ingestion Bronze', difficulty: 2,
-    description: 'Chargez les tables clients et produits depuis une source et stockez-les dans un Lakehouse Bronze.',
-    hint: 'Source → tables clients et produits → connectez chacune au Lakehouse Bronze (2 liens = 2 tables dans le lakehouse).',
+    description: 'L\'equipe data demarre un nouveau projet de lakehouse. La premiere etape consiste a ingerer les donnees brutes (clients et produits) dans la couche Bronze, sans aucune transformation.\n\nMethodologie : Chargez les 2 tables et stockez-les telles quelles dans un Lakehouse Bronze.',
+    hint: 'Source → tables clients + produits → connectez chacune au Bronze.',
     hintNodes: ['csv_source', 'lakehouse_bronze'],
     sources: { 'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }, { name: 'produits', data: PRODUITS_SMALL }] },
     validate: (outputs, nodes, conns, cfgs) => {
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 2))
-        return { ok: false, msg: 'Le Lakehouse Bronze doit contenir au moins 2 tables.' };
+        return { ok: false, msg: 'Le Bronze doit contenir au moins 2 tables.' };
       return { ok: true, msg: 'Ingestion Bronze reussie !' };
     },
   },
   {
-    id: 'pipe-11', title: 'Remplir les trous', difficulty: 2,
-    description: 'Les evaluations ont des commentaires vides. Remplacez-les par "Non evalue" au lieu de supprimer les lignes.',
-    hint: 'Source → Remplir Vides (colonne: commentaire, valeur: Non evalue) → Export CSV.',
+    id: 'pipe-11', title: 'Evaluations partielles', difficulty: 2,
+    description: 'Les evaluations annuelles ont ete saisies mais certains managers n\'ont pas rempli le champ commentaire. Le RH souhaite que chaque evaluation ait un commentaire — les vides doivent indiquer "Non evalue" plutot que d\'etre supprimes.\n\nMethodologie : Comblez les trous sans perdre aucune ligne.',
+    hint: 'Source → Remplir Vides (commentaire → "Non evalue") → Export.',
     hintNodes: ['csv_source', 'fill_na', 'csv_export'],
     sources: { 'csv_source': [{ name: 'evaluations', data: EVALUATIONS_WITH_EMPTY }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 8) return { ok: false, msg: `Gardez les 8 lignes ! (recu: ${data.length})` };
       if (data.some(r => !r.commentaire || r.commentaire.trim() === '')) return { ok: false, msg: 'Il reste des commentaires vides.' };
-      return { ok: true, msg: 'Commentaires remplis !' };
+      return { ok: true, msg: 'Evaluations completes !' };
     },
   },
   {
-    id: 'pipe-12', title: 'Pipeline complet', difficulty: 2,
-    description: 'Nettoyez les commandes : dedoublonnez, supprimez les vides, filtrez statut="Livree", triez par montant decroissant.',
-    hint: 'Source → Dedoublonner → Suppr. Vides → Filtrer (Livree) → Trier (montant desc) → Export.',
+    id: 'pipe-12', title: 'Nettoyage complet', difficulty: 2,
+    description: 'Le fichier de commandes est un vrai cauchemar : doublons, cellules vides, et differents statuts melanges. Le controleur de gestion n\'a besoin que des commandes livrees, triees par montant decroissant.\n\nMethodologie : Appliquez dans l\'ordre : deduplication, suppression des vides, filtre sur statut, puis tri.',
+    hint: 'Source → Dedup → Suppr. Vides → Filtrer (Livree) → Trier (montant desc) → Export.',
     hintNodes: ['csv_source', 'deduplicate', 'clean_na', 'filter', 'sort', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_DIRTY }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (!exp) return { ok: false, msg: 'Ajoutez une destination.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length === 0) return { ok: false, msg: 'Aucune donnee en sortie.' };
       if (data.some(r => r.statut !== 'Livree')) return { ok: false, msg: 'Toutes les lignes doivent avoir statut = Livree.' };
       for (let i = 1; i < data.length; i++) {
-        if (parseFloat(data[i].montant) > parseFloat(data[i - 1].montant)) return { ok: false, msg: 'Le tri par montant decroissant n\'est pas correct.' };
+        if (parseFloat(data[i].montant) > parseFloat(data[i - 1].montant)) return { ok: false, msg: 'Le tri decroissant n\'est pas correct.' };
       }
-      return { ok: true, msg: 'Pipeline complet reussi !' };
+      return { ok: true, msg: 'Nettoyage complet reussi !' };
     },
   },
   {
-    id: 'pipe-13', title: 'Mapping de colonnes', difficulty: 2,
-    description: 'Les produits ont des noms de colonnes en anglais. Utilisez un Mapping pour renommer product_id→id, name→nom, category→categorie, price→prix, qty→stock.',
-    hint: 'Source → Mapping (configurez les correspondances) → Export CSV.',
+    id: 'pipe-13', title: 'Integration fournisseur', difficulty: 2,
+    description: 'Un fournisseur international envoie son catalogue avec des colonnes en anglais (product_id, name, category, price, qty). Notre systeme interne attend les noms francais (id, nom, categorie, prix, stock).\n\nMethodologie : Utilisez un mapping pour convertir le schema du fournisseur vers le notre.',
+    hint: 'Source → Mapping (5 correspondances) → Export.',
     hintNodes: ['csv_source', 'mapping', 'csv_export'],
     sources: { 'csv_source': [{ name: 'produits', data: PRODUITS_EN }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 4) return { ok: false, msg: `Attendu 4 lignes.` };
       const cols = Object.keys(data[0] || {});
-      if (!cols.includes('nom') || !cols.includes('prix')) return { ok: false, msg: 'Les colonnes doivent etre en francais: id, nom, categorie, prix, stock.' };
-      return { ok: true, msg: 'Mapping reussi !' };
+      if (!cols.includes('nom') || !cols.includes('prix')) return { ok: false, msg: 'Les colonnes doivent etre en francais.' };
+      return { ok: true, msg: 'Catalogue integre !' };
     },
   },
   {
-    id: 'pipe-14', title: 'Premier agregat', difficulty: 2,
-    description: 'Calculez le nombre de commandes et le montant total par client_id a partir des commandes propres.',
-    hint: 'Source → Agreger (Group By: client_id, Aggs: count + sum montant) → Export.',
-    hintNodes: ['csv_source', 'aggregate', 'csv_export'],
+    id: 'pipe-14', title: 'KPI camembert statuts', difficulty: 2,
+    description: 'Le directeur veut un graphique camembert montrant la repartition des commandes par statut (Livree, En cours, Annulee). Pour cela, il faut agreger les commandes par statut et compter le nombre dans chaque categorie. Le resultat sera envoye vers un Dashboard.\n\nMethodologie : Agregez les donnees par statut avec un comptage, puis envoyez vers un Dashboard (clic droit pour sauvegarder vers le BI Dojo).',
+    hint: 'Source → Agreger (Group By: statut, Agg: count) → Dashboard.',
+    hintNodes: ['csv_source', 'aggregate', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
-      { id: 'CMD001', client_id: '1', montant: '150' }, { id: 'CMD002', client_id: '2', montant: '230' },
-      { id: 'CMD003', client_id: '1', montant: '85' }, { id: 'CMD004', client_id: '3', montant: '320' },
-      { id: 'CMD005', client_id: '2', montant: '175' }, { id: 'CMD006', client_id: '1', montant: '210' },
+      { id: 'CMD001', client_id: '1', montant: '150', statut: 'Livree' }, { id: 'CMD002', client_id: '2', montant: '230', statut: 'Livree' },
+      { id: 'CMD003', client_id: '1', montant: '85', statut: 'En cours' }, { id: 'CMD004', client_id: '3', montant: '320', statut: 'Livree' },
+      { id: 'CMD005', client_id: '2', montant: '175', statut: 'Annulee' }, { id: 'CMD006', client_id: '1', montant: '210', statut: 'En cours' },
     ] }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (!exp) return { ok: false, msg: 'Ajoutez une destination.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
-      if (data.length !== 3) return { ok: false, msg: `Attendu 3 groupes (clients 1, 2, 3). Recu: ${data.length}.` };
-      return { ok: true, msg: 'Agregation reussie !' };
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez un Dashboard.' };
+      if (data.length !== 3) return { ok: false, msg: `Attendu 3 groupes (Livree, En cours, Annulee). Recu: ${data.length}.` };
+      if (!data[0].statut) return { ok: false, msg: 'Agregez par la colonne statut.' };
+      return { ok: true, msg: 'KPIs prets pour le camembert !' };
     },
   },
   {
     id: 'pipe-15', title: 'Bronze vers Silver', difficulty: 2,
-    description: 'Prenez les commandes du Bronze (deja chargees), nettoyez-les (doublons + vides) et stockez en Silver.',
-    hint: 'Source → Bronze → sortie table → Dedoublonner → Suppr. Vides → Silver.',
+    description: 'Les commandes brutes sont stockees dans le Bronze mais contiennent des doublons et des lignes vides. L\'etape Silver consiste a nettoyer ces donnees pour les rendre exploitables par les analystes.\n\nMethodologie : Chargez les donnees dans le Bronze, puis appliquez un nettoyage (dedup + vides) avant de stocker en Silver.',
+    hint: 'Source → Bronze → sortie table → Dedup → Suppr. Vides → Silver.',
     hintNodes: ['csv_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'lakehouse_silver'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_DIRTY }] },
     validate: (outputs, nodes, conns, cfgs) => {
       const hasBronze = nodes.some(n => n.type === 'lakehouse_bronze');
       const hasSilver = nodes.some(n => n.type === 'lakehouse_silver');
-      if (!hasBronze || !hasSilver) return { ok: false, msg: 'Utilisez un Lakehouse Bronze ET un Lakehouse Silver.' };
+      if (!hasBronze || !hasSilver) return { ok: false, msg: 'Utilisez un Lakehouse Bronze ET Silver.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1))
-        return { ok: false, msg: 'Le Lakehouse Silver doit contenir au moins 1 table nettoyee.' };
-      return { ok: true, msg: 'Transition Bronze → Silver reussie !' };
+        return { ok: false, msg: 'Le Silver doit contenir au moins 1 table nettoyee.' };
+      return { ok: true, msg: 'Bronze → Silver reussi !' };
     },
   },
   {
     id: 'pipe-16', title: 'Echantillon de test', difficulty: 2,
-    description: 'Extrayez les 3 premieres lignes des employes pour un test rapide.',
-    hint: 'Source → Echantillonner (mode: Top N, valeur: 3) → Export CSV.',
+    description: 'L\'equipe QA a besoin d\'un petit jeu de donnees pour tester un nouveau formulaire. Extrayez les 3 premiers employes du fichier pour creer un jeu de test rapide.\n\nMethodologie : Echantillonnez les premieres lignes et exportez.',
+    hint: 'Source → Echantillonner (Top N: 3) → Export CSV.',
     hintNodes: ['csv_source', 'sample', 'csv_export'],
     sources: { 'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => n.type === 'csv_export');
-      if (!exp) return { ok: false, msg: 'Ajoutez un Export CSV.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length === 3) return { ok: true, msg: 'Echantillon extrait !' };
       return { ok: false, msg: `Attendu 3 lignes. Recu: ${data.length}.` };
     },
@@ -464,35 +439,32 @@ export const EXERCISES = [
 
   // ══════════ DIFFICILE (10) ══════════
   {
-    id: 'pipe-17', title: 'Aiguillage qualite', difficulty: 3,
-    description: 'Verifiez si les commandes ne sont pas vides avec Si/Sinon, puis filtrez les livrees d\'un cote et les annulees de l\'autre. Exportez les deux flux.',
-    hint: 'Source → Si/Sinon (table_not_empty) → Vrai → Filtrer (statut=Livree) → Export 1 / Filtrer (statut=Annulee) → Export 2.',
+    id: 'pipe-17', title: 'Aiguillage logistique', difficulty: 3,
+    description: 'Le centre logistique doit router les commandes vers deux equipes differentes : les commandes livrees sont archivees, les commandes annulees sont transmises au service reclamation. Il faut d\'abord verifier que le fichier n\'est pas vide avant de router.\n\nMethodologie : Validez la presence de donnees, puis separez en deux flux distincts avec des filtres.',
+    hint: 'Source → Si/Sinon (table_not_empty) → Filtrer Livree → Export 1 / Filtrer Annulee → Export 2.',
     hintNodes: ['csv_source', 'if_condition', 'filter', 'filter', 'csv_export', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', montant: '150', statut: 'Livree' }, { id: 'CMD002', montant: '230', statut: 'Livree' },
       { id: 'CMD003', montant: '320', statut: 'En cours' }, { id: 'CMD004', montant: '85', statut: 'Livree' },
       { id: 'CMD005', montant: '210', statut: 'Annulee' }, { id: 'CMD006', montant: '95', statut: 'Livree' },
     ] }] },
-    validate: (outputs, nodes, conns) => {
+    validate: (outputs, nodes) => {
       const hasIf = nodes.some(n => n.type === 'if_condition');
       if (!hasIf) return { ok: false, msg: 'Utilisez un noeud Si/Sinon.' };
       const filters = nodes.filter(n => n.type === 'filter');
-      if (filters.length < 2) return { ok: false, msg: `Utilisez au moins 2 filtres pour separer les flux. Actuellement: ${filters.length}.` };
+      if (filters.length < 2) return { ok: false, msg: `Utilisez au moins 2 filtres. (${filters.length} actuellement)` };
       const exports = nodes.filter(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (exports.length < 2) return { ok: false, msg: 'Ajoutez 2 destinations (une par flux).' };
-      return { ok: true, msg: 'Aiguillage reussi !' };
+      if (exports.length < 2) return { ok: false, msg: 'Ajoutez 2 destinations.' };
+      return { ok: true, msg: 'Aiguillage logistique operationnel !' };
     },
   },
   {
-    id: 'pipe-18', title: 'Recherche fournisseur', difficulty: 3,
-    description: 'Verifiez si chaque produit a un fournisseur connu en comparant la categorie. Separez Match / No Match.',
-    hint: 'Source produits + Source fournisseurs → Lookup (sur categorie). 2 sorties: Match et No Match.',
-    hintNodes: ['csv_source', 'csv_source', 'lookup'],
+    id: 'pipe-18', title: 'Audit fournisseurs', difficulty: 3,
+    description: 'Le service achats veut s\'assurer que chaque produit du catalogue est couvert par un fournisseur reference. Les produits dont la categorie ne correspond a aucun fournisseur doivent etre identifies pour lancer un appel d\'offres.\n\nMethodologie : Comparez les categories produits avec celles des fournisseurs pour separer les produits couverts des orphelins.',
+    hint: 'Source produits + Source fournisseurs → Lookup (categorie) → Match / No Match.',
+    hintNodes: ['csv_source', 'db_source', 'lookup'],
     sources: {
-      'csv_source': [{ name: 'produits', data: [
-        ...PRODUITS_SMALL,
-        { id: 'P99', nom: 'Gadget X', categorie: 'Divers', prix: '25', stock: '50' },
-      ]}],
+      'csv_source': [{ name: 'produits', data: [...PRODUITS_SMALL, { id: 'P99', nom: 'Gadget X', categorie: 'Divers', prix: '25', stock: '50' }] }],
       'db_source': [{ name: 'fournisseurs', data: FOURNISSEURS }],
     },
     validate: (outputs, nodes) => {
@@ -500,102 +472,95 @@ export const EXERCISES = [
       if (!lk) return { ok: false, msg: 'Utilisez un noeud Lookup (Existe).' };
       const match = outputs[`${lk.id}_match`] || [];
       const noMatch = outputs[`${lk.id}_nomatch`] || [];
-      if (match.length > 0 && noMatch.length > 0) return { ok: true, msg: `Lookup reussi ! Match: ${match.length}, No Match: ${noMatch.length}` };
-      if (match.length > 0 || noMatch.length > 0) return { ok: true, msg: `Lookup configure. Match: ${match.length}, No Match: ${noMatch.length}` };
+      if (match.length > 0 && noMatch.length > 0) return { ok: true, msg: `Audit termine ! Couverts: ${match.length}, Orphelins: ${noMatch.length}` };
+      if (match.length > 0 || noMatch.length > 0) return { ok: true, msg: `Lookup ok. Match: ${match.length}, No Match: ${noMatch.length}` };
       return { ok: false, msg: 'Configurez le lookup sur la colonne categorie.' };
     },
   },
   {
-    id: 'pipe-19', title: 'Colonne calculee', difficulty: 3,
-    description: 'Ajoutez une colonne nom_complet = concat(prenom, " ", nom) aux employes.',
-    hint: 'Source → ForEachRow (ajouter colonne: nom_complet, fonction: concat, col1: prenom, col2: nom) → Export.',
-    hintNodes: ['csv_source', 'foreach_row', 'csv_export'],
+    id: 'pipe-19', title: 'Annuaire employes', difficulty: 3,
+    description: 'L\'intranet a besoin d\'un annuaire affichant le nom complet de chaque employe. Le fichier source separe le nom et le prenom en deux colonnes distinctes, mais l\'annuaire attend une seule colonne "nom_complet".\n\nMethodologie : Creez une colonne calculee concatenant prenom et nom, puis exportez vers le Dashboard.',
+    hint: 'Source → ForEachRow (concat prenom + nom → nom_complet) → Dashboard.',
+    hintNodes: ['csv_source', 'foreach_row', 'dashboard'],
     sources: { 'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (!exp) return { ok: false, msg: 'Ajoutez une destination.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 8) return { ok: false, msg: `Attendu 8 lignes.` };
       if (!data[0].nom_complet) return { ok: false, msg: 'La colonne nom_complet est manquante.' };
-      return { ok: true, msg: 'Colonne calculee ajoutee !' };
+      return { ok: true, msg: 'Annuaire genere !' };
     },
   },
   {
-    id: 'pipe-20', title: 'Classement ventes', difficulty: 3,
-    description: 'Ajoutez un rang (row_number) aux commandes triees par montant decroissant.',
-    hint: 'Source → Fenetre (row_number, orderBy: montant, desc, alias: rang) → Export.',
-    hintNodes: ['csv_source', 'window_func', 'csv_export'],
+    id: 'pipe-20', title: 'Top ventes Dashboard', difficulty: 3,
+    description: 'Le directeur commercial veut un tableau de bord affichant les commandes classees par montant, avec un numero de rang pour identifier rapidement les meilleures ventes. Ce classement sera envoye vers un Dashboard pour visualisation.\n\nMethodologie : Ajoutez un rang base sur le montant decroissant, puis envoyez au Dashboard.',
+    hint: 'Source → Fenetre (row_number, montant desc, alias: rang) → Dashboard.',
+    hintNodes: ['csv_source', 'window_func', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', montant: '150' }, { id: 'CMD002', montant: '230' },
       { id: 'CMD003', montant: '320' }, { id: 'CMD004', montant: '85' },
       { id: 'CMD005', montant: '210' },
     ] }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (!exp) return { ok: false, msg: 'Ajoutez une destination.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez un Dashboard.' };
       if (data.length !== 5) return { ok: false, msg: `Attendu 5 lignes.` };
       const hasRank = Object.keys(data[0] || {}).some(c => c !== 'id' && c !== 'montant');
-      if (!hasRank) return { ok: false, msg: 'La colonne de rang est manquante. Configurez la fenetre.' };
-      return { ok: true, msg: 'Classement ajoute !' };
+      if (!hasRank) return { ok: false, msg: 'La colonne de rang est manquante.' };
+      return { ok: true, msg: 'Dashboard top ventes pret !' };
     },
   },
   {
-    id: 'pipe-21', title: 'Bronze → Silver complet', difficulty: 3,
-    description: 'Depuis les commandes brutes : dedoublonner, supprimer vides, renommer mnt→montant et st→statut, filtrer statut=Livree, stocker en Silver.',
-    hint: 'Source → Bronze → sortie → Dedup → Clean NA → Renommer (mnt→montant) → Renommer (st→statut) → Filtrer (statut=Livree) → Silver.',
+    id: 'pipe-21', title: 'Bronze → Silver transformation', difficulty: 3,
+    description: 'Les commandes brutes du Bronze ont des problemes multiples : doublons, cellules vides, et colonnes au format technique (mnt, st). La couche Silver doit contenir des donnees propres avec des noms metier, filtrees sur les commandes livrees.\n\nMethodologie : Nettoyez (dedup + vides), renommez les colonnes, filtrez, puis stockez en Silver.',
+    hint: 'Bronze → Dedup → Suppr. Vides → Renommer (mnt→montant, st→statut) → Filtrer (Livree) → Silver.',
     hintNodes: ['csv_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'rename_col', 'rename_col', 'filter', 'lakehouse_silver'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       ...COMMANDES_TECH_NAMES,
-      { cmd_id: 'CMD001', clt_id: '1', dt_cmd: '2024-01-10', mnt: '150', st: 'Livree' }, // dupe
-      { cmd_id: 'CMD006', clt_id: '3', dt_cmd: '2024-03-01', mnt: '', st: 'En cours' }, // empty
+      { cmd_id: 'CMD001', clt_id: '1', dt_cmd: '2024-01-10', mnt: '150', st: 'Livree' },
+      { cmd_id: 'CMD006', clt_id: '3', dt_cmd: '2024-03-01', mnt: '', st: 'En cours' },
     ] }] },
     validate: (outputs, nodes, conns, cfgs) => {
-      const hasBronze = nodes.some(n => n.type === 'lakehouse_bronze');
-      const hasSilver = nodes.some(n => n.type === 'lakehouse_silver');
-      if (!hasBronze) return { ok: false, msg: 'Ajoutez un Lakehouse Bronze.' };
-      if (!hasSilver) return { ok: false, msg: 'Ajoutez un Lakehouse Silver.' };
-      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1))
-        return { ok: false, msg: 'Le Silver doit contenir au moins 1 table.' };
+      if (!nodes.some(n => n.type === 'lakehouse_bronze')) return { ok: false, msg: 'Ajoutez un Bronze.' };
+      if (!nodes.some(n => n.type === 'lakehouse_silver')) return { ok: false, msg: 'Ajoutez un Silver.' };
+      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1)) return { ok: false, msg: 'Le Silver doit contenir au moins 1 table.' };
       return { ok: true, msg: 'Pipeline Bronze → Silver complet !' };
     },
   },
   {
-    id: 'pipe-22', title: 'Silver → Gold : KPIs', difficulty: 3,
-    description: 'Depuis les commandes Silver, agregez par client_id : COUNT et SUM montant. Stockez dans Gold.',
-    hint: 'Source → Silver → sortie → Agreger (groupBy: client_id, count + sum montant) → Gold.',
-    hintNodes: ['csv_source', 'lakehouse_silver', 'aggregate', 'lakehouse_gold'],
+    id: 'pipe-22', title: 'Gold : CA par client', difficulty: 3,
+    description: 'Pour alimenter un graphique en barres du chiffre d\'affaires par client, il faut agreger les commandes Silver : compter le nombre de commandes et sommer les montants par client_id. Le resultat ira dans la couche Gold puis vers un Dashboard.\n\nMethodologie : Agregez par client_id (count + sum montant) et stockez en Gold.',
+    hint: 'Source → Silver → Agreger (client_id: count + sum montant) → Gold → Dashboard.',
+    hintNodes: ['csv_source', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', client_id: '1', montant: '150' }, { id: 'CMD002', client_id: '2', montant: '230' },
       { id: 'CMD003', client_id: '1', montant: '85' }, { id: 'CMD004', client_id: '3', montant: '320' },
       { id: 'CMD005', client_id: '2', montant: '175' },
     ] }] },
     validate: (outputs, nodes, conns, cfgs) => {
-      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1))
-        return { ok: false, msg: 'Le Gold doit contenir au moins 1 table agregee.' };
-      return { ok: true, msg: 'KPIs Gold generes !' };
+      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Le Gold doit contenir au moins 1 table.' };
+      const hasDash = nodes.some(n => n.type === 'dashboard');
+      if (!hasDash) return { ok: false, msg: 'Ajoutez un Dashboard pour la visualisation.' };
+      return { ok: true, msg: 'Gold KPIs + Dashboard prets !' };
     },
   },
   {
-    id: 'pipe-23', title: 'Pipeline avec monitoring', difficulty: 3,
-    description: 'Construisez un pipeline Source → Filtre → Export avec un noeud Journal (Log) apres chaque etape pour tracer l\'execution.',
-    hint: 'Source → Log("Donnees chargees") → Filtrer → Log("Donnees filtrees") → Export.',
+    id: 'pipe-23', title: 'Pipeline auditable', difficulty: 3,
+    description: 'L\'equipe conformite exige que chaque pipeline de production soit auditable. Pour chaque etape cle (chargement, filtrage), un journal doit enregistrer le nombre de lignes traitees.\n\nMethodologie : Intercalez des noeuds Journal entre vos etapes de transformation.',
+    hint: 'Source → Log → Filtrer → Log → Export.',
     hintNodes: ['csv_source', 'log', 'filter', 'log', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut) }] },
     validate: (outputs, nodes) => {
-      const logNodes = nodes.filter(n => n.type === 'log');
-      if (logNodes.length < 2) return { ok: false, msg: `Utilisez au moins 2 noeuds Journal. Actuellement: ${logNodes.length}.` };
-      const filterNodes = nodes.filter(n => n.type === 'filter');
-      if (filterNodes.length === 0) return { ok: false, msg: 'Ajoutez un noeud Filtrer.' };
-      return { ok: true, msg: 'Pipeline monitore !' };
+      const logs = nodes.filter(n => n.type === 'log');
+      if (logs.length < 2) return { ok: false, msg: `Utilisez au moins 2 noeuds Journal. (${logs.length} actuellement)` };
+      if (!nodes.some(n => n.type === 'filter')) return { ok: false, msg: 'Ajoutez un Filtrer.' };
+      return { ok: true, msg: 'Pipeline auditable !' };
     },
   },
   {
-    id: 'pipe-24', title: 'Multi-source ingestion', difficulty: 3,
-    description: 'Chargez clients (CSV), produits (SQL) et fournisseurs (API), stockez les 3 dans un Bronze.',
-    hint: 'Source CSV + Source SQL + Source API → chacune connectee au Bronze (3 tables).',
+    id: 'pipe-24', title: 'Ingestion multi-source', difficulty: 3,
+    description: 'L\'entreprise recoit des donnees de 3 systemes differents : les clients via un fichier CSV, les produits depuis une base SQL, et les fournisseurs par API REST. Toutes ces donnees doivent etre centralisees dans un seul Lakehouse Bronze.\n\nMethodologie : Utilisez 3 types de sources differentes et stockez tout dans un Bronze.',
+    hint: '3 types de sources differents → chacune connectee au Bronze.',
     hintNodes: ['csv_source', 'db_source', 'api_source', 'lakehouse_bronze'],
     sources: {
       'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }],
@@ -603,17 +568,16 @@ export const EXERCISES = [
       'api_source': [{ name: 'fournisseurs', data: FOURNISSEURS }],
     },
     validate: (outputs, nodes, conns, cfgs) => {
-      const sources = nodes.filter(n => ['csv_source', 'db_source', 'api_source'].includes(n.type));
-      if (sources.length < 3) return { ok: false, msg: `Utilisez 3 sources differentes. Actuellement: ${sources.length}.` };
-      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 3))
-        return { ok: false, msg: 'Le Bronze doit contenir au moins 3 tables.' };
+      const srcTypes = new Set(nodes.filter(n => ['csv_source', 'db_source', 'api_source'].includes(n.type)).map(n => n.type));
+      if (srcTypes.size < 3) return { ok: false, msg: `Utilisez 3 sources differentes. (${srcTypes.size} actuellement)` };
+      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 3)) return { ok: false, msg: 'Le Bronze doit contenir 3 tables.' };
       return { ok: true, msg: 'Ingestion multi-source reussie !' };
     },
   },
   {
-    id: 'pipe-25', title: 'ForEach batch', difficulty: 3,
-    description: 'Appliquez le meme nettoyage (suppr vides + dedup) a toutes les tables d\'une source en une seule operation ForEach.',
-    hint: 'Source (avec plusieurs tables) → ForEach [clean_na, deduplicate] → les tables nettoyees sortent automatiquement.',
+    id: 'pipe-25', title: 'Nettoyage en lot', difficulty: 3,
+    description: 'Plusieurs tables (clients et commandes) souffrent des memes problemes de qualite : doublons et cellules vides. Plutot que de creer un pipeline de nettoyage pour chacune, utilisez un traitement en lot qui applique les memes regles a toutes les tables.\n\nMethodologie : Configurez un ForEach avec les etapes de nettoyage communes.',
+    hint: 'Source (2 tables) → ForEach [Suppr. Vides + Dedup] → sorties nettoyees.',
     hintNodes: ['csv_source', 'foreach'],
     sources: { 'csv_source': [
       { name: 'clients', data: CLIENTS_WITH_DUPES },
@@ -622,77 +586,69 @@ export const EXERCISES = [
     validate: (outputs, nodes) => {
       const fe = nodes.find(n => n.type === 'foreach');
       if (!fe) return { ok: false, msg: 'Utilisez un noeud ForEach.' };
-      const feOutput = outputs[fe.id];
-      if (feOutput && feOutput.length > 0) return { ok: true, msg: 'Batch ForEach reussi !' };
-      return { ok: false, msg: 'Configurez les etapes du ForEach (Suppr. Vides + Dedoublonner).' };
+      if (outputs[fe.id]?.length > 0) return { ok: true, msg: 'Nettoyage en lot reussi !' };
+      return { ok: false, msg: 'Configurez les etapes du ForEach.' };
     },
   },
   {
-    id: 'pipe-26', title: 'Detection anomalies', difficulty: 3,
-    description: 'Ajoutez un classement par montant (window row_number) puis filtrez pour ne garder que le top 3.',
-    hint: 'Source → Fenetre (row_number, montant desc, alias: rang) → Filtrer (rang ≤ 3)... astuce: filtrez sur rang=1, rang=2, rang=3 ou utilisez Sample Top 3.',
-    hintNodes: ['csv_source', 'window_func', 'sample', 'csv_export'],
+    id: 'pipe-26', title: 'Podium des ventes', difficulty: 3,
+    description: 'Pour la reunion commerciale, on veut presenter un podium des 3 meilleures ventes du trimestre. A partir de 6 commandes, il faut extraire uniquement les 3 plus gros montants et les envoyer vers un Dashboard.\n\nMethodologie : Triez ou classez par montant, puis extrayez le top 3 pour le Dashboard.',
+    hint: 'Source → Trier (montant desc) → Echantillonner (Top 3) → Dashboard.',
+    hintNodes: ['csv_source', 'sort', 'sample', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', montant: '150' }, { id: 'CMD002', montant: '230' },
       { id: 'CMD003', montant: '320' }, { id: 'CMD004', montant: '85' },
       { id: 'CMD005', montant: '210' }, { id: 'CMD006', montant: '95' },
     ] }] },
     validate: (outputs, nodes, conns) => {
-      const exp = nodes.find(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (!exp) return { ok: false, msg: 'Ajoutez une destination.' };
-      const inc = conns.filter(c => c.to === exp.id);
-      const data = inc.length > 0 ? outputs[inc[0].from] || [] : [];
-      if (data.length === 3) return { ok: true, msg: 'Top 3 extrait !' };
-      return { ok: false, msg: `Attendu: 3 lignes (top montants). Recu: ${data.length}.` };
+      const data = getDestinationData(outputs, nodes, conns);
+      if (data === null) return { ok: false, msg: 'Ajoutez un Dashboard.' };
+      if (data.length === 3) return { ok: true, msg: 'Podium pret pour la reunion !' };
+      return { ok: false, msg: `Attendu: 3 lignes. Recu: ${data.length}.` };
     },
   },
 
   // ══════════ EXPERT (6) ══════════
   {
-    id: 'pipe-27', title: 'ETL E-Commerce complet', difficulty: 4,
-    description: 'Pipeline complet : Sources (clients + commandes + produits) → Bronze → Silver (clean + join commandes/clients) → Gold (agregat par categorie) → Dashboard.',
-    hint: '3 Sources → Bronze (3 tables) → sorties Bronze → Clean/Dedup → Join commandes+clients → Silver → Agreger → Gold → Dashboard.',
+    id: 'pipe-27', title: 'ETL E-Commerce', difficulty: 4,
+    description: 'Le projet data de la marketplace arrive a maturite. Il faut construire le pipeline complet : ingerer les donnees brutes (clients, commandes, produits) dans le Bronze, les nettoyer et enrichir (jointure commandes/clients) pour le Silver, puis agreger les ventes par categorie pour le Gold. Le resultat alimente un Dashboard BI.\n\nMethodologie : Architecture medallion complete avec nettoyage, enrichissement et agregation.',
+    hint: 'Sources → Bronze (3 tables) → Clean/Dedup → Join → Silver → Agreger → Gold → Dashboard.',
     hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'join', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }, { name: 'commandes', data: COMMANDES_DIRTY }],
       'db_source': [{ name: 'produits', data: PRODUITS_SMALL }],
     },
     validate: (outputs, nodes, conns, cfgs) => {
-      const hasBronze = nodes.some(n => n.type === 'lakehouse_bronze');
-      const hasSilver = nodes.some(n => n.type === 'lakehouse_silver');
-      const hasGold = nodes.some(n => n.type === 'lakehouse_gold');
-      const hasDash = nodes.some(n => n.type === 'dashboard');
-      if (!hasBronze || !hasSilver || !hasGold) return { ok: false, msg: 'Utilisez les 3 couches : Bronze, Silver, Gold.' };
-      if (!hasDash) return { ok: false, msg: 'Ajoutez un Dashboard en sortie.' };
+      const has = t => nodes.some(n => n.type === t);
+      if (!has('lakehouse_bronze') || !has('lakehouse_silver') || !has('lakehouse_gold')) return { ok: false, msg: 'Utilisez les 3 couches medallion.' };
+      if (!has('dashboard')) return { ok: false, msg: 'Ajoutez un Dashboard.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 2)) return { ok: false, msg: 'Bronze: au moins 2 tables.' };
-      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1)) return { ok: false, msg: 'Silver: au moins 1 table nettoyee.' };
-      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table agregee.' };
-      return { ok: true, msg: 'ETL E-Commerce complet ! Architecture medallion maitrisee.' };
+      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1)) return { ok: false, msg: 'Silver: au moins 1 table.' };
+      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table.' };
+      return { ok: true, msg: 'ETL E-Commerce complet !' };
     },
   },
   {
-    id: 'pipe-28', title: 'Pipeline RH Analytics', difficulty: 4,
-    description: 'Joindre employes + departements (sur departement_id), ajouter une colonne nom_complet (ForEachRow), agreger le salaire moyen par departement, exporter vers Dashboard.',
-    hint: 'Source employes + Source departements → Join (departement_id) → ForEachRow (nom_complet = concat prenom+nom) → Agreger (avg salaire par departement_id) → Dashboard.',
+    id: 'pipe-28', title: 'RH Analytics Dashboard', difficulty: 4,
+    description: 'Le DRH demande un tableau de bord croisant les employes avec leurs departements. Il veut voir le nom complet de chaque employe et le salaire moyen par departement sous forme de graphique en barres.\n\nMethodologie : Joignez employes et departements, creez la colonne nom_complet, agregez le salaire moyen par departement, puis envoyez au Dashboard.',
+    hint: 'Join (departement_id) → ForEachRow (nom_complet) → Agreger (avg salaire) → Dashboard.',
     hintNodes: ['csv_source', 'db_source', 'join', 'foreach_row', 'aggregate', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }],
       'db_source': [{ name: 'departements', data: DEPARTEMENTS.map(d => ({ departement_id: d.id, dept_nom: d.nom, responsable: d.responsable, budget: d.budget })) }],
     },
     validate: (outputs, nodes) => {
-      const hasJoin = nodes.some(n => n.type === 'join');
-      const hasAgg = nodes.some(n => n.type === 'aggregate');
-      const hasDash = nodes.some(n => n.type === 'dashboard');
-      if (!hasJoin) return { ok: false, msg: 'Utilisez un noeud Joindre.' };
-      if (!hasAgg) return { ok: false, msg: 'Utilisez un noeud Agreger.' };
-      if (!hasDash) return { ok: false, msg: 'Ajoutez un Dashboard.' };
-      return { ok: true, msg: 'Pipeline RH Analytics complet !' };
+      const has = t => nodes.some(n => n.type === t);
+      if (!has('join')) return { ok: false, msg: 'Joignez employes + departements.' };
+      if (!has('aggregate')) return { ok: false, msg: 'Agregez les salaires.' };
+      if (!has('dashboard')) return { ok: false, msg: 'Ajoutez un Dashboard.' };
+      return { ok: true, msg: 'Dashboard RH Analytics complet !' };
     },
   },
   {
-    id: 'pipe-29', title: 'Routage intelligent', difficulty: 4,
-    description: 'Separez les commandes en 3 flux : Livrees → Gold, En cours → Silver, Annulees → Log + CSV archive. Utilisez Si/Sinon pour verifier que la table n\'est pas vide, puis filtrez par statut.',
-    hint: 'Source → Si/Sinon (table_not_empty) → Sortie Vrai → Filtrer (Livree) → Gold / Filtrer (Annulee) → Log + CSV / Filtrer (En cours) → Silver.',
+    id: 'pipe-29', title: 'Tri-routage commandes', difficulty: 4,
+    description: 'Le centre de gestion a 3 workflows distincts pour les commandes : les livrees vont dans le Gold pour les KPIs, les commandes en cours restent en Silver pour suivi, et les annulees sont archivees en CSV avec un log d\'erreur. Il faut router chaque statut vers la bonne destination.\n\nMethodologie : Validez les donnees, puis creez 3 branches avec des filtres pour chaque statut.',
+    hint: 'Si/Sinon (not empty) → Filtrer (Livree) → Gold / Filtrer (En cours) → Silver / Filtrer (Annulee) → Log + CSV.',
     hintNodes: ['csv_source', 'if_condition', 'filter', 'filter', 'filter', 'lakehouse_gold', 'lakehouse_silver', 'log', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'commandes', data: [
@@ -705,41 +661,37 @@ export const EXERCISES = [
       ] }],
     },
     validate: (outputs, nodes) => {
-      const hasIf = nodes.some(n => n.type === 'if_condition');
-      const hasLog = nodes.some(n => n.type === 'log');
-      const filters = nodes.filter(n => n.type === 'filter');
-      if (!hasIf) return { ok: false, msg: 'Utilisez un noeud Si/Sinon.' };
-      if (filters.length < 2) return { ok: false, msg: `Utilisez au moins 2 filtres pour router par statut. Actuellement: ${filters.length}.` };
-      if (!hasLog) return { ok: false, msg: 'Ajoutez un Journal pour les commandes annulees.' };
-      const destinations = nodes.filter(n => ['lakehouse_gold', 'lakehouse_silver', 'csv_export', 'warehouse', 'dashboard'].includes(n.type));
-      if (destinations.length < 2) return { ok: false, msg: 'Routez vers au moins 2 destinations.' };
-      return { ok: true, msg: 'Routage intelligent reussi !' };
+      const has = t => nodes.some(n => n.type === t);
+      if (!has('if_condition')) return { ok: false, msg: 'Utilisez Si/Sinon.' };
+      if (nodes.filter(n => n.type === 'filter').length < 2) return { ok: false, msg: 'Au moins 2 filtres necessaires.' };
+      if (!has('log')) return { ok: false, msg: 'Ajoutez un Journal pour les annulees.' };
+      const dests = nodes.filter(n => ['lakehouse_gold', 'lakehouse_silver', 'csv_export', 'warehouse', 'dashboard'].includes(n.type));
+      if (dests.length < 2) return { ok: false, msg: 'Routez vers au moins 2 destinations.' };
+      return { ok: true, msg: 'Tri-routage operationnel !' };
     },
   },
   {
-    id: 'pipe-30', title: 'Data Quality Framework', difficulty: 4,
-    description: 'Source avec donnees sales → ForEach(clean + dedup) → Lookup(table reference) → Match → Silver, NoMatch → Log + CSV rejet.',
-    hint: 'Source (donnees sales) + Source (reference) → ForEach[clean, dedup] → Lookup → Match→Silver, NoMatch→Log+CSV.',
+    id: 'pipe-30', title: 'Controle qualite', difficulty: 4,
+    description: 'Avant d\'integrer les nouvelles commandes dans le systeme, il faut verifier qu\'elles referencent des clients connus. Les commandes sont sales (doublons, vides). Apres nettoyage, chaque commande est comparee a la table de reference clients. Les commandes valides vont en Silver, les invalides sont rejetees avec un log.\n\nMethodologie : Nettoyez en lot (ForEach), puis validez les references (Lookup).',
+    hint: 'ForEach [clean + dedup] → Lookup (client_id) → Match→Silver / NoMatch→Log+CSV.',
     hintNodes: ['csv_source', 'db_source', 'foreach', 'lookup', 'lakehouse_silver', 'log', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'commandes', data: COMMANDES_DIRTY }],
       'db_source': [{ name: 'clients_ref', data: CLEAN_CLIENTS.map(c => ({ client_id: c.id, nom: c.nom, ville: c.ville })) }],
     },
     validate: (outputs, nodes) => {
-      const hasFE = nodes.some(n => n.type === 'foreach');
-      const hasLK = nodes.some(n => n.type === 'lookup');
-      const hasLog = nodes.some(n => n.type === 'log');
-      if (!hasFE) return { ok: false, msg: 'Utilisez ForEach pour le nettoyage batch.' };
-      if (!hasLK) return { ok: false, msg: 'Utilisez Lookup pour la validation.' };
-      if (!hasLog) return { ok: false, msg: 'Ajoutez un Journal pour les rejets.' };
-      return { ok: true, msg: 'Framework Data Quality en place !' };
+      const has = t => nodes.some(n => n.type === t);
+      if (!has('foreach')) return { ok: false, msg: 'Utilisez ForEach.' };
+      if (!has('lookup')) return { ok: false, msg: 'Utilisez Lookup.' };
+      if (!has('log')) return { ok: false, msg: 'Ajoutez un Journal pour les rejets.' };
+      return { ok: true, msg: 'Controle qualite en place !' };
     },
   },
   {
-    id: 'pipe-31', title: 'Dashboard temps reel', difficulty: 4,
-    description: 'Ventes + Produits → Bronze → Silver (join sur produit_id, window rank par montant, ForEachRow categorie_upper) → Gold (agregat par categorie) → Dashboard.',
-    hint: 'Source ventes + Source produits → Bronze → sorties → Join (produit_id) → Window(rank montant desc) → ForEachRow(upper categorie) → Silver → Agreger (sum montant par categorie) → Gold → Dashboard.',
-    hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'join', 'window_func', 'foreach_row', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
+    id: 'pipe-31', title: 'Pipeline BI complet', difficulty: 4,
+    description: 'Le comite de direction veut un Dashboard avec : le CA par categorie (barres), le classement des ventes (table), et les produits enrichis avec leur categorie. Les ventes et produits viennent de 2 sources differentes. L\'architecture doit suivre le modele medallion.\n\nMethodologie : Bronze (ingestion) → Silver (join + window rank + enrichissement) → Gold (agregat par categorie) → Dashboard.',
+    hint: 'Sources → Bronze → Join (produit_id) → Window(rank) → Silver → Agreger → Gold → Dashboard.',
+    hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'join', 'window_func', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'ventes', data: [
         { produit_id: 'P01', montant: '1200', date: '2024-01-15' },
@@ -751,21 +703,19 @@ export const EXERCISES = [
       'db_source': [{ name: 'produits', data: PRODUITS_SMALL.map(p => ({ ...p, produit_id: p.id })) }],
     },
     validate: (outputs, nodes, conns, cfgs) => {
-      const has = (t) => nodes.some(n => n.type === t);
-      if (!has('lakehouse_bronze') || !has('lakehouse_silver') || !has('lakehouse_gold'))
-        return { ok: false, msg: 'Utilisez les 3 couches medallion.' };
+      const has = t => nodes.some(n => n.type === t);
+      if (!has('lakehouse_bronze') || !has('lakehouse_silver') || !has('lakehouse_gold')) return { ok: false, msg: 'Utilisez les 3 couches medallion.' };
       if (!has('window_func')) return { ok: false, msg: 'Utilisez une fonction fenetre.' };
       if (!has('dashboard')) return { ok: false, msg: 'Ajoutez un Dashboard.' };
-      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1))
-        return { ok: false, msg: 'Gold doit contenir au moins 1 table.' };
-      return { ok: true, msg: 'Dashboard temps reel operationnel !' };
+      if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table.' };
+      return { ok: true, msg: 'Pipeline BI complet !' };
     },
   },
   {
     id: 'pipe-32', title: 'Architecture libre', difficulty: 4,
-    description: 'Exercice sandbox note : construisez la meilleure architecture possible avec les donnees fournies. Score base sur : sources, nettoyage, lakehouse, monitoring, destinations.',
-    hint: 'Utilisez un maximum d\'outils : sources multiples, Bronze/Silver/Gold, nettoyage, agrégats, journal, destinations multiples.',
-    hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold', 'log', 'dashboard', 'csv_export'],
+    description: 'Vous etes le data engineer en charge de concevoir l\'architecture data d\'une startup e-commerce. Vous disposez de toutes les donnees (clients, commandes, produits, fournisseurs, evaluations) provenant de sources variees. Votre score depend de la richesse de votre architecture.\n\nMethodologie : Libre ! Utilisez un maximum d\'outils : sources multiples, medallion, nettoyage, transformations avancees, monitoring et destinations.',
+    hint: 'Max de points : 3 sources + nettoyage + Bronze/Silver/Gold + Log + Dashboard + CSV + agregats/joins.',
+    hintNodes: ['csv_source', 'db_source', 'api_source', 'lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold', 'log', 'dashboard', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }, { name: 'commandes', data: COMMANDES_DIRTY }],
       'db_source': [{ name: 'produits', data: PRODUITS_SMALL }, { name: 'fournisseurs', data: FOURNISSEURS }],
@@ -774,32 +724,24 @@ export const EXERCISES = [
     validate: (outputs, nodes, conns, cfgs) => {
       let score = 0;
       const msg = [];
-      // Sources (max 3 pts)
       const srcTypes = new Set(nodes.filter(n => ['csv_source', 'db_source', 'api_source'].includes(n.type)).map(n => n.type));
       score += Math.min(3, srcTypes.size);
-      if (srcTypes.size >= 2) msg.push(`${srcTypes.size} types de sources`);
-      // Cleaning (max 2 pts)
+      if (srcTypes.size >= 2) msg.push(`${srcTypes.size} sources`);
       const cleanTypes = new Set(nodes.filter(n => ['clean_na', 'deduplicate', 'fill_na', 'filter'].includes(n.type)).map(n => n.type));
       score += Math.min(2, cleanTypes.size);
-      if (cleanTypes.size > 0) msg.push(`${cleanTypes.size} etapes de nettoyage`);
-      // Lakehouse (max 3 pts)
+      if (cleanTypes.size > 0) msg.push(`${cleanTypes.size} nettoyage`);
       ['lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold'].forEach(t => { if (nodes.some(n => n.type === t)) score++; });
       const lhCount = ['lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold'].filter(t => nodes.some(n => n.type === t)).length;
-      if (lhCount > 0) msg.push(`${lhCount}/3 couches medallion`);
-      // Monitoring (1 pt)
+      if (lhCount > 0) msg.push(`${lhCount}/3 medallion`);
       if (nodes.some(n => n.type === 'log')) { score++; msg.push('monitoring'); }
-      // Destinations (max 2 pts)
       const destTypes = new Set(nodes.filter(n => ['warehouse', 'dashboard', 'csv_export'].includes(n.type)).map(n => n.type));
       score += Math.min(2, destTypes.size);
       if (destTypes.size > 0) msg.push(`${destTypes.size} destinations`);
-      // Transform complexity (max 2 pts)
-      const advancedTypes = new Set(nodes.filter(n => ['aggregate', 'join', 'window_func', 'foreach_row', 'foreach', 'lookup', 'if_condition'].includes(n.type)).map(n => n.type));
-      score += Math.min(2, advancedTypes.size);
-      if (advancedTypes.size > 0) msg.push(`${advancedTypes.size} transformations avancees`);
-
-      const maxScore = 13;
+      const advTypes = new Set(nodes.filter(n => ['aggregate', 'join', 'window_func', 'foreach_row', 'foreach', 'lookup', 'if_condition'].includes(n.type)).map(n => n.type));
+      score += Math.min(2, advTypes.size);
+      if (advTypes.size > 0) msg.push(`${advTypes.size} transforms avancees`);
       const stars = score >= 10 ? 3 : score >= 7 ? 2 : score >= 4 ? 1 : 0;
-      return { ok: score >= 4, msg: `Score: ${score}/${maxScore} — ${msg.join(', ')}`, stars };
+      return { ok: score >= 4, msg: `Score: ${score}/13 — ${msg.join(', ')}`, stars };
     },
   },
 ];

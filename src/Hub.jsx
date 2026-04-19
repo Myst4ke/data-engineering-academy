@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import App from './App';
 import PipelineDojo from './pipeline/PipelineDojo';
-import BiDojo from './bi/BiDojo';
+import BiDojoWrapper from './bi/BiDojoWrapper';
 
 const MODULES = [
   {
@@ -51,7 +51,7 @@ export default function Hub() {
   }
 
   if (activeModule === 'bi-dojo') {
-    return <BiDojo onBackToHub={() => setActiveModule(null)} />;
+    return <BiDojoWrapper onBackToHub={() => setActiveModule(null)} />;
   }
 
   return (

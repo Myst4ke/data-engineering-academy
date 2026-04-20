@@ -6,7 +6,7 @@ export default function LookupConfig({ mainColumns, refColumns, initialParams, o
   const [column, setColumn] = useState(initialParams?.column || (commonCols[0] || ''));
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
+    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-2 mb-4">
           <span className="text-2xl">🔎</span>

@@ -25,3 +25,18 @@ npm-debug.log*
 
 # Cache
 .cache/
+
+# Local build artifacts and Electron packaging (non-source)
+build-output/
+electron-build/
+electron-dist/
+electron-out/
+electron-release/
+release/
+Data-Dojo-Build/
+
+# Local analysis scripts and screenshots
+tmp-analysis/
+
+# Claude local settings
+.claude/settings.local.json

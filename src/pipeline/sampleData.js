@@ -1,6 +1,6 @@
 /**
  * Sample datasets for Pipeline Dojo
- * Two themes: E-commerce & RH
+ * Two thèmes: E-commerce & RH
  */
 
 export const DATABASES = {
@@ -26,18 +26,18 @@ export const DATABASES = {
       produits: {
         name: 'produits',
         rows: [
-          { id: 'P01', nom: 'Laptop Pro', categorie: 'Informatique', prix: '1200', stock: '45' },
-          { id: 'P02', nom: 'Souris RGB', categorie: 'Informatique', prix: '35', stock: '200' },
-          { id: 'P03', nom: 'Ecran 27p', categorie: 'Informatique', prix: '450', stock: '80' },
-          { id: 'P04', nom: 'Clavier MK', categorie: 'Informatique', prix: '75', stock: '150' },
-          { id: 'P05', nom: 'Casque Audio', categorie: 'Audio', prix: '120', stock: '90' },
-          { id: 'P06', nom: 'Webcam HD', categorie: 'Informatique', prix: '60', stock: '110' },
-          { id: 'P07', nom: 'Enceinte BT', categorie: 'Audio', prix: '45', stock: '180' },
-          { id: 'P08', nom: 'Hub USB-C', categorie: 'Accessoire', prix: '30', stock: '300' },
-          { id: 'P09', nom: 'Chaise Ergo', categorie: 'Mobilier', prix: '350', stock: '25' },
-          { id: 'P10', nom: 'Bureau Ajust', categorie: 'Mobilier', prix: '500', stock: '15' },
-          { id: 'P11', nom: 'Tapis Souris', categorie: 'Accessoire', prix: '15', stock: '400' },
-          { id: 'P12', nom: 'Cable HDMI', categorie: 'Accessoire', prix: '12', stock: '500' },
+          { id: 'P01', nom: 'Laptop Pro', catégorie: 'Informatique', prix: '1200', stock: '45' },
+          { id: 'P02', nom: 'Souris RGB', catégorie: 'Informatique', prix: '35', stock: '200' },
+          { id: 'P03', nom: 'Écran 27p', catégorie: 'Informatique', prix: '450', stock: '80' },
+          { id: 'P04', nom: 'Clavier MK', catégorie: 'Informatique', prix: '75', stock: '150' },
+          { id: 'P05', nom: 'Casque Audio', catégorie: 'Audio', prix: '120', stock: '90' },
+          { id: 'P06', nom: 'Webcam HD', catégorie: 'Informatique', prix: '60', stock: '110' },
+          { id: 'P07', nom: 'Enceinte BT', catégorie: 'Audio', prix: '45', stock: '180' },
+          { id: 'P08', nom: 'Hub USB-C', catégorie: 'Accessoire', prix: '30', stock: '300' },
+          { id: 'P09', nom: 'Chaise Ergo', catégorie: 'Mobilier', prix: '350', stock: '25' },
+          { id: 'P10', nom: 'Bureau Ajust', catégorie: 'Mobilier', prix: '500', stock: '15' },
+          { id: 'P11', nom: 'Tapis Souris', catégorie: 'Accessoire', prix: '15', stock: '400' },
+          { id: 'P12', nom: 'Cable HDMI', catégorie: 'Accessoire', prix: '12', stock: '500' },
         ],
       },
       commandes: {
@@ -47,12 +47,12 @@ export const DATABASES = {
       fournisseurs: {
         name: 'fournisseurs',
         rows: [
-          { id: 'F01', nom: 'TechCo', pays: 'France', contact: 'contact@techco.fr', categorie: 'Informatique' },
-          { id: 'F02', nom: 'AudioMax', pays: 'Allemagne', contact: 'info@audiomax.de', categorie: 'Audio' },
-          { id: 'F03', nom: 'PeriphPlus', pays: 'France', contact: 'vente@periphplus.fr', categorie: 'Accessoire' },
-          { id: 'F04', nom: 'MobilierPro', pays: 'Italie', contact: 'sales@mobilier.it', categorie: 'Mobilier' },
-          { id: 'F05', nom: 'GlobalTech', pays: 'USA', contact: 'order@globaltech.com', categorie: 'Informatique' },
-          { id: 'F06', nom: 'EuroSupply', pays: 'Espagne', contact: 'info@eurosupply.es', categorie: 'Accessoire' },
+          { id: 'F01', nom: 'TechCo', pays: 'France', contact: 'contact@techco.fr', catégorie: 'Informatique' },
+          { id: 'F02', nom: 'AudioMax', pays: 'Allemagne', contact: 'info@audiomax.de', catégorie: 'Audio' },
+          { id: 'F03', nom: 'PeriphPlus', pays: 'France', contact: 'vente@periphplus.fr', catégorie: 'Accessoire' },
+          { id: 'F04', nom: 'MobilierPro', pays: 'Italie', contact: 'sales@mobilier.it', catégorie: 'Mobilier' },
+          { id: 'F05', nom: 'GlobalTech', pays: 'USA', contact: 'order@globaltech.com', catégorie: 'Informatique' },
+          { id: 'F06', nom: 'EuroSupply', pays: 'Espagne', contact: 'info@eurosupply.es', catégorie: 'Accessoire' },
         ],
       },
     },

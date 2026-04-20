@@ -1,7 +1,9 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Copy, Settings, X, Undo2, Redo2, Save, FolderOpen, Monitor, Trash2, Play, Info } from 'lucide-react';
 import { getAllTables } from '../pipeline/sampleData';
 import { BarChart, LineChart, PieChart, KpiCard, ScatterPlot, Gauge, Treemap, MapChart, FunnelChart, DataTable, TextWidget, Slicer, recommendChart } from './charts';
 import ChartConfig from './ChartConfig';
+import BackButton from '../components/BackButton';
 
 function aggregateData(data, xCol, yCol, aggFunc) {
   if (aggFunc === 'none' || !aggFunc) return data;
@@ -97,17 +99,29 @@ function GridWidget({ widget, data: defaultData, rawData: defaultRawData, allTab
       onContextMenu={e => { e.preventDefault(); onConfig(widget.id); }}>
       {showHeader && <div className="flex items-center justify-between px-2 py-1 border-b border-slate-100 shrink-0 cursor-grab active:cursor-grabbing select-none"
         onMouseDown={e => { if (e.button === 0 && !e.shiftKey) { e.preventDefault(); onDragStart(widget.id, e); } }}>
-        <span className="text-[10px] font-semibold text-slate-700 truncate">{config?.title || ''}</span>
-        <div className="flex items-center gap-0.5" onMouseDown={e => e.stopPropagation()}>
-          <button onClick={() => onDuplicate(widget.id)} className="text-[9px] text-slate-400 hover:text-emerald-500" title="Dupliquer">📋</button>
-          <button onClick={() => onConfig(widget.id)} className="text-[9px] text-slate-400 hover:text-indigo-500">⚙️</button>
-          <button onClick={() => onRemove(widget.id)} className="text-[9px] text-slate-400 hover:text-red-500">✕</button>
+        <span className="text-[11px] font-semibold text-slate-700 truncate" title={config?.title || ''}>{config?.title || ''}</span>
+        <div className="flex items-center gap-1" onMouseDown={e => e.stopPropagation()}>
+          <button onClick={() => onDuplicate(widget.id)} className="w-5 h-5 rounded hover:bg-emerald-50 text-slate-400 hover:text-emerald-500 flex items-center justify-center" title="Dupliquer" aria-label="Dupliquer ce widget">
+            <Copy className="w-3 h-3" aria-hidden="true" />
+          </button>
+          <button onClick={() => onConfig(widget.id)} className="w-5 h-5 rounded hover:bg-indigo-50 text-slate-400 hover:text-indigo-500 flex items-center justify-center" title="Configurer" aria-label="Configurer ce widget">
+            <Settings className="w-3 h-3" aria-hidden="true" />
+          </button>
+          <button onClick={() => onRemove(widget.id)} className="w-5 h-5 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center" title="Supprimer" aria-label="Supprimer ce widget">
+            <X className="w-3 h-3" aria-hidden="true" />
+          </button>
         </div>
       </div>}
-      {!showHeader && <div className="absolute top-0 right-0 flex gap-0.5 p-0.5 opacity-0 hover:opacity-100 transition-opacity z-10" onMouseDown={e => e.stopPropagation()}>
-        <button onClick={() => onDuplicate(widget.id)} className="text-[9px] text-slate-400 hover:text-emerald-500 bg-white rounded px-1">📋</button>
-        <button onClick={() => onConfig(widget.id)} className="text-[9px] text-slate-400 hover:text-indigo-500 bg-white rounded px-1">⚙️</button>
-        <button onClick={() => onRemove(widget.id)} className="text-[9px] text-slate-400 hover:text-red-500 bg-white rounded px-1">✕</button>
+      {!showHeader && <div className="absolute top-0 right-0 flex gap-1 p-0.5 opacity-0 hover:opacity-100 transition-opacity z-10" onMouseDown={e => e.stopPropagation()}>
+        <button onClick={() => onDuplicate(widget.id)} className="w-5 h-5 rounded bg-white shadow-sm text-slate-400 hover:text-emerald-500 flex items-center justify-center" title="Dupliquer" aria-label="Dupliquer ce widget">
+          <Copy className="w-3 h-3" aria-hidden="true" />
+        </button>
+        <button onClick={() => onConfig(widget.id)} className="w-5 h-5 rounded bg-white shadow-sm text-slate-400 hover:text-indigo-500 flex items-center justify-center" title="Configurer" aria-label="Configurer ce widget">
+          <Settings className="w-3 h-3" aria-hidden="true" />
+        </button>
+        <button onClick={() => onRemove(widget.id)} className="w-5 h-5 rounded bg-white shadow-sm text-slate-400 hover:text-red-500 flex items-center justify-center" title="Supprimer" aria-label="Supprimer ce widget">
+          <X className="w-3 h-3" aria-hidden="true" />
+        </button>
       </div>}
       <div ref={chartRef} className="flex-1 p-0.5" style={{ minHeight: 0, overflow: 'hidden' }}>{renderChart()}</div>
       <div onMouseDown={e => { if (e.button === 0) { e.preventDefault(); e.stopPropagation(); onResizeStart(widget.id, e); } }}
@@ -269,7 +283,7 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
     setConfigWidgetId(null);
   };
 
-  // ── Multi-selection ──
+  // ── Multi-sélection ──
   const toggleSelect = useCallback((id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]);
   }, []);
@@ -329,8 +343,19 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
 
   // ── Auto-generate dashboard ──
   const autoGenerate = useCallback(() => {
+    if (!rawData || rawData.length < 3) {
+      window.alert('La table sélectionnée a trop peu de données (moins de 3 lignes) pour générer un dashboard pertinent.');
+      return;
+    }
     pushHistory();
-    const numCols = columns.filter(c => rawData.slice(0, 20).some(r => !isNaN(parseFloat(r[c])) && parseFloat(r[c]) !== 0));
+    // Une colonne est considérée numérique si ≥ 70 % des valeurs non-nulles parsent en nombre
+    const sample = rawData.slice(0, 30);
+    const numCols = columns.filter(c => {
+      const nonEmpty = sample.filter(r => r[c] !== '' && r[c] != null);
+      if (nonEmpty.length === 0) return false;
+      const numeric = nonEmpty.filter(r => !isNaN(parseFloat(r[c])));
+      return numeric.length / nonEmpty.length >= 0.7;
+    });
     const textCols = columns.filter(c => !numCols.includes(c));
     const dateCols = columns.filter(c => rawData.slice(0, 5).some(r => /^\d{4}-\d{2}/.test(String(r[c]))));
 
@@ -361,6 +386,10 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
     add({ chartType: 'table', title: 'Données', xCol: columns[0] || '', yCol: columns[1] || columns[0] || '' }, 8, 5);
 
     nextId.current = id;
+    if (ws.length === 0) {
+      window.alert('Aucun widget pertinent n\'a pu être généré à partir de cette table (colonnes non reconnues). Essayez d\'ajouter des widgets manuellement.');
+      return;
+    }
     updateWidgets(compact(ws));
   }, [columns, rawData, pushHistory, updateWidgets]);
 
@@ -475,6 +504,8 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
   // ── Save / Load ──
   const saveDashboard = () => {
     if (!dashName.trim()) return;
+    const exists = savedDashboards.some(d => d.name === dashName);
+    if (exists && !window.confirm(`Un dashboard nommé « ${dashName} » existe déjà. Le remplacer ?`)) return;
     const dash = { name: dashName, tableId: selectedTableId, pages, date: new Date().toISOString() };
     const updated = [...savedDashboards.filter(d => d.name !== dashName), dash];
     setSavedDashboards(updated);
@@ -504,6 +535,7 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
   };
 
   const deleteDashboard = (name) => {
+    if (!window.confirm(`Supprimer définitivement le dashboard « ${name} » ?`)) return;
     const updated = savedDashboards.filter(d => d.name !== name);
     setSavedDashboards(updated);
     localStorage.setItem('biDojo_dashboards', JSON.stringify(updated));
@@ -532,23 +564,42 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
     <div className={`h-screen flex flex-col ${presentationMode ? 'bg-white' : 'bg-slate-50'}`} onClick={() => setSelectedIds([])}>
       {/* Header */}
       {!presentationMode && (
-        <div className="flex-none flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 shadow-sm">
+        <div className="flex-none flex items-center justify-between px-4 py-2 bg-white border-b border-[#EDE3D2] shadow-sm flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <button onClick={onBackToHub} className="game-btn px-3 py-1.5 text-sm font-semibold">← Accueil</button>
-            <h1 className="text-lg font-bold text-emerald-600">📊 BI Dojo</h1>
+            <BackButton onClick={onBackToHub} label="Accueil" />
+            <h1 className="font-display text-xl text-[#2B2D42] tracking-tight flex items-center gap-2">
+              BI <span className="font-display-italic text-[#5ED6B4]">Dojo</span>
+            </h1>
           </div>
           <div className="flex items-center gap-1.5">
-            <button onClick={undo} disabled={!canUndo} className={`game-btn px-2 py-1 text-xs font-medium ${canUndo ? '' : 'opacity-30 cursor-default'}`} title="Ctrl+Z">↩️</button>
-            <button onClick={redo} disabled={!canRedo} className={`game-btn px-2 py-1 text-xs font-medium ${canRedo ? '' : 'opacity-30 cursor-default'}`} title="Ctrl+Y">↪️</button>
+            <button onClick={undo} disabled={!canUndo} className={`game-btn px-2 py-1.5 flex items-center ${canUndo ? '' : 'opacity-30 cursor-default'}`} title="Annuler (Ctrl+Z)" aria-label="Annuler la dernière action">
+              <Undo2 className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button onClick={redo} disabled={!canRedo} className={`game-btn px-2 py-1.5 flex items-center ${canRedo ? '' : 'opacity-30 cursor-default'}`} title="Rétablir (Ctrl+Y)" aria-label="Rétablir">
+              <Redo2 className="w-4 h-4" aria-hidden="true" />
+            </button>
             <div className="w-px h-5 bg-slate-200 mx-1" />
-            <button onClick={() => setShowSaveDialog(true)} className="game-btn px-2 py-1 text-xs font-medium" title="Sauvegarder">💾</button>
-            <button onClick={() => setShowLoadDialog(true)} className="game-btn px-2 py-1 text-xs font-medium" title="Charger">📂</button>
-            <button onClick={() => setPresentationMode(true)} className="game-btn px-2 py-1 text-xs font-medium" title="Présentation">🖥️</button>
-            <span className="text-xs text-slate-400 ml-1">{widgets.length} widget{widgets.length !== 1 ? 's' : ''}</span>
+            <button onClick={() => setShowSaveDialog(true)} className="game-btn px-2 py-1.5 flex items-center" title="Sauvegarder" aria-label="Sauvegarder le dashboard">
+              <Save className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button onClick={() => setShowLoadDialog(true)} className="game-btn px-2 py-1.5 flex items-center" title="Charger" aria-label="Charger un dashboard">
+              <FolderOpen className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button onClick={() => setPresentationMode(true)} className="game-btn px-2 py-1.5 flex items-center" title="Mode présentation" aria-label="Activer le mode présentation">
+              <Monitor className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <span className="text-xs text-slate-500 ml-1">{widgets.length} widget{widgets.length !== 1 ? 's' : ''}</span>
+            <span
+              className="hidden lg:inline-flex items-center gap-1 text-xs text-slate-400 ml-2"
+              title="Maj+clic pour multi-sélection · Ctrl+A pour tout sélectionner · Suppr pour supprimer"
+            >
+              <Info className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Maj+clic · Ctrl+A</span>
+            </span>
             {exercise && onExerciseValidate && (
               <button onClick={() => onExerciseValidate(widgets, pages)}
-                className="px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors shadow ml-1">
-                Valider
+                className="px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors shadow ml-1 flex items-center gap-1">
+                <Play className="w-3.5 h-3.5" aria-hidden="true" /> Valider
               </button>
             )}
           </div>
@@ -575,12 +626,19 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
       {/* Multi-select toolbar */}
       {selectedIds.length >= 2 && !presentationMode && (
         <div className="flex-none flex items-center gap-2 px-4 py-1.5 bg-amber-50 border-b border-amber-200" onClick={e => e.stopPropagation()}>
-          <span className="text-xs text-amber-600 font-medium">{selectedIds.length} sélectionnés</span>
-          <button onClick={() => alignSelected('left')} className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium hover:bg-amber-200">⬅ Aligner gauche</button>
-          <button onClick={() => alignSelected('top')} className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium hover:bg-amber-200">⬆ Aligner haut</button>
-          <button onClick={duplicateSelected} className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium hover:bg-amber-200">📋 Dupliquer</button>
-          <button onClick={removeSelected} className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium hover:bg-red-200">🗑️ Supprimer</button>
-          <button onClick={() => setSelectedIds([])} className="text-[10px] text-amber-400 hover:text-amber-600 ml-2">Désélectionner</button>
+          <span className="text-xs text-amber-700 font-medium">{selectedIds.length} sélectionnés</span>
+          <button onClick={() => alignSelected('left')} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium hover:bg-amber-200">← Aligner à gauche</button>
+          <button onClick={() => alignSelected('top')} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium hover:bg-amber-200">↑ Aligner en haut</button>
+          <button onClick={duplicateSelected} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium hover:bg-amber-200 inline-flex items-center gap-1">
+            <Copy className="w-3 h-3" aria-hidden="true" /> Dupliquer
+          </button>
+          <button
+            onClick={() => { if (window.confirm(`Supprimer les ${selectedIds.length} widgets sélectionnés ?`)) removeSelected(); }}
+            className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium hover:bg-red-200 inline-flex items-center gap-1"
+          >
+            <Trash2 className="w-3 h-3" aria-hidden="true" /> Supprimer
+          </button>
+          <button onClick={() => setSelectedIds([])} className="text-xs text-amber-600 hover:text-amber-800 ml-2">Désélectionner</button>
         </div>
       )}
 
@@ -647,7 +705,15 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
                 onDragStart={startDrag} onResizeStart={startResize} isDragging={activeId === w.id}
                 isSelected={selectedIds.includes(w.id)} onSelect={toggleSelect}
                 onCrossFilter={addCrossFilter} crossFilters={crossFilters} />)}
-              {widgets.length === 0 && <div className="absolute inset-0 flex items-center justify-center"><div className="text-center"><p className="text-4xl mb-3">📊</p><p className="text-slate-400 text-sm">Ajoutez des widgets ou choisissez un template</p></div></div>}
+              {widgets.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center max-w-xs">
+                    <p className="text-5xl mb-3" aria-hidden="true">📊</p>
+                    <p className="text-slate-700 text-sm font-semibold mb-1">Votre dashboard est vide.</p>
+                    <p className="text-slate-500 text-xs">Ajoutez un widget depuis la barre latérale, ou choisissez un template ci-contre pour démarrer.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -668,12 +734,21 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
                   </span>
                 )}
                 {pages.length > 1 && !presentationMode && (
-                  <button onClick={e => { e.stopPropagation(); removePage(p.id); }} className="text-slate-400 hover:text-red-400 text-[9px] ml-1">✕</button>
+                  <button
+                    onClick={e => { e.stopPropagation(); if (window.confirm(`Supprimer la page « ${p.name} » et tous ses widgets ?`)) removePage(p.id); }}
+                    className="text-slate-400 hover:text-red-500 ml-1 flex items-center"
+                    aria-label={`Supprimer la page ${p.name}`}
+                  >
+                    <X className="w-3 h-3" aria-hidden="true" />
+                  </button>
                 )}
               </div>
             ))}
             {!presentationMode && (
-              <button onClick={addPage} className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-indigo-500 hover:bg-slate-50 text-sm font-bold" title="Nouvelle page">+</button>
+              <button onClick={addPage} className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-indigo-500 hover:bg-slate-50 text-sm font-bold" title="Nouvelle page" aria-label="Ajouter une page">+</button>
+            )}
+            {!presentationMode && (
+              <span className="ml-2 text-[11px] text-slate-400 hidden md:inline" title="Double-cliquez sur une page pour la renommer">Double-clic : renommer</span>
             )}
           </div>
         </div>
@@ -684,14 +759,22 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
 
       {/* Save dialog */}
       {showSaveDialog && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setShowSaveDialog(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-80" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-slate-800 mb-3">Sauvegarder le dashboard</h3>
-            <input type="text" value={dashName} onChange={e => setDashName(e.target.value)} placeholder="Nom du dashboard"
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm mb-3 focus:border-indigo-400 focus:outline-none" />
+        <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50" onClick={() => setShowSaveDialog(false)} role="dialog" aria-modal="true" aria-labelledby="save-dash-title">
+          <div className="game-panel modal-content p-6 w-80" onClick={e => e.stopPropagation()}>
+            <h3 id="save-dash-title" className="text-lg font-bold text-slate-800 mb-3">Sauvegarder le dashboard</h3>
+            <label htmlFor="dash-name" className="block text-xs text-slate-600 mb-1">Nom</label>
+            <input
+              id="dash-name"
+              type="text"
+              value={dashName}
+              onChange={e => setDashName(e.target.value)}
+              placeholder="Ex : Ventes 2025"
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm mb-3 focus:border-indigo-400 focus:outline-none"
+            />
             <div className="flex gap-2">
               <button onClick={() => setShowSaveDialog(false)} className="flex-1 py-2 rounded-lg border border-slate-200 text-sm text-slate-600">Annuler</button>
-              <button onClick={saveDashboard} disabled={!dashName.trim()} className={`flex-1 py-2 rounded-lg text-sm font-semibold ${dashName.trim() ? 'bg-indigo-500 text-white' : 'bg-slate-200 text-slate-400'}`}>Sauvegarder</button>
+              <button onClick={saveDashboard} disabled={!dashName.trim()} className={`flex-1 py-2 rounded-lg text-sm font-semibold ${dashName.trim() ? 'bg-indigo-500 text-white hover:bg-indigo-600' : 'bg-slate-200 text-slate-500'}`}>Sauvegarder</button>
             </div>
           </div>
         </div>
@@ -699,18 +782,20 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
 
       {/* Load dialog */}
       {showLoadDialog && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setShowLoadDialog(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-96 max-h-[60vh] flex flex-col" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-slate-800 mb-3">Charger un dashboard</h3>
+        <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50" onClick={() => setShowLoadDialog(false)} role="dialog" aria-modal="true" aria-labelledby="load-dash-title">
+          <div className="game-panel modal-content p-6 w-96 max-h-[60vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <h3 id="load-dash-title" className="text-lg font-bold text-slate-800 mb-3">Charger un dashboard</h3>
             <div className="flex-1 overflow-y-auto space-y-2">
-              {savedDashboards.length === 0 && <p className="text-sm text-slate-400 text-center py-4">Aucun dashboard sauvegardé</p>}
+              {savedDashboards.length === 0 && <p className="text-sm text-slate-500 text-center py-4">Aucun dashboard sauvegardé pour le moment.</p>}
               {savedDashboards.map(d => (
                 <div key={d.name} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50">
-                  <div className="cursor-pointer flex-1" onClick={() => loadDashboard(d)}>
+                  <button className="cursor-pointer flex-1 text-left" onClick={() => loadDashboard(d)} aria-label={`Charger le dashboard ${d.name}`}>
                     <p className="text-sm font-medium text-slate-700">{d.name}</p>
-                    <p className="text-[10px] text-slate-400">{d.pages ? `${d.pages.length} page(s) · ${d.pages.reduce((s, p) => s + p.widgets.length, 0)} widgets` : `${d.widgets?.length || 0} widgets`} · {new Date(d.date).toLocaleDateString()}</p>
-                  </div>
-                  <button onClick={() => deleteDashboard(d.name)} className="text-xs text-red-400 hover:text-red-500 p-1">🗑️</button>
+                    <p className="text-xs text-slate-500">{d.pages ? `${d.pages.length} page(s) · ${d.pages.reduce((s, p) => s + p.widgets.length, 0)} widgets` : `${d.widgets?.length || 0} widgets`} · {new Date(d.date).toLocaleDateString()}</p>
+                  </button>
+                  <button onClick={() => deleteDashboard(d.name)} className="text-red-500 hover:text-red-600 p-1.5 rounded hover:bg-red-50" aria-label={`Supprimer ${d.name}`} title="Supprimer">
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
+                  </button>
                 </div>
               ))}
             </div>

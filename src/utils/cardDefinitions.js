@@ -8,7 +8,7 @@ export const CARD_DEFINITIONS = {
     shortName: 'drop_duplicates',
     icon: '🔄',
     description: 'Supprime les lignes en double dans le tableau.',
-    detailedExplanation: `Cette carte supprime toutes les lignes qui sont des doublons exacts.
+    detailedExplanation: `Cette carte supprimé toutes les lignes qui sont des doublons exacts.
 
 • Compare chaque ligne avec les autres
 • Seules les correspondances EXACTES sont supprimees
@@ -30,10 +30,10 @@ export const CARD_DEFINITIONS = {
     name: 'Trier',
     shortName: 'sort',
     icon: '↕️',
-    description: 'Trie les donnees par une colonne specifique.',
+    description: 'Trie les données par une colonne specifique.',
     detailedExplanation: `Cette carte trie toutes les lignes selon une colonne choisie.
 
-• Trie par ordre croissant (A-Z, 0-9) ou decroissant
+• Trie par ordre croissant (A-Z, 0-9) ou décroissant
 • Les nombres sont tries numeriquement
 • Les textes sont tries alphabetiquement`,
     example: {
@@ -53,7 +53,7 @@ export const CARD_DEFINITIONS = {
     shortName: 'delete',
     icon: '🗑️',
     description: 'Supprime une colonne du tableau.',
-    detailedExplanation: `Cette carte supprime entierement une colonne du tableau.
+    detailedExplanation: `Cette carte supprimé entierement une colonne du tableau.
 
 • La colonne specifiee est retiree de toutes les lignes
 • Les autres colonnes restent intactes
@@ -75,8 +75,8 @@ export const CARD_DEFINITIONS = {
     description: 'Supprime les lignes contenant des cellules vides.',
     detailedExplanation: `Cette carte nettoie le tableau en supprimant les lignes incompletes.
 
-• Verifie chaque cellule de chaque ligne
-• Si UNE cellule est vide, toute la ligne est supprimee
+• Vérifié chaque cellule de chaque ligne
+• Si UNE cellule est vide, toute la ligne est supprimée
 • Les cellules avec des espaces sont considerees vides`,
     example: {
       before: [

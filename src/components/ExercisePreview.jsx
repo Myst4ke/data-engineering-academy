@@ -97,7 +97,7 @@ export default function ExercisePreview({ exerciseId, anchorRect, onClose }) {
       ) : preview ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-indigo-500 font-semibold">{preview.optimalSteps} carte{preview.optimalSteps > 1 ? 's' : ''} optimal</span>
+            <span className="text-[10px] text-[#FF8066] font-semibold">{preview.optimalSteps} carte{preview.optimalSteps > 1 ? 's' : ''} optimal</span>
           </div>
           <MiniPreviewTable cols={preview.inputCols} rows={preview.inputRows} sample={preview.inputSample} label="Entrée" />
           <MiniPreviewTable cols={preview.outputCols} rows={preview.outputRows} sample={preview.outputSample} label="Objectif" />

@@ -16,12 +16,12 @@ const CLIENTS = [
 ];
 
 const PRODUITS = [
-  { id: 'P01', nom: 'Laptop Pro', categorie: 'Informatique', prix: '1200', stock: '45' },
-  { id: 'P02', nom: 'Souris RGB', categorie: 'Informatique', prix: '35', stock: '200' },
-  { id: 'P03', nom: 'Ecran 27p', categorie: 'Informatique', prix: '450', stock: '80' },
-  { id: 'P05', nom: 'Casque Audio', categorie: 'Audio', prix: '120', stock: '90' },
-  { id: 'P07', nom: 'Enceinte BT', categorie: 'Audio', prix: '45', stock: '180' },
-  { id: 'P09', nom: 'Chaise Ergo', categorie: 'Mobilier', prix: '350', stock: '25' },
+  { id: 'P01', nom: 'Laptop Pro', catégorie: 'Informatique', prix: '1200', stock: '45' },
+  { id: 'P02', nom: 'Souris RGB', catégorie: 'Informatique', prix: '35', stock: '200' },
+  { id: 'P03', nom: 'Écran 27p', catégorie: 'Informatique', prix: '450', stock: '80' },
+  { id: 'P05', nom: 'Casque Audio', catégorie: 'Audio', prix: '120', stock: '90' },
+  { id: 'P07', nom: 'Enceinte BT', catégorie: 'Audio', prix: '45', stock: '180' },
+  { id: 'P09', nom: 'Chaise Ergo', catégorie: 'Mobilier', prix: '350', stock: '25' },
 ];
 
 const COMMANDES_PAR_STATUT = [
@@ -64,10 +64,10 @@ const SALAIRE_PAR_DEPT = [
 ];
 
 const VENTES_PAR_CATEGORIE = [
-  { categorie: 'Informatique', sum_montant: '8500', count_ventes: '15' },
-  { categorie: 'Audio', sum_montant: '2400', count_ventes: '8' },
-  { categorie: 'Mobilier', sum_montant: '1750', count_ventes: '5' },
-  { categorie: 'Accessoire', sum_montant: '950', count_ventes: '12' },
+  { catégorie: 'Informatique', sum_montant: '8500', count_ventes: '15' },
+  { catégorie: 'Audio', sum_montant: '2400', count_ventes: '8' },
+  { catégorie: 'Mobilier', sum_montant: '1750', count_ventes: '5' },
+  { catégorie: 'Accessoire', sum_montant: '950', count_ventes: '12' },
 ];
 
 const TOP_VENTES = [
@@ -92,32 +92,32 @@ export const BI_EXERCISES = [
   // ══════════ FACILE (5) ══════════
   {
     id: 'bi-01', title: 'Mon premier KPI', difficulty: 1, isTutorial: true,
-    description: 'Le directeur veut voir en un coup d\'oeil le nombre total de clients. Un simple chiffre en grand suffit.\n\nMethodologie : Ajoutez un widget KPI, selectionnez la colonne "id" comme valeur, puis changez l\'agregation a COUNT.',
-    hint: 'Ajoutez un widget KPI. Dans la config, selectionnez la colonne "id" avec l\'agregation COUNT.',
+    description: 'Le directeur veut voir en un coup d\'oeil le nombre total de clients. Un simple chiffre en grand suffit.\n\nMethodologie : Ajoutez un widget KPI, sélectionnez la colonne "id" comme valeur, puis changez l\'agrégation a COUNT.',
+    hint: 'Ajoutez un widget KPI. Dans la config, sélectionnez la colonne "id" avec l\'agrégation COUNT.',
     hintWidgets: ['kpi'],
     tables: [mkTable('clients', CLIENTS)],
     validate: (widgets) => {
       const kpis = widgets.filter(w => w.config?.chartType === 'kpi');
       if (kpis.length === 0) return { ok: false, msg: 'Ajoutez un widget KPI.' };
-      return { ok: true, msg: 'Premier KPI cree !' };
+      return { ok: true, msg: 'Premier KPI créé !' };
     },
   },
   {
-    id: 'bi-02', title: 'Barres par categorie', difficulty: 1,
-    description: 'Le responsable produit souhaite visualiser combien de produits il y a dans chaque categorie (Informatique, Audio, Mobilier). Un graphique en barres est ideal pour cette comparaison.\n\nMethodologie : Creez un graphique en barres avec la categorie en axe X et un comptage en axe Y.',
-    hint: 'Widget Barres → Axe X: categorie, Axe Y: id, Agregation: COUNT.',
+    id: 'bi-02', title: 'Barres par catégorie', difficulty: 1,
+    description: 'Le responsable produit souhaite visualiser combien de produits il y a dans chaque catégorie (Informatique, Audio, Mobilier). Un graphique en barres est ideal pour cette comparaison.\n\nMethodologie : Creez un graphique en barres avec la catégorie en axe X et un comptage en axe Y.',
+    hint: 'Widget Barres → Axe X: catégorie, Axe Y: id, Agrégation: COUNT.',
     hintWidgets: ['bar'],
     tables: [mkTable('produits', PRODUITS)],
     validate: (widgets) => {
       const bars = widgets.filter(w => w.config?.chartType === 'bar');
       if (bars.length === 0) return { ok: false, msg: 'Ajoutez un graphique en Barres.' };
-      if (bars[0].config?.xCol !== 'categorie') return { ok: false, msg: 'Utilisez la colonne "categorie" en Axe X.' };
-      return { ok: true, msg: 'Barres par categorie !' };
+      if (bars[0].config?.xCol !== 'catégorie') return { ok: false, msg: 'Utilisez la colonne "catégorie" en Axe X.' };
+      return { ok: true, msg: 'Barres par catégorie !' };
     },
   },
   {
     id: 'bi-03', title: 'Camembert des statuts', difficulty: 1,
-    description: 'Le service logistique a besoin de visualiser la repartition des commandes par statut (Livree, En cours, Annulee). L\'equipe Pipeline a deja prepare une table agregee "commandes_par_statut" (similaire a l\'exercice Pipeline #14). A vous de la mettre en forme.\n\nMethodologie : Creez un camembert avec le statut comme label et le nombre de commandes comme valeur.',
+    description: 'Le service logistique a besoin de visualiser la répartition des commandes par statut (Livree, En cours, Annulee). L\'equipe Pipeline a déjà prepare une table agrégée "commandes_par_statut" (similaire a l\'exercice Pipeline #14). A vous de la mettre en forme.\n\nMethodologie : Creez un camembert avec le statut comme label et le nombre de commandes comme valeur.',
     hint: 'Widget Camembert → Labels: statut, Valeur: count_commandes.',
     hintWidgets: ['pie'],
     tables: [mkPipeTable('commandes_par_statut', COMMANDES_PAR_STATUT)],
@@ -129,7 +129,7 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-04', title: 'Tendance mensuelle', difficulty: 1,
-    description: 'Le controleur de gestion veut suivre l\'evolution du CA mois par mois. L\'equipe data a prepare une table "ca_mensuel" avec le montant agrege par mois depuis le Pipeline Dojo.\n\nMethodologie : Creez un graphique en ligne avec le mois en axe X et le montant en axe Y.',
+    description: 'Le controleur de gestion veut suivre l\'evolution du CA mois par mois. L\'equipe data a prepare une table "ca_mensuel" avec le montant agrégé par mois depuis le Pipeline Dojo.\n\nMethodologie : Creez un graphique en ligne avec le mois en axe X et le montant en axe Y.',
     hint: 'Widget Ligne → Axe X: mois, Axe Y: montant.',
     hintWidgets: ['line'],
     tables: [mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS)],
@@ -141,21 +141,21 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-05', title: 'Tableau employes', difficulty: 1,
-    description: 'Le RH a besoin d\'un tableau affichant la liste des employes avec leur departement, poste et salaire pour une revue rapide.\n\nMethodologie : Ajoutez un widget Tableau (Table) pour afficher les donnees brutes.',
+    description: 'Le RH a besoin d\'un tableau affichant la liste des employes avec leur departement, poste et salaire pour une revue rapide.\n\nMethodologie : Ajoutez un widget Tableau (Table) pour afficher les données brutes.',
     hint: 'Widget Table. Il affiche automatiquement toutes les colonnes.',
     hintWidgets: ['table'],
     tables: [mkTable('employes', EMPLOYES)],
     validate: (widgets) => {
       const tables = widgets.filter(w => w.config?.chartType === 'table');
       if (tables.length === 0) return { ok: false, msg: 'Ajoutez un widget Table.' };
-      return { ok: true, msg: 'Tableau employes cree !' };
+      return { ok: true, msg: 'Tableau employes créé !' };
     },
   },
 
   // ══════════ INTERMEDIAIRE (6) ══════════
   {
     id: 'bi-06', title: 'Dashboard KPI + Barres', difficulty: 2,
-    description: 'Le directeur commercial veut un mini-dashboard montrant deux informations : le nombre total de clients (KPI) et la repartition des clients par ville (barres). Les deux widgets doivent etre sur la meme page.\n\nMethodologie : Combinez un KPI (count) et un graphique en barres (ville) sur le meme dashboard.',
+    description: 'Le directeur commercial veut un mini-dashboard montrant deux informations : le nombre total de clients (KPI) et la répartition des clients par ville (barres). Les deux widgets doivent etre sur la même page.\n\nMethodologie : Combinez un KPI (count) et un graphique en barres (ville) sur le même dashboard.',
     hint: 'KPI (count id) + Barres (X: ville, Y: id, count).',
     hintWidgets: ['kpi', 'bar'],
     tables: [mkTable('clients', CLIENTS)],
@@ -169,7 +169,7 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-07', title: 'Filtrage par slicer', difficulty: 2,
-    description: 'Le directeur regional veut pouvoir filtrer dynamiquement les donnees clients par ville. Quand il clique sur "Paris", tous les graphiques doivent se mettre a jour pour ne montrer que les clients parisiens.\n\nMethodologie : Ajoutez un Slicer sur la colonne "ville" et au moins un graphique qui sera filtre.',
+    description: 'Le directeur regional veut pouvoir filtrer dynamiquement les données clients par ville. Quand il clique sur "Paris", tous les graphiques doivent se mettre a jour pour ne montrer que les clients parisiens.\n\nMethodologie : Ajoutez un Slicer sur la colonne "ville" et au moins un graphique qui sera filtre.',
     hint: 'Slicer (colonne: ville) + KPI ou Barres. Cliquez sur une ville dans le slicer pour filtrer.',
     hintWidgets: ['slicer', 'kpi'],
     tables: [mkTable('clients', CLIENTS)],
@@ -182,7 +182,7 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-08', title: 'Donut CA clients', difficulty: 2,
-    description: 'Pour la presentation investisseurs, on veut un donut chart montrant la repartition du CA par client. La table "ca_par_client" a ete generee par le pipeline d\'agregation (exercice Pipeline #22 — Gold CA par client).\n\nMethodologie : Creez un Camembert en mode Donut avec les noms clients en labels et la somme des montants en valeur.',
+    description: 'Pour la presentation investisseurs, on veut un donut chart montrant la répartition du CA par client. La table "ca_par_client" a ete générée par le pipeline d\'agrégation (exercice Pipeline #22 — Gold CA par client).\n\nMethodologie : Creez un Camembert en mode Donut avec les noms clients en labels et la somme des montants en valeur.',
     hint: 'Camembert → Labels: nom, Valeur: sum_montant, cochez "Mode Donut".',
     hintWidgets: ['pie'],
     tables: [mkPipeTable('ca_par_client', CA_PAR_CLIENT)],
@@ -202,12 +202,12 @@ export const BI_EXERCISES = [
     validate: (widgets) => {
       const gauges = widgets.filter(w => w.config?.chartType === 'gauge');
       if (gauges.length === 0) return { ok: false, msg: 'Ajoutez une Jauge.' };
-      return { ok: true, msg: 'Jauge d\'objectif creee !' };
+      return { ok: true, msg: 'Jauge d\'objectif créée !' };
     },
   },
   {
     id: 'bi-10', title: 'Vue d\'ensemble commandes', difficulty: 2,
-    description: 'Le comite de pilotage veut une vue synthetique des commandes a partir de la table "commandes_par_statut" (Pipeline #14). Il faut un KPI pour le total, un camembert par statut, et un tableau detaille. Tout sur une seule page.\n\nMethodologie : Combinez 3 types de widgets differents pour offrir une vue multi-angle.',
+    description: 'Le comite de pilotage veut une vue synthetique des commandes à partir de la table "commandes_par_statut" (Pipeline #14). Il faut un KPI pour le total, un camembert par statut, et un tableau detaille. Tout sur une seule page.\n\nMethodologie : Combinez 3 types de widgets differents pour offrir une vue multi-angle.',
     hint: 'KPI (count) + Camembert (statut) + Table.',
     hintWidgets: ['kpi', 'pie', 'table'],
     tables: [mkPipeTable('commandes_par_statut', COMMANDES_PAR_STATUT)],
@@ -215,7 +215,7 @@ export const BI_EXERCISES = [
       const types = new Set(widgets.map(w => w.config?.chartType));
       if (widgets.length < 3) return { ok: false, msg: `Ajoutez au moins 3 widgets. (${widgets.length} actuellement)` };
       if (types.size < 3) return { ok: false, msg: `Utilisez au moins 3 types differents. (${types.size} actuellement)` };
-      return { ok: true, msg: 'Vue d\'ensemble complete !' };
+      return { ok: true, msg: 'Vue d\'ensemble complété !' };
     },
   },
   {
@@ -234,10 +234,10 @@ export const BI_EXERCISES = [
   // ══════════ DIFFICILE (5) ══════════
   {
     id: 'bi-12', title: 'Dashboard multi-tables', difficulty: 3,
-    description: 'Le CEO veut un dashboard croisant 2 sources : la table "ventes_par_categorie" produite par le pipeline ETL (Pipeline #27) et le catalogue produits brut. Un graphique pour le CA par categorie, un tableau pour les produits.\n\nMethodologie : Utilisez le selecteur "Source de donnees" dans la config de chaque widget pour pointer vers des tables differentes.',
-    hint: 'Barres (table: ventes_par_categorie, X: categorie, Y: sum_montant) + Table (table: produits).',
+    description: 'Le CEO veut un dashboard croisant 2 sources : la table "ventes_par_catégorie" produite par le pipeline ETL (Pipeline #27) et le catalogue produits brut. Un graphique pour le CA par catégorie, un tableau pour les produits.\n\nMethodologie : Utilisez le selecteur "Source de données" dans la config de chaque widget pour pointer vers des tables differentes.',
+    hint: 'Barres (table: ventes_par_catégorie, X: catégorie, Y: sum_montant) + Table (table: produits).',
     hintWidgets: ['bar', 'table'],
-    tables: [mkPipeTable('ventes_par_categorie', VENTES_PAR_CATEGORIE), mkTable('produits', PRODUITS)],
+    tables: [mkPipeTable('ventes_par_catégorie', VENTES_PAR_CATEGORIE), mkTable('produits', PRODUITS)],
     validate: (widgets) => {
       if (widgets.length < 2) return { ok: false, msg: 'Ajoutez au moins 2 widgets.' };
       const tableIds = new Set(widgets.map(w => w.config?.tableId).filter(Boolean));
@@ -260,10 +260,10 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-14', title: 'Dashboard 2 pages', difficulty: 3,
-    description: 'L\'entreprise veut un dashboard en 2 pages : Page 1 "Ventes" avec les KPIs sur la table "ventes_par_categorie" (Pipeline #27), et Page 2 "Produits" avec un treemap et un tableau du catalogue brut.\n\nMethodologie : Utilisez le systeme de pages (onglets en bas) pour separer les vues.',
+    description: 'L\'entreprise veut un dashboard en 2 pages : Page 1 "Ventes" avec les KPIs sur la table "ventes_par_catégorie" (Pipeline #27), et Page 2 "Produits" avec un treemap et un tableau du catalogue brut.\n\nMethodologie : Utilisez le système de pages (onglets en bas) pour separer les vues.',
     hint: 'Creez 2 pages via le bouton "+" en bas. Mettez les ventes sur Page 1, les produits sur Page 2.',
     hintWidgets: ['kpi', 'bar', 'treemap', 'table'],
-    tables: [mkPipeTable('ventes_par_categorie', VENTES_PAR_CATEGORIE), mkTable('produits', PRODUITS)],
+    tables: [mkPipeTable('ventes_par_catégorie', VENTES_PAR_CATEGORIE), mkTable('produits', PRODUITS)],
     validate: (widgets, pages) => {
       if (!pages || pages.length < 2) return { ok: false, msg: 'Creez au moins 2 pages.' };
       const pagesWithWidgets = pages.filter(p => p.widgets.length > 0);
@@ -273,8 +273,8 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-15', title: 'Treemap + Scatter', difficulty: 3,
-    description: 'Le data analyst veut explorer les produits sous deux angles : un treemap montrant le poids de chaque categorie (par prix total), et un nuage de points croisant prix et stock pour identifier les produits chers a faible stock.\n\nMethodologie : Creez un Treemap (categorie/prix) et un Scatter (X: prix, Y: stock).',
-    hint: 'Treemap (labels: categorie, valeur: prix, sum) + Nuage (X: prix, Y: stock).',
+    description: 'Le data analyst veut explorer les produits sous deux angles : un treemap montrant le poids de chaque catégorie (par prix total), et un nuage de points croisant prix et stock pour identifier les produits chers a faible stock.\n\nMethodologie : Creez un Treemap (catégorie/prix) et un Scatter (X: prix, Y: stock).',
+    hint: 'Treemap (labels: catégorie, valeur: prix, sum) + Nuage (X: prix, Y: stock).',
     hintWidgets: ['treemap', 'scatter'],
     tables: [mkTable('produits', PRODUITS)],
     validate: (widgets) => {
@@ -287,7 +287,7 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-16', title: 'Top ventes Pipeline', difficulty: 3,
-    description: 'L\'equipe commerciale a genere un classement des 3 meilleures ventes via le Pipeline Dojo (exercice Pipeline #26 — Podium des ventes). Vous devez maintenant presenter ces resultats dans un dashboard avec un KPI du montant total, un graphique en barres du podium, et un tableau detaille.\n\nMethodologie : Utilisez la table Pipeline "top_ventes" pour vos 3 widgets.',
+    description: 'L\'equipe commerciale a généré un classement des 3 meilleures ventes via le Pipeline Dojo (exercice Pipeline #26 — Podium des ventes). Vous devez maintenant presenter ces resultats dans un dashboard avec un KPI du montant total, un graphique en barres du podium, et un tableau detaille.\n\nMethodologie : Utilisez la table Pipeline "top_ventes" pour vos 3 widgets.',
     hint: 'KPI (sum montant) + Barres (X: id, Y: montant) + Table.',
     hintWidgets: ['kpi', 'bar', 'table'],
     tables: [mkPipeTable('top_ventes', TOP_VENTES)],
@@ -302,7 +302,7 @@ export const BI_EXERCISES = [
   // ══════════ EXPERT (4) ══════════
   {
     id: 'bi-17', title: 'Dashboard direction', difficulty: 4,
-    description: 'Le comite de direction veut un dashboard executif pour le bilan annuel. Vous disposez de 3 tables Pipeline : "commandes_par_statut" (#14), "ca_mensuel", et "ca_par_client" (#22). Le dashboard doit inclure des KPIs, des graphiques de repartition, l\'evolution temporelle, et des filtres. Minimum 6 widgets avec des titres.\n\nMethodologie : Construisez un dashboard riche et lisible avec au moins 4 types de graphiques differents.',
+    description: 'Le comite de direction veut un dashboard executif pour le bilan annuel. Vous disposez de 3 tables Pipeline : "commandes_par_statut" (#14), "ca_mensuel", et "ca_par_client" (#22). Le dashboard doit inclure des KPIs, des graphiques de répartition, l\'evolution temporelle, et des filtres. Minimum 6 widgets avec des titres.\n\nMethodologie : Construisez un dashboard riche et lisible avec au moins 4 types de graphiques differents.',
     hint: 'KPI×2 + Camembert + Barres + Ligne + Slicer + Table. Pensez aux titres !',
     hintWidgets: ['kpi', 'kpi', 'pie', 'bar', 'line', 'slicer', 'table'],
     tables: [mkPipeTable('commandes_par_statut', COMMANDES_PAR_STATUT), mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS), mkPipeTable('ca_par_client', CA_PAR_CLIENT)],
@@ -316,8 +316,8 @@ export const BI_EXERCISES = [
     },
   },
   {
-    id: 'bi-18', title: 'Analyse RH complete', difficulty: 4,
-    description: 'Le DRH prepare une presentation sur la masse salariale. Vous disposez de la table brute "employes" et de la table "salaire_par_dept" generee par le pipeline RH (exercice Pipeline #28). Il veut un KPI du salaire moyen, des barres par departement, un camembert des postes, un tableau et un slicer.\n\nMethodologie : Croisez les 2 tables pour un dashboard complet avec au moins 5 widgets.',
+    id: 'bi-18', title: 'Analyse RH complété', difficulty: 4,
+    description: 'Le DRH prepare une presentation sur la masse salariale. Vous disposez de la table brute "employes" et de la table "salaire_par_dept" générée par le pipeline RH (exercice Pipeline #28). Il veut un KPI du salaire moyen, des barres par departement, un camembert des postes, un tableau et un slicer.\n\nMethodologie : Croisez les 2 tables pour un dashboard complet avec au moins 5 widgets.',
     hint: '2 tables : "employes" + "salaire_par_dept". KPI + Barres + Camembert + Table + Slicer.',
     hintWidgets: ['kpi', 'bar', 'pie', 'table', 'slicer'],
     tables: [mkTable('employes', EMPLOYES), mkPipeTable('salaire_par_dept', SALAIRE_PAR_DEPT)],
@@ -327,15 +327,15 @@ export const BI_EXERCISES = [
       if (tableIds.size < 2) return { ok: false, msg: 'Utilisez les 2 tables (employes + salaire_par_dept).' };
       const hasSlicer = widgets.some(w => w.config?.chartType === 'slicer');
       if (!hasSlicer) return { ok: false, msg: 'Ajoutez un Slicer.' };
-      return { ok: true, msg: 'Analyse RH complete !' };
+      return { ok: true, msg: 'Analyse RH complété !' };
     },
   },
   {
     id: 'bi-19', title: 'E-Commerce 360', difficulty: 4,
-    description: 'Construisez le dashboard ultime e-commerce en croisant 3 tables issues du Pipeline : "ventes_par_categorie" (#27), "ca_par_client" (#22) et "ca_mensuel". Le dashboard doit comporter 2 pages minimum, 7 widgets, et exploiter au moins 2 des 3 tables.\n\nMethodologie : Page 1 = vue globale (KPIs + camembert + ligne). Page 2 = detail clients + categories.',
+    description: 'Construisez le dashboard ultime e-commerce en croisant 3 tables issues du Pipeline : "ventes_par_catégorie" (#27), "ca_par_client" (#22) et "ca_mensuel". Le dashboard doit comporter 2 pages minimum, 7 widgets, et exploiter au moins 2 des 3 tables.\n\nMethodologie : Page 1 = vue globale (KPIs + camembert + ligne). Page 2 = detail clients + catégories.',
     hint: 'Page 1: KPI + Camembert + Ligne. Page 2: Barres + Treemap + Table. Slicer en bonus.',
     hintWidgets: ['kpi', 'pie', 'line', 'bar', 'treemap', 'table'],
-    tables: [mkPipeTable('ventes_par_categorie', VENTES_PAR_CATEGORIE), mkPipeTable('ca_par_client', CA_PAR_CLIENT), mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS)],
+    tables: [mkPipeTable('ventes_par_catégorie', VENTES_PAR_CATEGORIE), mkPipeTable('ca_par_client', CA_PAR_CLIENT), mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS)],
     validate: (widgets, pages) => {
       if (widgets.length < 7) return { ok: false, msg: `Minimum 7 widgets. (${widgets.length})` };
       if (!pages || pages.length < 2) return { ok: false, msg: 'Creez au moins 2 pages.' };
@@ -348,10 +348,10 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-20', title: 'Dashboard libre', difficulty: 4,
-    description: 'Vous etes le data analyst en charge de creer le meilleur dashboard possible. Votre score depend de la diversite des widgets, l\'utilisation de tables multiples, les filtres interactifs, et la presentation (titres, pages).\n\nMethodologie : Libre ! Combinez un maximum de types de graphiques, tables et fonctionnalites.',
+    description: 'Vous etes le data analyst en charge de créer le meilleur dashboard possible. Votre score depend de la diversite des widgets, l\'utilisation de tables multiples, les filtres interactifs, et la presentation (titres, pages).\n\nMethodologie : Libre ! Combinez un maximum de types de graphiques, tables et fonctionnalites.',
     hint: 'Max de points : widgets varies + multi-tables + slicer + pages + titres.',
     hintWidgets: ['kpi', 'bar', 'pie', 'line', 'slicer', 'treemap', 'table'],
-    tables: [mkPipeTable('ventes_par_categorie', VENTES_PAR_CATEGORIE), mkPipeTable('ca_par_client', CA_PAR_CLIENT), mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS), mkTable('produits', PRODUITS), mkTable('employes', EMPLOYES)],
+    tables: [mkPipeTable('ventes_par_catégorie', VENTES_PAR_CATEGORIE), mkPipeTable('ca_par_client', CA_PAR_CLIENT), mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS), mkTable('produits', PRODUITS), mkTable('employes', EMPLOYES)],
     validate: (widgets, pages) => {
       let score = 0; const msg = [];
       // Widget count (max 3)
@@ -380,7 +380,7 @@ export const BI_EXERCISES = [
 
 export const BI_TIERS = [
   { id: 1, name: 'Facile', color: 'from-emerald-400 to-green-500', icon: '🌱', minToUnlockNext: 5 },
-  { id: 2, name: 'Intermediaire', color: 'from-blue-400 to-indigo-500', icon: '🔧', minToUnlockNext: 4 },
+  { id: 2, name: 'Intermédiaire', color: 'from-blue-400 to-indigo-500', icon: '🔧', minToUnlockNext: 4 },
   { id: 3, name: 'Difficile', color: 'from-amber-400 to-orange-500', icon: '🔥', minToUnlockNext: 3 },
   { id: 4, name: 'Expert', color: 'from-red-400 to-rose-600', icon: '💎', minToUnlockNext: null },
 ];

@@ -54,20 +54,20 @@ function StackedBarChart({ data, xCol, yCol, groupCol, mode, width, height }) {
   const m = { top: 10, right: 10, bottom: 36, left: 45 };
   const w = width - m.left - m.right, h = height - m.top - m.bottom;
 
-  const categories = [...new Set(data.map(r => r[xCol]))];
+  const catégories = [...new Set(data.map(r => r[xCol]))];
   const groups = [...new Set(data.map(r => r[groupCol]))];
   const grouped = {};
-  categories.forEach(c => { grouped[c] = {}; groups.forEach(g => { grouped[c][g] = 0; }); });
+  catégories.forEach(c => { grouped[c] = {}; groups.forEach(g => { grouped[c][g] = 0; }); });
   data.forEach(r => { if (grouped[r[xCol]]) grouped[r[xCol]][r[groupCol]] = (grouped[r[xCol]][r[groupCol]] || 0) + (parseFloat(r[yCol]) || 0); });
 
-  const maxVal = mode === 'stacked' ? Math.max(...categories.map(c => groups.reduce((s, g) => s + (grouped[c][g] || 0), 0)), 1) : Math.max(...categories.flatMap(c => groups.map(g => grouped[c][g] || 0)), 1);
-  const catW = w / categories.length;
+  const maxVal = mode === 'stacked' ? Math.max(...catégories.map(c => groups.reduce((s, g) => s + (grouped[c][g] || 0), 0)), 1) : Math.max(...catégories.flatMap(c => groups.map(g => grouped[c][g] || 0)), 1);
+  const catW = w / catégories.length;
 
   return (
     <div ref={ref} className="relative" style={{ width, height }}>
       <svg width={width} height={height}>
         <g transform={`translate(${m.left},${m.top})`}>
-          {categories.map((cat, ci) => {
+          {catégories.map((cat, ci) => {
             let cumY = 0;
             const barW = mode === 'stacked' ? catW * 0.6 : (catW * 0.7) / groups.length;
             return groups.map((grp, gi) => {
@@ -81,7 +81,7 @@ function StackedBarChart({ data, xCol, yCol, groupCol, mode, width, height }) {
               </g>);
             });
           })}
-          {categories.map((cat, ci) => <text key={ci} x={ci * catW + catW / 2} y={h + 12} textAnchor="middle" fontSize="7" fill="#64748B" className="select-none">{String(cat).slice(0, 6)}</text>)}
+          {catégories.map((cat, ci) => <text key={ci} x={ci * catW + catW / 2} y={h + 12} textAnchor="middle" fontSize="7" fill="#64748B" className="select-none">{String(cat).slice(0, 6)}</text>)}
           <line x1={0} y1={h} x2={w} y2={h} stroke="#E2E8F0" strokeWidth={1} />
         </g>
       </svg>

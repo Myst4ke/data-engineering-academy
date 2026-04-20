@@ -4,28 +4,28 @@ import { createPortal } from 'react-dom';
 const STEPS = [
   {
     target: '[data-tutorial="current-table"]',
-    title: 'Table d\'entree',
-    text: 'Voici vos donnees de depart. C\'est cette table que vous allez transformer.',
+    title: 'Table d\'entrée',
+    text: 'Voici vos données de départ. C\'est cette table que vous allez transformer.',
   },
   {
     target: '[data-tutorial="target-table"]',
     title: 'Objectif',
-    text: 'Voici le resultat a obtenir. Comparez-le avec la table d\'entree pour comprendre les transformations necessaires.',
+    text: 'Voici le résultat à obtenir. Comparez-le avec la table d\'entrée pour comprendre les transformations nécessaires.',
   },
   {
     target: '[data-tutorial="hint-btn"]',
     title: 'Indice',
-    text: 'Besoin d\'aide ? Cliquez ici pour un indice sur les cartes a utiliser.',
+    text: 'Besoin d\'aide ? Cliquez ici pour un indice sur les cartes à utiliser.',
   },
   {
     target: '[data-tutorial="pipeline"]',
     title: 'Pipeline',
-    text: 'Les cartes jouees apparaissent ici dans l\'ordre. Reorganisez-les par glisser-deposer, modifiez leurs parametres en cliquant dessus, ou supprimez-les.',
+    text: 'Les cartes jouées apparaissent ici dans l\'ordre. Réorganisez-les par glisser-déposer, modifiez leurs paramètres en cliquant dessus, ou supprimez-les.',
   },
   {
     target: '[data-tutorial="hand"]',
     title: 'Vos cartes',
-    text: 'Choisissez une carte en cliquant dessus ou en la glissant vers le pipeline. Chaque carte effectue une transformation differente.',
+    text: 'Choisissez une carte en cliquant dessus ou en la glissant vers le pipeline. Chaque carte effectue une transformation différente.',
   },
 ];
 
@@ -112,12 +112,12 @@ export default function Tutorial({ onComplete }) {
 
       {/* Tooltip */}
       <div
-        className="fixed z-[62] rounded-xl shadow-2xl p-4 max-w-xs bg-white border border-indigo-200"
+        className="fixed z-[62] rounded-xl shadow-2xl p-4 max-w-xs bg-white border border-[#FFE5DC]"
         style={{ ...tooltipStyle, pointerEvents: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-xs text-indigo-500 font-semibold mb-1">
-          Etape {step + 1}/{STEPS.length}
+        <p className="text-xs text-[#FF8066] font-semibold mb-1">
+          Étape {step + 1}/{STEPS.length}
         </p>
         <h3 className="text-sm font-bold text-slate-800 mb-1">{currentStep.title}</h3>
         <p className="text-xs text-slate-600 leading-relaxed mb-3">{currentStep.text}</p>
@@ -130,9 +130,9 @@ export default function Tutorial({ onComplete }) {
           </button>
           <button
             onClick={handleNext}
-            className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-[#FF8066] hover:bg-[#E85D41] text-white text-xs font-semibold rounded-lg transition-colors"
           >
-            {step < STEPS.length - 1 ? 'Suivant' : 'Compris !'}
+            {step < STEPS.length - 1 ? 'Suivant' : 'J\'ai compris'}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Maximize2, X, Target, CheckCircle2 } from 'lucide-react';
 
 function TablePopup({ data, title, isTarget, isSuccess, onClose }) {
   const columns = data && data.length > 0 ? Object.keys(data[0]) : [];
@@ -15,22 +16,23 @@ function TablePopup({ data, title, isTarget, isSuccess, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${title} en plein écran`}
     >
       <div
-        className={`
-          bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col
+        className={`game-panel modal-content max-w-4xl w-full max-h-[90vh] flex flex-col
           ${isSuccess ? 'ring-2 ring-emerald-500' : ''}
           ${isTarget ? 'ring-2 ring-amber-400' : ''}
         `}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            {isTarget && <span className="text-xl">🎯</span>}
-            {isSuccess && <span className="text-xl">✅</span>}
+            {isTarget && <Target className="w-5 h-5 text-amber-500" aria-hidden="true" />}
+            {isSuccess && <CheckCircle2 className="w-5 h-5 text-emerald-500" aria-hidden="true" />}
             <span className={`text-lg font-bold uppercase tracking-wide ${
               isTarget ? 'text-amber-600' :
               isSuccess ? 'text-emerald-600' : 'text-slate-700'
@@ -43,9 +45,10 @@ function TablePopup({ data, title, isTarget, isSuccess, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-800 transition-colors text-lg font-bold"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-800 transition-colors"
+            aria-label="Fermer"
           >
-            ×
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -65,7 +68,7 @@ function TablePopup({ data, title, isTarget, isSuccess, onClose }) {
                   {columns.map((col) => (
                     <td key={col} className="px-4 py-2 whitespace-nowrap">
                       {row[col] === '' || row[col] === null || row[col] === undefined ? (
-                        <span className="text-gray-500 italic">vide</span>
+                        <span className="text-slate-500 italic">vide</span>
                       ) : (
                         String(row[col])
                       )}
@@ -107,7 +110,7 @@ export default function TableView({
             {title}
           </span>
         </div>
-        <p className="text-slate-400 italic text-xs sm:text-sm">Aucune donnée</p>
+        <p className="text-slate-500 italic text-xs sm:text-sm">Aucune donnée disponible pour le moment.</p>
       </div>
     );
   }
@@ -126,8 +129,8 @@ export default function TableView({
       {/* Header */}
       <div className="flex items-center justify-between mb-1 sm:mb-2">
         <div className="flex items-center gap-1 sm:gap-2">
-          {isTarget && <span className="text-sm sm:text-lg">🎯</span>}
-          {isSuccess && <span className="text-sm sm:text-lg">✅</span>}
+          {isTarget && <Target className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" aria-hidden="true" />}
+          {isSuccess && <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" aria-hidden="true" />}
           <span className={`text-xs sm:text-sm font-bold uppercase tracking-wide ${
             isTarget ? 'text-amber-600' :
             isSuccess ? 'text-emerald-600' : 'text-slate-700'
@@ -138,12 +141,13 @@ export default function TableView({
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setShowPopup(true)}
-            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors text-xs sm:text-sm"
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors"
             title="Agrandir"
+            aria-label={`Agrandir la table ${title}`}
           >
-            🔍
+            <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
-          <span className="text-[10px] sm:text-xs text-indigo-600 bg-indigo-100 px-1.5 sm:px-2 py-0.5 rounded font-medium">
+          <span className="text-[11px] sm:text-xs text-indigo-600 bg-indigo-100 px-1.5 sm:px-2 py-0.5 rounded font-medium">
             {data.length} ligne{data.length > 1 ? 's' : ''}
           </span>
         </div>

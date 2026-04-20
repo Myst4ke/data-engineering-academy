@@ -89,12 +89,12 @@ const EMPLOYES_FULL = [
 ];
 
 const PRODUITS_SMALL = [
-  { id: 'P01', nom: 'Laptop Pro', categorie: 'Informatique', prix: '1200', stock: '45' },
-  { id: 'P02', nom: 'Souris RGB', categorie: 'Informatique', prix: '35', stock: '200' },
-  { id: 'P03', nom: 'Ecran 27p', categorie: 'Informatique', prix: '450', stock: '80' },
-  { id: 'P05', nom: 'Casque Audio', categorie: 'Audio', prix: '120', stock: '90' },
-  { id: 'P07', nom: 'Enceinte BT', categorie: 'Audio', prix: '45', stock: '180' },
-  { id: 'P09', nom: 'Chaise Ergo', categorie: 'Mobilier', prix: '350', stock: '25' },
+  { id: 'P01', nom: 'Laptop Pro', catégorie: 'Informatique', prix: '1200', stock: '45' },
+  { id: 'P02', nom: 'Souris RGB', catégorie: 'Informatique', prix: '35', stock: '200' },
+  { id: 'P03', nom: 'Écran 27p', catégorie: 'Informatique', prix: '450', stock: '80' },
+  { id: 'P05', nom: 'Casque Audio', catégorie: 'Audio', prix: '120', stock: '90' },
+  { id: 'P07', nom: 'Enceinte BT', catégorie: 'Audio', prix: '45', stock: '180' },
+  { id: 'P09', nom: 'Chaise Ergo', catégorie: 'Mobilier', prix: '350', stock: '25' },
 ];
 
 const DEPARTEMENTS = [
@@ -106,10 +106,10 @@ const DEPARTEMENTS = [
 ];
 
 const FOURNISSEURS = [
-  { id: 'F01', nom: 'TechCo', pays: 'France', contact: 'contact@techco.fr', categorie: 'Informatique' },
-  { id: 'F02', nom: 'AudioMax', pays: 'Allemagne', contact: 'info@audiomax.de', categorie: 'Audio' },
-  { id: 'F03', nom: 'PeriphPlus', pays: 'France', contact: 'vente@periphplus.fr', categorie: 'Accessoire' },
-  { id: 'F04', nom: 'MobilierPro', pays: 'Italie', contact: 'sales@mobilier.it', categorie: 'Mobilier' },
+  { id: 'F01', nom: 'TechCo', pays: 'France', contact: 'contact@techco.fr', catégorie: 'Informatique' },
+  { id: 'F02', nom: 'AudioMax', pays: 'Allemagne', contact: 'info@audiomax.de', catégorie: 'Audio' },
+  { id: 'F03', nom: 'PeriphPlus', pays: 'France', contact: 'vente@periphplus.fr', catégorie: 'Accessoire' },
+  { id: 'F04', nom: 'MobilierPro', pays: 'Italie', contact: 'sales@mobilier.it', catégorie: 'Mobilier' },
 ];
 
 // Data with technical column names
@@ -145,7 +145,7 @@ const COMMANDES_DIRTY = [
 const PRODUITS_EN = [
   { product_id: 'P01', name: 'Laptop Pro', category: 'IT', price: '1200', qty: '45' },
   { product_id: 'P02', name: 'Souris RGB', category: 'IT', price: '35', qty: '200' },
-  { product_id: 'P03', name: 'Ecran 27p', category: 'IT', price: '450', qty: '80' },
+  { product_id: 'P03', name: 'Écran 27p', category: 'IT', price: '450', qty: '80' },
   { product_id: 'P05', name: 'Casque Audio', category: 'Audio', price: '120', qty: '90' },
 ];
 
@@ -163,7 +163,7 @@ const EVALUATIONS_WITH_EMPTY = [
 const VENTES_NORD = [
   { region: 'Nord', produit: 'Laptop', montant: '1200', date: '2024-01-15' },
   { region: 'Nord', produit: 'Souris', montant: '35', date: '2024-01-20' },
-  { region: 'Nord', produit: 'Ecran', montant: '450', date: '2024-02-10' },
+  { region: 'Nord', produit: 'Écran', montant: '450', date: '2024-02-10' },
 ];
 const VENTES_SUD = [
   { region: 'Sud', produit: 'Laptop', montant: '1200', date: '2024-01-18' },
@@ -187,21 +187,21 @@ export const EXERCISES = [
   // ══════════ FACILE (6) ══════════
   {
     id: 'pipe-01', title: 'Export clients', difficulty: 1, isTutorial: true,
-    description: 'Le service commercial lance une campagne emailing et a besoin de la liste complete des clients avec leurs coordonnees. La base contient une table "clients" prete a l\'emploi.\n\nMethodologie : Chargez la table depuis une source de donnees et envoyez-la vers un fichier d\'export.',
+    description: 'Le service commercial lance une campagne emailing et a besoin de la liste complété des clients avec leurs coordonnees. La base contient une table "clients" prete a l\'emploi.\n\nMethodologie : Chargez la table depuis une source de données et envoyez-la vers un fichier d\'export.',
     hint: 'Source CSV → clic droit pour charger clients → connectez a Export CSV.',
     hintNodes: ['csv_source', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
       if (data === null) return { ok: false, msg: 'Ajoutez un noeud Export CSV.' };
-      if (data.length === 0) return { ok: false, msg: 'Aucune donnee ne parvient a l\'export.' };
+      if (data.length === 0) return { ok: false, msg: 'Aucune donnée ne parvient a l\'export.' };
       if (data[0].nom) return { ok: true, msg: 'Pipeline fonctionnel !' };
-      return { ok: false, msg: 'Les donnees ne semblent pas etre la table clients.' };
+      return { ok: false, msg: 'Les données ne semblent pas etre la table clients.' };
     },
   },
   {
     id: 'pipe-02', title: 'Commandes incompletes', difficulty: 1,
-    description: 'Le service comptabilite signale que certaines commandes ont des champs vides (montant ou statut manquant). Ces lignes faussent les rapports financiers et doivent etre retirees avant tout traitement.\n\nMethodologie : Identifiez et supprimez les lignes contenant des cellules vides, puis exportez les donnees propres.',
+    description: 'Le service comptabilite signale que certaines commandes ont des champs vides (montant ou statut manquant). Ces lignes faussent les rapports financiers et doivent etre retirees avant tout traitement.\n\nMethodologie : Identifiez et supprimez les lignes contenant des cellules vides, puis exportez les données propres.',
     hint: 'Source → Suppr. Vides → Export CSV.',
     hintNodes: ['csv_source', 'clean_na', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY }] },
@@ -209,13 +209,13 @@ export const EXERCISES = [
       const data = getDestinationData(outputs, nodes, conns);
       if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       const clean = COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut);
-      if (data.length === clean.length) return { ok: true, msg: 'Donnees nettoyees !' };
+      if (data.length === clean.length) return { ok: true, msg: 'Données nettoyees !' };
       return { ok: false, msg: `Attendu: ${clean.length} lignes sans vides. Recu: ${data.length}.` };
     },
   },
   {
     id: 'pipe-03', title: 'Import en double', difficulty: 1,
-    description: 'Suite a un probleme technique, la table clients a ete importee deux fois dans le systeme. Le fichier contient donc des doublons exacts qu\'il faut eliminer avant de mettre a jour le CRM.\n\nMethodologie : Supprimez les lignes identiques pour ne garder qu\'un exemplaire de chaque client.',
+    description: 'Suite a un problème technique, la table clients a ete importee deux fois dans le système. Le fichier contient donc des doublons exacts qu\'il faut eliminer avant de mettre a jour le CRM.\n\nMethodologie : Supprimez les lignes identiques pour ne garder qu\'un exemplaire de chaque client.',
     hint: 'Source → Dedoublonner → Export CSV.',
     hintNodes: ['csv_source', 'deduplicate', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLIENTS_WITH_DUPES }] },
@@ -228,8 +228,8 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-04', title: 'Rapport salaires', difficulty: 1,
-    description: 'La direction demande un rapport des employes classes par salaire, du plus eleve au plus bas, pour preparer la revue annuelle des remunerations.\n\nMethodologie : Triez les employes et exportez la liste ordonnee.',
-    hint: 'Source → Trier (salaire, decroissant) → Export CSV.',
+    description: 'La direction demande un rapport des employes classes par salaire, du plus élevé au plus bas, pour preparer la revue annuelle des remunerations.\n\nMethodologie : Triez les employes et exportez la liste ordonnee.',
+    hint: 'Source → Trier (salaire, décroissant) → Export CSV.',
     hintNodes: ['csv_source', 'sort', 'csv_export'],
     sources: { 'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }] },
     validate: (outputs, nodes, conns) => {
@@ -237,15 +237,15 @@ export const EXERCISES = [
       if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 8) return { ok: false, msg: `Attendu 8 employes, recu ${data.length}.` };
       for (let i = 1; i < data.length; i++) {
-        if (parseFloat(data[i].salaire) > parseFloat(data[i - 1].salaire)) return { ok: false, msg: 'Les salaires ne sont pas tries par ordre decroissant.' };
+        if (parseFloat(data[i].salaire) > parseFloat(data[i - 1].salaire)) return { ok: false, msg: 'Les salaires ne sont pas tries par ordre décroissant.' };
       }
-      return { ok: true, msg: 'Rapport salaires genere !' };
+      return { ok: true, msg: 'Rapport salaires généré !' };
     },
   },
   {
     id: 'pipe-05', title: 'Nettoyage RGPD', difficulty: 1,
-    description: 'Le DPO (responsable protection des donnees) a identifie que le fichier clients contient des colonnes techniques internes (_hash, _internal_id) qui ne doivent pas etre exposees. Seules les colonnes id, nom, email et ville doivent etre conservees.\n\nMethodologie : Selectionnez uniquement les colonnes autorisees et exportez le resultat.',
-    hint: 'Source → Selectionner colonnes (id, nom, email, ville) → Export CSV.',
+    description: 'Le DPO (responsable protection des données) a identifie que le fichier clients contient des colonnes techniques internes (_hash, _internal_id) qui ne doivent pas etre exposees. Seules les colonnes id, nom, email et ville doivent etre conservees.\n\nMethodologie : Selectionnez uniquement les colonnes autorisees et exportez le resultat.',
+    hint: 'Source → Sélectionner colonnes (id, nom, email, ville) → Export CSV.',
     hintNodes: ['csv_source', 'select_cols', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLIENTS_WITH_EXTRA_COLS }] },
     validate: (outputs, nodes, conns) => {
@@ -255,7 +255,7 @@ export const EXERCISES = [
       const cols = Object.keys(data[0] || {});
       if (cols.includes('_hash') || cols.includes('_internal_id')) return { ok: false, msg: 'Les colonnes techniques sont encore presentes.' };
       if (!cols.includes('nom') || !cols.includes('email')) return { ok: false, msg: 'Il manque des colonnes (nom, email...).' };
-      return { ok: true, msg: 'Donnees conformes RGPD !' };
+      return { ok: true, msg: 'Données conformes RGPD !' };
     },
   },
   {
@@ -279,7 +279,7 @@ export const EXERCISES = [
   // ══════════ INTERMEDIAIRE (10) ══════════
   {
     id: 'pipe-07', title: 'Commandes livrees', difficulty: 2,
-    description: 'Le service logistique veut un fichier contenant uniquement les commandes effectivement livrees, sans aucune donnee incomplete. Le fichier source contient des cellules vides et differents statuts.\n\nMethodologie : Commencez par retirer les lignes incompletes, puis isolez les commandes ayant le statut "Livree".',
+    description: 'Le service logistique veut un fichier contenant uniquement les commandes effectivement livrees, sans aucune donnée incomplete. Le fichier source contient des cellules vides et differents statuts.\n\nMethodologie : Commencez par retirer les lignes incompletes, puis isolez les commandes ayant le statut "Livree".',
     hint: 'Source → Suppr. Vides → Filtrer (statut=Livree) → Export. L\'ordre est important !',
     hintNodes: ['csv_source', 'clean_na', 'filter', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY }] },
@@ -293,7 +293,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-08', title: 'Enrichir les commandes', difficulty: 2,
-    description: 'Pour le reporting mensuel, le directeur commercial souhaite voir le nom et la ville du client directement sur chaque ligne de commande. Les commandes contiennent un "client_id" et la table clients utilise la meme cle.\n\nMethodologie : Combinez les deux tables sur leur colonne commune pour enrichir les commandes.',
+    description: 'Pour le reporting mensuel, le directeur commercial souhaite voir le nom et la ville du client directement sur chaque ligne de commande. Les commandes contiennent un "client_id" et la table clients utilisé la même cle.\n\nMethodologie : Combinez les deux tables sur leur colonne commune pour enrichir les commandes.',
     hint: 'Source 1 (commandes) + Source 2 (clients) → Joindre (sur client_id) → Export.',
     hintNodes: ['csv_source', 'db_source', 'join', 'csv_export'],
     sources: {
@@ -319,7 +319,7 @@ export const EXERCISES = [
   {
     id: 'pipe-09', title: 'Consolidation regionale', difficulty: 2,
     description: 'Les equipes Nord et Sud envoient chacune leurs ventes dans un fichier separe. La direction financiere a besoin d\'un fichier unique regroupant les ventes de toutes les regions pour le bilan trimestriel.\n\nMethodologie : Fusionnez les deux fichiers en un seul et exportez le resultat.',
-    hint: 'Source 1 (Nord) + Source 2 (Sud) → Concatener → Export CSV.',
+    hint: 'Source 1 (Nord) + Source 2 (Sud) → Concaténer → Export CSV.',
     hintNodes: ['csv_source', 'db_source', 'concat', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'ventes_nord', data: VENTES_NORD }],
@@ -334,7 +334,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-10', title: 'Ingestion Bronze', difficulty: 2,
-    description: 'L\'equipe data demarre un nouveau projet de lakehouse. La premiere etape consiste a ingerer les donnees brutes (clients et produits) dans la couche Bronze, sans aucune transformation.\n\nMethodologie : Chargez les 2 tables et stockez-les telles quelles dans un Lakehouse Bronze.',
+    description: 'L\'equipe data demarre un nouveau projet de lakehouse. La premiere étape consiste a ingerer les données brutes (clients et produits) dans la couche Bronze, sans aucune transformation.\n\nMethodologie : Chargez les 2 tables et stockez-les telles quelles dans un Lakehouse Bronze.',
     hint: 'Source → tables clients + produits → connectez chacune au Bronze.',
     hintNodes: ['csv_source', 'lakehouse_bronze'],
     sources: { 'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }, { name: 'produits', data: PRODUITS_SMALL }] },
@@ -360,24 +360,24 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-12', title: 'Nettoyage complet', difficulty: 2,
-    description: 'Le fichier de commandes est un vrai cauchemar : doublons, cellules vides, et differents statuts melanges. Le controleur de gestion n\'a besoin que des commandes livrees, triees par montant decroissant.\n\nMethodologie : Appliquez dans l\'ordre : deduplication, suppression des vides, filtre sur statut, puis tri.',
+    description: 'Le fichier de commandes est un vrai cauchemar : doublons, cellules vides, et differents statuts melanges. Le controleur de gestion n\'a besoin que des commandes livrees, triees par montant décroissant.\n\nMethodologie : Appliquez dans l\'ordre : déduplication, suppression des vides, filtre sur statut, puis tri.',
     hint: 'Source → Dedup → Suppr. Vides → Filtrer (Livree) → Trier (montant desc) → Export.',
     hintNodes: ['csv_source', 'deduplicate', 'clean_na', 'filter', 'sort', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_DIRTY }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
       if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
-      if (data.length === 0) return { ok: false, msg: 'Aucune donnee en sortie.' };
+      if (data.length === 0) return { ok: false, msg: 'Aucune donnée en sortie.' };
       if (data.some(r => r.statut !== 'Livree')) return { ok: false, msg: 'Toutes les lignes doivent avoir statut = Livree.' };
       for (let i = 1; i < data.length; i++) {
-        if (parseFloat(data[i].montant) > parseFloat(data[i - 1].montant)) return { ok: false, msg: 'Le tri decroissant n\'est pas correct.' };
+        if (parseFloat(data[i].montant) > parseFloat(data[i - 1].montant)) return { ok: false, msg: 'Le tri décroissant n\'est pas correct.' };
       }
-      return { ok: true, msg: 'Nettoyage complet reussi !' };
+      return { ok: true, msg: 'Nettoyage complet réussi !' };
     },
   },
   {
     id: 'pipe-13', title: 'Integration fournisseur', difficulty: 2,
-    description: 'Un fournisseur international envoie son catalogue avec des colonnes en anglais (product_id, name, category, price, qty). Notre systeme interne attend les noms francais (id, nom, categorie, prix, stock).\n\nMethodologie : Utilisez un mapping pour convertir le schema du fournisseur vers le notre.',
+    description: 'Un fournisseur international envoie son catalogue avec des colonnes en anglais (product_id, name, category, price, qty). Notre système interne attend les noms francais (id, nom, catégorie, prix, stock).\n\nMethodologie : Utilisez un mapping pour convertir le schema du fournisseur vers le notre.',
     hint: 'Source → Mapping (5 correspondances) → Export.',
     hintNodes: ['csv_source', 'mapping', 'csv_export'],
     sources: { 'csv_source': [{ name: 'produits', data: PRODUITS_EN }] },
@@ -392,8 +392,8 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-14', title: 'KPI camembert statuts', difficulty: 2,
-    description: 'Le directeur veut un graphique camembert montrant la repartition des commandes par statut (Livree, En cours, Annulee). Pour cela, il faut agreger les commandes par statut et compter le nombre dans chaque categorie. Le resultat sera envoye vers un Dashboard.\n\nMethodologie : Agregez les donnees par statut avec un comptage, puis envoyez vers un Dashboard (clic droit pour sauvegarder vers le BI Dojo).',
-    hint: 'Source → Agreger (Group By: statut, Agg: count) → Dashboard.',
+    description: 'Le directeur veut un graphique camembert montrant la répartition des commandes par statut (Livree, En cours, Annulee). Pour cela, il faut agréger les commandes par statut et compter le nombre dans chaque catégorie. Le resultat sera envoye vers un Dashboard.\n\nMethodologie : Agregez les données par statut avec un comptage, puis envoyez vers un Dashboard (clic droit pour sauvegarder vers le BI Dojo).',
+    hint: 'Source → Agréger (Group By: statut, Agg: count) → Dashboard.',
     hintNodes: ['csv_source', 'aggregate', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', client_id: '1', montant: '150', statut: 'Livree' }, { id: 'CMD002', client_id: '2', montant: '230', statut: 'Livree' },
@@ -410,7 +410,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-15', title: 'Bronze vers Silver', difficulty: 2,
-    description: 'Les commandes brutes sont stockees dans le Bronze mais contiennent des doublons et des lignes vides. L\'etape Silver consiste a nettoyer ces donnees pour les rendre exploitables par les analystes.\n\nMethodologie : Chargez les donnees dans le Bronze, puis appliquez un nettoyage (dedup + vides) avant de stocker en Silver.',
+    description: 'Les commandes brutes sont stockees dans le Bronze mais contiennent des doublons et des lignes vides. L\'étape Silver consiste a nettoyer ces données pour les rendre exploitables par les analystes.\n\nMethodologie : Chargez les données dans le Bronze, puis appliquez un nettoyage (dedup + vides) avant de stocker en Silver.',
     hint: 'Source → Bronze → sortie table → Dedup → Suppr. Vides → Silver.',
     hintNodes: ['csv_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'lakehouse_silver'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_DIRTY }] },
@@ -420,19 +420,19 @@ export const EXERCISES = [
       if (!hasBronze || !hasSilver) return { ok: false, msg: 'Utilisez un Lakehouse Bronze ET Silver.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1))
         return { ok: false, msg: 'Le Silver doit contenir au moins 1 table nettoyee.' };
-      return { ok: true, msg: 'Bronze → Silver reussi !' };
+      return { ok: true, msg: 'Bronze → Silver réussi !' };
     },
   },
   {
-    id: 'pipe-16', title: 'Echantillon de test', difficulty: 2,
-    description: 'L\'equipe QA a besoin d\'un petit jeu de donnees pour tester un nouveau formulaire. Extrayez les 3 premiers employes du fichier pour creer un jeu de test rapide.\n\nMethodologie : Echantillonnez les premieres lignes et exportez.',
+    id: 'pipe-16', title: 'Échantillon de test', difficulty: 2,
+    description: 'L\'equipe QA a besoin d\'un petit jeu de données pour tester un nouveau formulaire. Extrayez les 3 premiers employes du fichier pour créer un jeu de test rapide.\n\nMethodologie : Echantillonnez les premieres lignes et exportez.',
     hint: 'Source → Echantillonner (Top N: 3) → Export CSV.',
     hintNodes: ['csv_source', 'sample', 'csv_export'],
     sources: { 'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
       if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
-      if (data.length === 3) return { ok: true, msg: 'Echantillon extrait !' };
+      if (data.length === 3) return { ok: true, msg: 'Échantillon extrait !' };
       return { ok: false, msg: `Attendu 3 lignes. Recu: ${data.length}.` };
     },
   },
@@ -440,7 +440,7 @@ export const EXERCISES = [
   // ══════════ DIFFICILE (10) ══════════
   {
     id: 'pipe-17', title: 'Aiguillage logistique', difficulty: 3,
-    description: 'Le centre logistique doit router les commandes vers deux equipes differentes : les commandes livrees sont archivees, les commandes annulees sont transmises au service reclamation. Il faut d\'abord verifier que le fichier n\'est pas vide avant de router.\n\nMethodologie : Validez la presence de donnees, puis separez en deux flux distincts avec des filtres.',
+    description: 'Le centre logistique doit router les commandes vers deux equipes differentes : les commandes livrees sont archivees, les commandes annulees sont transmises au service reclamation. Il faut d\'abord vérifier que le fichier n\'est pas vide avant de router.\n\nMethodologie : Validez la presence de données, puis separez en deux flux distincts avec des filtres.',
     hint: 'Source → Si/Sinon (table_not_empty) → Filtrer Livree → Export 1 / Filtrer Annulee → Export 2.',
     hintNodes: ['csv_source', 'if_condition', 'filter', 'filter', 'csv_export', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
@@ -460,11 +460,11 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-18', title: 'Audit fournisseurs', difficulty: 3,
-    description: 'Le service achats veut s\'assurer que chaque produit du catalogue est couvert par un fournisseur reference. Les produits dont la categorie ne correspond a aucun fournisseur doivent etre identifies pour lancer un appel d\'offres.\n\nMethodologie : Comparez les categories produits avec celles des fournisseurs pour separer les produits couverts des orphelins.',
-    hint: 'Source produits + Source fournisseurs → Lookup (categorie) → Match / No Match.',
+    description: 'Le service achats veut s\'assurer que chaque produit du catalogue est couvert par un fournisseur référence. Les produits dont la catégorie ne correspond a aucun fournisseur doivent etre identifies pour lancer un appel d\'offres.\n\nMethodologie : Comparez les catégories produits avec celles des fournisseurs pour separer les produits couverts des orphelins.',
+    hint: 'Source produits + Source fournisseurs → Lookup (catégorie) → Match / No Match.',
     hintNodes: ['csv_source', 'db_source', 'lookup'],
     sources: {
-      'csv_source': [{ name: 'produits', data: [...PRODUITS_SMALL, { id: 'P99', nom: 'Gadget X', categorie: 'Divers', prix: '25', stock: '50' }] }],
+      'csv_source': [{ name: 'produits', data: [...PRODUITS_SMALL, { id: 'P99', nom: 'Gadget X', catégorie: 'Divers', prix: '25', stock: '50' }] }],
       'db_source': [{ name: 'fournisseurs', data: FOURNISSEURS }],
     },
     validate: (outputs, nodes) => {
@@ -474,7 +474,7 @@ export const EXERCISES = [
       const noMatch = outputs[`${lk.id}_nomatch`] || [];
       if (match.length > 0 && noMatch.length > 0) return { ok: true, msg: `Audit termine ! Couverts: ${match.length}, Orphelins: ${noMatch.length}` };
       if (match.length > 0 || noMatch.length > 0) return { ok: true, msg: `Lookup ok. Match: ${match.length}, No Match: ${noMatch.length}` };
-      return { ok: false, msg: 'Configurez le lookup sur la colonne categorie.' };
+      return { ok: false, msg: 'Configurez le lookup sur la colonne catégorie.' };
     },
   },
   {
@@ -488,13 +488,13 @@ export const EXERCISES = [
       if (data === null) return { ok: false, msg: 'Ajoutez une destination.' };
       if (data.length !== 8) return { ok: false, msg: `Attendu 8 lignes.` };
       if (!data[0].nom_complet) return { ok: false, msg: 'La colonne nom_complet est manquante.' };
-      return { ok: true, msg: 'Annuaire genere !' };
+      return { ok: true, msg: 'Annuaire généré !' };
     },
   },
   {
     id: 'pipe-20', title: 'Top ventes Dashboard', difficulty: 3,
-    description: 'Le directeur commercial veut un tableau de bord affichant les commandes classees par montant, avec un numero de rang pour identifier rapidement les meilleures ventes. Ce classement sera envoye vers un Dashboard pour visualisation.\n\nMethodologie : Ajoutez un rang base sur le montant decroissant, puis envoyez au Dashboard.',
-    hint: 'Source → Fenetre (row_number, montant desc, alias: rang) → Dashboard.',
+    description: 'Le directeur commercial veut un tableau de bord affichant les commandes classees par montant, avec un numéro de rang pour identifier rapidement les meilleures ventes. Ce classement sera envoye vers un Dashboard pour visualisation.\n\nMethodologie : Ajoutez un rang base sur le montant décroissant, puis envoyez au Dashboard.',
+    hint: 'Source → Fenêtre (row_number, montant desc, alias: rang) → Dashboard.',
     hintNodes: ['csv_source', 'window_func', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', montant: '150' }, { id: 'CMD002', montant: '230' },
@@ -512,7 +512,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-21', title: 'Bronze → Silver transformation', difficulty: 3,
-    description: 'Les commandes brutes du Bronze ont des problemes multiples : doublons, cellules vides, et colonnes au format technique (mnt, st). La couche Silver doit contenir des donnees propres avec des noms metier, filtrees sur les commandes livrees.\n\nMethodologie : Nettoyez (dedup + vides), renommez les colonnes, filtrez, puis stockez en Silver.',
+    description: 'Les commandes brutes du Bronze ont des problèmes multiples : doublons, cellules vides, et colonnes au format technique (mnt, st). La couche Silver doit contenir des données propres avec des noms métier, filtrees sur les commandes livrees.\n\nMethodologie : Nettoyez (dedup + vides), renommez les colonnes, filtrez, puis stockez en Silver.',
     hint: 'Bronze → Dedup → Suppr. Vides → Renommer (mnt→montant, st→statut) → Filtrer (Livree) → Silver.',
     hintNodes: ['csv_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'rename_col', 'rename_col', 'filter', 'lakehouse_silver'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
@@ -529,8 +529,8 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-22', title: 'Gold : CA par client', difficulty: 3,
-    description: 'Pour alimenter un graphique en barres du chiffre d\'affaires par client, il faut agreger les commandes Silver : compter le nombre de commandes et sommer les montants par client_id. Le resultat ira dans la couche Gold puis vers un Dashboard.\n\nMethodologie : Agregez par client_id (count + sum montant) et stockez en Gold.',
-    hint: 'Source → Silver → Agreger (client_id: count + sum montant) → Gold → Dashboard.',
+    description: 'Pour alimenter un graphique en barres du chiffre d\'affaires par client, il faut agréger les commandes Silver : compter le nombre de commandes et sommer les montants par client_id. Le resultat ira dans la couche Gold puis vers un Dashboard.\n\nMethodologie : Agregez par client_id (count + sum montant) et stockez en Gold.',
+    hint: 'Source → Silver → Agréger (client_id: count + sum montant) → Gold → Dashboard.',
     hintNodes: ['csv_source', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', client_id: '1', montant: '150' }, { id: 'CMD002', client_id: '2', montant: '230' },
@@ -546,7 +546,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-23', title: 'Pipeline auditable', difficulty: 3,
-    description: 'L\'equipe conformite exige que chaque pipeline de production soit auditable. Pour chaque etape cle (chargement, filtrage), un journal doit enregistrer le nombre de lignes traitees.\n\nMethodologie : Intercalez des noeuds Journal entre vos etapes de transformation.',
+    description: 'L\'equipe conformite exige que chaque pipeline de production soit auditable. Pour chaque étape cle (chargement, filtrage), un journal doit enregistrer le nombre de lignes traitees.\n\nMethodologie : Intercalez des noeuds Journal entre vos étapes de transformation.',
     hint: 'Source → Log → Filtrer → Log → Export.',
     hintNodes: ['csv_source', 'log', 'filter', 'log', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut) }] },
@@ -559,7 +559,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-24', title: 'Ingestion multi-source', difficulty: 3,
-    description: 'L\'entreprise recoit des donnees de 3 systemes differents : les clients via un fichier CSV, les produits depuis une base SQL, et les fournisseurs par API REST. Toutes ces donnees doivent etre centralisees dans un seul Lakehouse Bronze.\n\nMethodologie : Utilisez 3 types de sources differentes et stockez tout dans un Bronze.',
+    description: 'L\'entreprise recoit des données de 3 systèmes differents : les clients via un fichier CSV, les produits depuis une base SQL, et les fournisseurs par API REST. Toutes ces données doivent etre centralisees dans un seul Lakehouse Bronze.\n\nMethodologie : Utilisez 3 types de sources differentes et stockez tout dans un Bronze.',
     hint: '3 types de sources differents → chacune connectee au Bronze.',
     hintNodes: ['csv_source', 'db_source', 'api_source', 'lakehouse_bronze'],
     sources: {
@@ -576,7 +576,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-25', title: 'Nettoyage en lot', difficulty: 3,
-    description: 'Plusieurs tables (clients et commandes) souffrent des memes problemes de qualite : doublons et cellules vides. Plutot que de creer un pipeline de nettoyage pour chacune, utilisez un traitement en lot qui applique les memes regles a toutes les tables.\n\nMethodologie : Configurez un ForEach avec les etapes de nettoyage communes.',
+    description: 'Plusieurs tables (clients et commandes) souffrent des mêmes problèmes de qualite : doublons et cellules vides. Plutot que de créer un pipeline de nettoyage pour chacune, utilisez un traitement en lot qui applique les mêmes règles a toutes les tables.\n\nMethodologie : Configurez un ForEach avec les étapes de nettoyage communes.',
     hint: 'Source (2 tables) → ForEach [Suppr. Vides + Dedup] → sorties nettoyees.',
     hintNodes: ['csv_source', 'foreach'],
     sources: { 'csv_source': [
@@ -586,8 +586,8 @@ export const EXERCISES = [
     validate: (outputs, nodes) => {
       const fe = nodes.find(n => n.type === 'foreach');
       if (!fe) return { ok: false, msg: 'Utilisez un noeud ForEach.' };
-      if (outputs[fe.id]?.length > 0) return { ok: true, msg: 'Nettoyage en lot reussi !' };
-      return { ok: false, msg: 'Configurez les etapes du ForEach.' };
+      if (outputs[fe.id]?.length > 0) return { ok: true, msg: 'Nettoyage en lot réussi !' };
+      return { ok: false, msg: 'Configurez les étapes du ForEach.' };
     },
   },
   {
@@ -611,8 +611,8 @@ export const EXERCISES = [
   // ══════════ EXPERT (6) ══════════
   {
     id: 'pipe-27', title: 'ETL E-Commerce', difficulty: 4,
-    description: 'Le projet data de la marketplace arrive a maturite. Il faut construire le pipeline complet : ingerer les donnees brutes (clients, commandes, produits) dans le Bronze, les nettoyer et enrichir (jointure commandes/clients) pour le Silver, puis agreger les ventes par categorie pour le Gold. Le resultat alimente un Dashboard BI.\n\nMethodologie : Architecture medallion complete avec nettoyage, enrichissement et agregation.',
-    hint: 'Sources → Bronze (3 tables) → Clean/Dedup → Join → Silver → Agreger → Gold → Dashboard.',
+    description: 'Le projet data de la marketplace arrive a maturite. Il faut construire le pipeline complet : ingerer les données brutes (clients, commandes, produits) dans le Bronze, les nettoyer et enrichir (jointure commandes/clients) pour le Silver, puis agréger les ventes par catégorie pour le Gold. Le resultat alimente un Dashboard BI.\n\nMethodologie : Architecture medallion complété avec nettoyage, enrichissement et agrégation.',
+    hint: 'Sources → Bronze (3 tables) → Clean/Dedup → Join → Silver → Agréger → Gold → Dashboard.',
     hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'join', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }, { name: 'commandes', data: COMMANDES_DIRTY }],
@@ -631,7 +631,7 @@ export const EXERCISES = [
   {
     id: 'pipe-28', title: 'RH Analytics Dashboard', difficulty: 4,
     description: 'Le DRH demande un tableau de bord croisant les employes avec leurs departements. Il veut voir le nom complet de chaque employe et le salaire moyen par departement sous forme de graphique en barres.\n\nMethodologie : Joignez employes et departements, creez la colonne nom_complet, agregez le salaire moyen par departement, puis envoyez au Dashboard.',
-    hint: 'Join (departement_id) → ForEachRow (nom_complet) → Agreger (avg salaire) → Dashboard.',
+    hint: 'Join (departement_id) → ForEachRow (nom_complet) → Agréger (avg salaire) → Dashboard.',
     hintNodes: ['csv_source', 'db_source', 'join', 'foreach_row', 'aggregate', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }],
@@ -647,7 +647,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-29', title: 'Tri-routage commandes', difficulty: 4,
-    description: 'Le centre de gestion a 3 workflows distincts pour les commandes : les livrees vont dans le Gold pour les KPIs, les commandes en cours restent en Silver pour suivi, et les annulees sont archivees en CSV avec un log d\'erreur. Il faut router chaque statut vers la bonne destination.\n\nMethodologie : Validez les donnees, puis creez 3 branches avec des filtres pour chaque statut.',
+    description: 'Le centre de gestion a 3 workflows distincts pour les commandes : les livrees vont dans le Gold pour les KPIs, les commandes en cours restent en Silver pour suivi, et les annulees sont archivees en CSV avec un log d\'erreur. Il faut router chaque statut vers la bonne destination.\n\nMethodologie : Validez les données, puis creez 3 branches avec des filtres pour chaque statut.',
     hint: 'Si/Sinon (not empty) → Filtrer (Livree) → Gold / Filtrer (En cours) → Silver / Filtrer (Annulee) → Log + CSV.',
     hintNodes: ['csv_source', 'if_condition', 'filter', 'filter', 'filter', 'lakehouse_gold', 'lakehouse_silver', 'log', 'csv_export'],
     sources: {
@@ -671,8 +671,8 @@ export const EXERCISES = [
     },
   },
   {
-    id: 'pipe-30', title: 'Controle qualite', difficulty: 4,
-    description: 'Avant d\'integrer les nouvelles commandes dans le systeme, il faut verifier qu\'elles referencent des clients connus. Les commandes sont sales (doublons, vides). Apres nettoyage, chaque commande est comparee a la table de reference clients. Les commandes valides vont en Silver, les invalides sont rejetees avec un log.\n\nMethodologie : Nettoyez en lot (ForEach), puis validez les references (Lookup).',
+    id: 'pipe-30', title: 'Contrôle qualite', difficulty: 4,
+    description: 'Avant d\'integrer les nouvelles commandes dans le système, il faut vérifier qu\'elles referencent des clients connus. Les commandes sont sales (doublons, vides). Apres nettoyage, chaque commande est comparee a la table de référence clients. Les commandes valides vont en Silver, les invalides sont rejetees avec un log.\n\nMethodologie : Nettoyez en lot (ForEach), puis validez les références (Lookup).',
     hint: 'ForEach [clean + dedup] → Lookup (client_id) → Match→Silver / NoMatch→Log+CSV.',
     hintNodes: ['csv_source', 'db_source', 'foreach', 'lookup', 'lakehouse_silver', 'log', 'csv_export'],
     sources: {
@@ -684,13 +684,13 @@ export const EXERCISES = [
       if (!has('foreach')) return { ok: false, msg: 'Utilisez ForEach.' };
       if (!has('lookup')) return { ok: false, msg: 'Utilisez Lookup.' };
       if (!has('log')) return { ok: false, msg: 'Ajoutez un Journal pour les rejets.' };
-      return { ok: true, msg: 'Controle qualite en place !' };
+      return { ok: true, msg: 'Contrôle qualite en place !' };
     },
   },
   {
     id: 'pipe-31', title: 'Pipeline BI complet', difficulty: 4,
-    description: 'Le comite de direction veut un Dashboard avec : le CA par categorie (barres), le classement des ventes (table), et les produits enrichis avec leur categorie. Les ventes et produits viennent de 2 sources differentes. L\'architecture doit suivre le modele medallion.\n\nMethodologie : Bronze (ingestion) → Silver (join + window rank + enrichissement) → Gold (agregat par categorie) → Dashboard.',
-    hint: 'Sources → Bronze → Join (produit_id) → Window(rank) → Silver → Agreger → Gold → Dashboard.',
+    description: 'Le comite de direction veut un Dashboard avec : le CA par catégorie (barres), le classement des ventes (table), et les produits enrichis avec leur catégorie. Les ventes et produits viennent de 2 sources differentes. L\'architecture doit suivre le modèle medallion.\n\nMethodologie : Bronze (ingestion) → Silver (join + window rank + enrichissement) → Gold (agregat par catégorie) → Dashboard.',
+    hint: 'Sources → Bronze → Join (produit_id) → Window(rank) → Silver → Agréger → Gold → Dashboard.',
     hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'join', 'window_func', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'ventes', data: [
@@ -705,7 +705,7 @@ export const EXERCISES = [
     validate: (outputs, nodes, conns, cfgs) => {
       const has = t => nodes.some(n => n.type === t);
       if (!has('lakehouse_bronze') || !has('lakehouse_silver') || !has('lakehouse_gold')) return { ok: false, msg: 'Utilisez les 3 couches medallion.' };
-      if (!has('window_func')) return { ok: false, msg: 'Utilisez une fonction fenetre.' };
+      if (!has('window_func')) return { ok: false, msg: 'Utilisez une fonction fenêtre.' };
       if (!has('dashboard')) return { ok: false, msg: 'Ajoutez un Dashboard.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table.' };
       return { ok: true, msg: 'Pipeline BI complet !' };
@@ -713,7 +713,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-32', title: 'Architecture libre', difficulty: 4,
-    description: 'Vous etes le data engineer en charge de concevoir l\'architecture data d\'une startup e-commerce. Vous disposez de toutes les donnees (clients, commandes, produits, fournisseurs, evaluations) provenant de sources variees. Votre score depend de la richesse de votre architecture.\n\nMethodologie : Libre ! Utilisez un maximum d\'outils : sources multiples, medallion, nettoyage, transformations avancees, monitoring et destinations.',
+    description: 'Vous etes le data engineer en charge de concevoir l\'architecture data d\'une startup e-commerce. Vous disposez de toutes les données (clients, commandes, produits, fournisseurs, evaluations) provenant de sources variees. Votre score depend de la richesse de votre architecture.\n\nMethodologie : Libre ! Utilisez un maximum d\'outils : sources multiples, medallion, nettoyage, transformations avancees, monitoring et destinations.',
     hint: 'Max de points : 3 sources + nettoyage + Bronze/Silver/Gold + Log + Dashboard + CSV + agregats/joins.',
     hintNodes: ['csv_source', 'db_source', 'api_source', 'lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold', 'log', 'dashboard', 'csv_export'],
     sources: {
@@ -748,7 +748,7 @@ export const EXERCISES = [
 
 export const TIERS = [
   { id: 1, name: 'Facile', color: 'from-emerald-400 to-green-500', icon: '🌱', minToUnlockNext: 6 },
-  { id: 2, name: 'Intermediaire', color: 'from-blue-400 to-indigo-500', icon: '🔧', minToUnlockNext: 6 },
+  { id: 2, name: 'Intermédiaire', color: 'from-blue-400 to-indigo-500', icon: '🔧', minToUnlockNext: 6 },
   { id: 3, name: 'Difficile', color: 'from-amber-400 to-orange-500', icon: '🔥', minToUnlockNext: 6 },
   { id: 4, name: 'Expert', color: 'from-red-400 to-rose-600', icon: '💎', minToUnlockNext: null },
 ];

@@ -5,7 +5,7 @@ export default function CardInfo({ cardInfo, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
@@ -13,12 +13,12 @@ export default function CardInfo({ cardInfo, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-transparent">
+        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-[#FFE5DC] to-transparent">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-4xl">{cardInfo.icon}</span>
               <div>
-                <h2 className="text-xl font-bold text-indigo-600">{cardInfo.name}</h2>
+                <h2 className="text-xl font-bold text-[#E85D41]">{cardInfo.name}</h2>
                 <p className="text-slate-500 font-mono text-sm">{cardInfo.shortName}</p>
               </div>
             </div>
@@ -34,12 +34,12 @@ export default function CardInfo({ cardInfo, onClose }) {
         {/* Content */}
         <div className="p-4 space-y-4">
           <div>
-            <h3 className="text-sm font-bold uppercase text-indigo-500 mb-2">Description</h3>
+            <h3 className="text-sm font-bold uppercase text-[#FF8066] mb-2">Description</h3>
             <p className="text-slate-700">{cardInfo.description}</p>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold uppercase text-indigo-500 mb-2">Comment ça marche</h3>
+            <h3 className="text-sm font-bold uppercase text-[#FF8066] mb-2">Comment ça marche</h3>
             <div className="text-slate-600 text-sm whitespace-pre-line bg-slate-50 rounded-lg p-3 border border-slate-200">
               {cardInfo.detailedExplanation}
             </div>
@@ -47,7 +47,7 @@ export default function CardInfo({ cardInfo, onClose }) {
 
           {example && (
             <div>
-              <h3 className="text-sm font-bold uppercase text-indigo-500 mb-2">Exemple</h3>
+              <h3 className="text-sm font-bold uppercase text-[#FF8066] mb-2">Exemple</h3>
               {/* Special layout for join with two input tables */}
               {example.secondTable ? (
                 <div className="space-y-3">
@@ -114,7 +114,7 @@ function MiniTable({ data }) {
     <div className="overflow-x-auto mt-2">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-indigo-600 border-b border-slate-200">
+          <tr className="text-[#E85D41] border-b border-slate-200">
             {columns.map((col) => (
               <th key={col} className="px-2 py-1 text-left font-bold">{col}</th>
             ))}

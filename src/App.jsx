@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { DndContext, closestCenter, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useDraggable } from '@dnd-kit/core';
+import { ArrowLeft } from 'lucide-react';
 import TableView from './components/TableView';
 import Card from './components/Card';
 import Pipeline from './components/Pipeline';
@@ -13,6 +15,7 @@ import HomeScreen from './components/HomeScreen';
 import SandboxImport from './components/SandboxImport';
 import Tutorial from './components/Tutorial';
 import DojoIntro, { useDojoIntro, DATA_DOJO_INTRO } from './components/DojoIntro';
+import BackButton from './components/BackButton';
 import { loadExercise, getExerciseList } from './utils/csvParser';
 import { getAllCards, getCardDisplayInfo } from './utils/cardDefinitions';
 import { applyPipeline, tablesEqual } from './transformations';
@@ -39,6 +42,7 @@ function App({ onBackToHub }) {
   const [currentExerciseId, setCurrentExerciseId] = useState(null);
   const [exerciseData, setExerciseData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const [pipeline, setPipeline] = useState([]);
   const [currentTable, setCurrentTable] = useState([]);
@@ -76,10 +80,19 @@ function App({ onBackToHub }) {
   const [isOverPipeline, setIsOverPipeline] = useState(false);
   const [handInsertIndex, setHandInsertIndex] = useState(null);
 
-  // DnD sensors
+  // DnD sensors (inclut clavier pour a11y)
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 8 } });
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } });
-  const sensors = useSensors(pointerSensor, touchSensor);
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } });
+  const keyboardSensor = useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates });
+  const sensors = useSensors(pointerSensor, touchSensor, keyboardSensor);
+
+  // Historique pour undo/redo (Data Dojo)
+  const historyRef = useRef({ past: [], future: [] });
+  const pushHistory = useCallback((snapshot) => {
+    historyRef.current.past.push(snapshot);
+    if (historyRef.current.past.length > 50) historyRef.current.past.shift();
+    historyRef.current.future = [];
+  }, []);
 
   // Tutorial: show on first visit to ex-01
   useEffect(() => {
@@ -103,6 +116,7 @@ function App({ onBackToHub }) {
 
     const loadData = async () => {
       setLoading(true);
+      setLoadError(null);
       setPipeline([]);
       setHasWon(false);
       setShowSuccess(false);
@@ -133,6 +147,7 @@ function App({ onBackToHub }) {
         }
       } catch (err) {
         console.error(err);
+        setLoadError("Impossible de charger l'exercice. Essayez de revenir à l'accueil.");
       } finally {
         setLoading(false);
       }
@@ -204,7 +219,7 @@ function App({ onBackToHub }) {
     }
   }, [hoveredPipelineIndex, pipeline, exerciseData, view, sandboxInput, sandboxSecondTable]);
 
-  const allCards = getAllCards();
+  const allCards = useMemo(() => getAllCards(), []);
 
   // Check if join/concat card is in pipeline to hide secondary table
   const hasSecondTableUsed = useMemo(() => {
@@ -278,24 +293,30 @@ function App({ onBackToHub }) {
         params: null,
       });
       if (newCard) {
-        setPipeline((prev) => [...prev, newCard]);
+        setPipeline((prev) => {
+          pushHistory(prev);
+          return [...prev, newCard];
+        });
       }
     }
-  }, []);
+  }, [pushHistory]);
 
   const handleParamConfirm = useCallback((params) => {
     // Editing existing card in pipeline
     if (editingCardId) {
-      setPipeline(prev => prev.map(card => {
-        if (card.id === editingCardId) {
-          return getCardDisplayInfo({
-            id: card.id,
-            type: card.type,
-            params,
-          });
-        }
-        return card;
-      }));
+      setPipeline(prev => {
+        pushHistory(prev);
+        return prev.map(card => {
+          if (card.id === editingCardId) {
+            return getCardDisplayInfo({
+              id: card.id,
+              type: card.type,
+              params,
+            });
+          }
+          return card;
+        });
+      });
       setEditingCardId(null);
       setEditInitialParams(null);
       setPendingCard(null);
@@ -313,16 +334,20 @@ function App({ onBackToHub }) {
     if (pendingInsertIndex !== null) {
       // Insert at specific position
       setPipeline(prev => {
+        pushHistory(prev);
         const newPipeline = [...prev];
         newPipeline.splice(pendingInsertIndex, 0, cardWithParams);
         return newPipeline;
       });
       setPendingInsertIndex(null);
     } else {
-      setPipeline((prev) => [...prev, cardWithParams]);
+      setPipeline((prev) => {
+        pushHistory(prev);
+        return [...prev, cardWithParams];
+      });
     }
     setPendingCard(null);
-  }, [pendingCard, editingCardId, pendingInsertIndex]);
+  }, [pendingCard, editingCardId, pendingInsertIndex, pushHistory]);
 
   const handleParamCancel = useCallback(() => {
     setPendingCard(null);
@@ -338,17 +363,50 @@ function App({ onBackToHub }) {
   }, []);
 
   const handleRemoveCard = useCallback((cardInfo) => {
-    setPipeline((prev) => prev.filter((c) => c.id !== cardInfo.id));
-  }, []);
+    setPipeline((prev) => {
+      pushHistory(prev);
+      return prev.filter((c) => c.id !== cardInfo.id);
+    });
+  }, [pushHistory]);
 
   const handleUndo = useCallback(() => {
-    setPipeline(prev => prev.slice(0, -1));
+    setPipeline(prev => {
+      if (historyRef.current.past.length === 0) return prev;
+      const previous = historyRef.current.past.pop();
+      historyRef.current.future.push(prev);
+      return previous;
+    });
+  }, []);
+
+  const handleRedo = useCallback(() => {
+    setPipeline(prev => {
+      if (historyRef.current.future.length === 0) return prev;
+      const next = historyRef.current.future.pop();
+      historyRef.current.past.push(prev);
+      return next;
+    });
   }, []);
 
   const handleReset = useCallback(() => {
+    if (pipeline.length === 0) return;
+    if (!window.confirm('Vider le pipeline ? Cette action peut être annulée avec Ctrl+Z.')) return;
+    pushHistory(pipeline);
     setPipeline([]);
     setHasWon(false);
-  }, []);
+  }, [pipeline, pushHistory]);
+
+  // Raccourcis clavier : Ctrl+Z / Ctrl+Y
+  useEffect(() => {
+    if (view !== 'game' && view !== 'sandbox') return;
+    const onKey = (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); handleUndo(); }
+      else if ((e.key === 'y') || (e.key === 'z' && e.shiftKey)) { e.preventDefault(); handleRedo(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [view, handleUndo, handleRedo]);
 
   const handleHoverCard = useCallback((index) => {
     setHoveredPipelineIndex(index);
@@ -360,14 +418,26 @@ function App({ onBackToHub }) {
 
   const handleNextExercise = useCallback(() => {
     const currentIndex = exercises.findIndex((e) => e.id === currentExerciseId);
-    const nextIndex = (currentIndex + 1) % exercises.length;
+    // Si on est au dernier exercice, on revient à l'accueil au lieu de boucler silencieusement
+    if (currentIndex === exercises.length - 1) {
+      setShowSuccess(false);
+      handleBackToHome();
+      return;
+    }
+    const nextIndex = currentIndex + 1;
     setCurrentExerciseId(exercises[nextIndex].id);
     setShowSuccess(false);
-  }, [exercises, currentExerciseId]);
+  }, [exercises, currentExerciseId, handleBackToHome]);
 
   const handleApplySolution = useCallback((solutionCards) => {
     setPipeline(solutionCards);
   }, []);
+
+  // Ref stable pour pipeline (évite re-créations des handlers DnD)
+  const pipelineRef = useRef(pipeline);
+  useEffect(() => { pipelineRef.current = pipeline; }, [pipeline]);
+  const handInsertIndexRef = useRef(handInsertIndex);
+  useEffect(() => { handInsertIndexRef.current = handInsertIndex; }, [handInsertIndex]);
 
   // DnD handlers
   const handleDragStart = useCallback((event) => {
@@ -376,11 +446,10 @@ function App({ onBackToHub }) {
     if (data?.type === 'hand-card') {
       setActiveDragCard(data.card);
     } else {
-      // Pipeline card being reordered
-      const card = pipeline.find(c => c.id === active.id);
+      const card = pipelineRef.current.find(c => c.id === active.id);
       setActiveDragCard(card || null);
     }
-  }, [pipeline]);
+  }, []);
 
   const handleDragOver = useCallback((event) => {
     const { active, over } = event;
@@ -396,16 +465,17 @@ function App({ onBackToHub }) {
     if (isHandCard) {
       // Detect if over pipeline area
       const overId = over.id;
+      const currentPipeline = pipelineRef.current;
       if (overId === 'pipeline-empty' || overId === 'pipeline-start' || overId === 'pipeline-end') {
         setIsOverPipeline(true);
         if (overId === 'pipeline-start') {
           setHandInsertIndex(0);
         } else if (overId === 'pipeline-end' || overId === 'pipeline-empty') {
-          setHandInsertIndex(pipeline.length);
+          setHandInsertIndex(currentPipeline.length);
         }
       } else {
         // Over a specific pipeline card - detect left/right half
-        const overIndex = pipeline.findIndex(c => c.id === overId);
+        const overIndex = currentPipeline.findIndex(c => c.id === overId);
         if (overIndex >= 0) {
           setIsOverPipeline(true);
           const overRect = over.rect;
@@ -428,7 +498,7 @@ function App({ onBackToHub }) {
         }
       }
     }
-  }, [pipeline]);
+  }, []);
 
   const handleDragCancel = useCallback(() => {
     setActiveDragCard(null);
@@ -446,11 +516,12 @@ function App({ onBackToHub }) {
 
     const activeData = active.data?.current;
     const isHandCard = activeData?.type === 'hand-card';
+    const currentPipeline = pipelineRef.current;
+    const currentInsertIdx = handInsertIndexRef.current;
 
     if (isHandCard) {
-      // Hand card dropped on pipeline
       const card = activeData.card;
-      const insertIdx = handInsertIndex !== null ? handInsertIndex : pipeline.length;
+      const insertIdx = currentInsertIdx !== null ? currentInsertIdx : currentPipeline.length;
 
       const needsParams = ['delete', 'filter', 'sort', 'join', 'rename', 'select', 'fill_na', 'concat', 'drop_duplicates', 'delete_na'].includes(card.type);
 
@@ -465,6 +536,7 @@ function App({ onBackToHub }) {
         });
         if (newCard) {
           setPipeline(prev => {
+            pushHistory(prev);
             const newPipeline = [...prev];
             newPipeline.splice(insertIdx, 0, newCard);
             return newPipeline;
@@ -472,14 +544,16 @@ function App({ onBackToHub }) {
         }
       }
     } else {
-      // Pipeline reorder
-      const oldIndex = pipeline.findIndex(c => c.id === active.id);
-      const newIndex = pipeline.findIndex(c => c.id === over.id);
+      const oldIndex = currentPipeline.findIndex(c => c.id === active.id);
+      const newIndex = currentPipeline.findIndex(c => c.id === over.id);
       if (oldIndex >= 0 && newIndex >= 0 && oldIndex !== newIndex) {
-        setPipeline(prev => arrayMove(prev, oldIndex, newIndex));
+        setPipeline(prev => {
+          pushHistory(prev);
+          return arrayMove(prev, oldIndex, newIndex);
+        });
       }
     }
-  }, [pipeline, handInsertIndex]);
+  }, [pushHistory]);
 
   const handleTutorialComplete = useCallback(() => {
     setShowTutorial(false);
@@ -492,10 +566,10 @@ function App({ onBackToHub }) {
   // Show loading while fetching exercise list
   if (loading && exercises.length === 0) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center" role="status" aria-live="polite">
         <div className="text-xl text-indigo-600 flex items-center gap-3 font-medium">
-          <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full" />
-          Chargement...
+          <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full" aria-hidden="true" />
+          <span>Chargement de l'exercice…</span>
         </div>
       </div>
     );
@@ -518,16 +592,13 @@ function App({ onBackToHub }) {
   // Sandbox import screen
   if (view === 'sandbox' && sandboxInput === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6">
+      <div className="min-h-screen p-4 sm:p-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={handleBackToHome}
-              className="game-btn px-3 py-1.5 text-sm font-semibold"
-            >
-              Accueil
-            </button>
-            <h1 className="text-xl font-bold text-indigo-600">Bac a sable</h1>
+            <BackButton onClick={handleBackToHome} />
+            <h1 className="font-display text-2xl text-[#2B2D42]">
+              Bac à <span className="font-display-italic text-[#FF8066]">sable</span>
+            </h1>
           </div>
           <SandboxImport onImport={handleSandboxImport} onCancel={handleBackToHome} />
         </div>
@@ -538,10 +609,10 @@ function App({ onBackToHub }) {
   // Loading exercise data
   if (loading && view === 'game') {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center" role="status" aria-live="polite">
         <div className="text-xl text-indigo-600 flex items-center gap-3 font-medium">
-          <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full" />
-          Chargement...
+          <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full" aria-hidden="true" />
+          <span>Chargement de l'exercice…</span>
         </div>
       </div>
     );
@@ -554,34 +625,38 @@ function App({ onBackToHub }) {
       {/* HEADER */}
       <div className="flex-none flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            onClick={handleBackToHome}
-            className="game-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold flex items-center gap-1"
-          >
-            <span className="hidden sm:inline">Accueil</span>
-            <span className="sm:hidden">&lt;</span>
-          </button>
-          <h1 className="text-base sm:text-xl font-bold text-indigo-600 tracking-wide">
-            {view === 'sandbox' ? 'BAC A SABLE' : 'DATA DOJO'}
+          <BackButton onClick={handleBackToHome} size="sm" label="Accueil" ariaLabel="Retour à l'accueil" />
+          <h1 className="font-display text-lg sm:text-2xl tracking-tight">
+            <span className="text-[#2B2D42]">{view === 'sandbox' ? 'Bac à sable' : 'Data'}</span>
+            {view !== 'sandbox' && <span className="font-display-italic text-[#FF8066]"> Dojo</span>}
           </h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-slate-600 text-xs sm:text-sm font-medium hidden sm:block">
             {view === 'sandbox' ? 'Mode libre' : exerciseData?.config?.title}
           </span>
-          {/* Show solution button if exercise was completed before */}
           {view === 'game' && wasCompleted && savedSolution && savedSolution.length > 0 && (
             <button
               onClick={() => setShowSolutionPopup(true)}
               className="game-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold flex items-center gap-1 text-emerald-600"
-              title="Voir ma solution precedente"
+              title="Voir ma solution précédente"
+              aria-label="Voir ma solution précédente"
             >
               <span className="hidden sm:inline">Solution</span>
+              <span className="sm:hidden" aria-hidden="true">📋</span>
             </button>
           )}
           {view === 'game' && <div data-tutorial="hint-btn"><HintPopup hint={exerciseData?.config?.hint} /></div>}
         </div>
       </div>
+
+      {/* ERROR BANNER */}
+      {loadError && (
+        <div role="alert" className="flex-none bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm flex items-center justify-between">
+          <span>{loadError}</span>
+          <button onClick={() => setLoadError(null)} className="text-red-500 hover:text-red-700 font-bold ml-2" aria-label="Fermer le message d'erreur">×</button>
+        </div>
+      )}
 
       {/* TABLES - Stack on mobile, row on desktop */}
       <div className="flex-none grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">

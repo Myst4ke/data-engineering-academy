@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { HelpCircle, X } from 'lucide-react';
 import CardInfo from './CardInfo';
 
 const CARD_COLORS = {
@@ -67,9 +68,10 @@ export default function Card({
     small: {
       card: 'w-20 h-28',
       icon: 'text-2xl mt-1',
-      name: 'text-[10px]',
-      techName: 'text-[8px]',
-      button: 'w-4 h-4 text-[8px]',
+      name: 'text-[11px]',
+      techName: 'text-[10px]',
+      button: 'w-6 h-6',
+      iconBtn: 'w-3 h-3',
       border: '2px',
       padding: 'p-1',
       showTechName: false,
@@ -78,8 +80,9 @@ export default function Card({
       card: 'w-24 h-32',
       icon: 'text-3xl mt-1',
       name: 'text-xs',
-      techName: 'text-[9px]',
-      button: 'w-5 h-5 text-[9px]',
+      techName: 'text-[10px]',
+      button: 'w-6 h-6',
+      iconBtn: 'w-3.5 h-3.5',
       border: '2px',
       padding: 'p-1.5',
       showTechName: false,
@@ -89,7 +92,8 @@ export default function Card({
       icon: 'text-4xl mt-2',
       name: 'text-sm',
       techName: 'text-[11px]',
-      button: 'w-6 h-6 text-[11px]',
+      button: 'w-7 h-7',
+      iconBtn: 'w-4 h-4',
       border: '3px',
       padding: 'p-2',
       showTechName: true,
@@ -140,20 +144,22 @@ export default function Card({
               {/* Info button - TOP LEFT */}
               <button
                 onClick={handleInfoClick}
-                className={`${s.button} rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center font-bold transition-colors backdrop-blur-sm shadow-sm`}
-                title="Info"
+                className={`${s.button} rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center transition-colors shadow-sm`}
+                title={`Aide sur ${cardInfo.name}`}
+                aria-label={`Aide sur ${cardInfo.name}`}
               >
-                ?
+                <HelpCircle className={s.iconBtn} aria-hidden="true" />
               </button>
 
               {/* Remove button - TOP RIGHT (only in pipeline) */}
               {isInPipeline && onRemove ? (
                 <button
                   onClick={handleRemove}
-                  className={`${s.button} rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 font-bold shadow-md transition-colors`}
-                  title="Retirer"
+                  className={`${s.button} rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 hover:text-red-600 shadow-md transition-colors`}
+                  title={`Retirer ${cardInfo.name}`}
+                  aria-label={`Retirer ${cardInfo.name}`}
                 >
-                  x
+                  <X className={s.iconBtn} aria-hidden="true" />
                 </button>
               ) : (
                 <div className={s.button} />
@@ -180,7 +186,10 @@ export default function Card({
             {/* Parameters - only show in pipeline */}
             {cardInfo.paramLabel && isInPipeline && (
               <div className="mt-auto">
-                <div className="bg-white/25 backdrop-blur-sm rounded px-1.5 py-1 text-[9px] text-center truncate font-medium">
+                <div
+                  className="bg-white/30 rounded px-1.5 py-1 text-[10px] text-center truncate font-medium"
+                  title={cardInfo.paramLabel}
+                >
                   {cardInfo.paramLabel}
                 </div>
               </div>

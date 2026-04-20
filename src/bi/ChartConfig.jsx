@@ -48,7 +48,7 @@ export default function ChartConfig({ columns: defaultColumns, data: defaultData
   const isSep = chartType === 'separator';
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
+    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b border-slate-200">
           <h3 className="text-lg font-bold text-slate-800">Configurer le widget</h3>
@@ -57,7 +57,7 @@ export default function ChartConfig({ columns: defaultColumns, data: defaultData
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {allTables && allTables.length > 1 && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Source de donnees</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Source de données</label>
               <select value={tableId} onChange={e => { setTableId(e.target.value); const t = allTables.find(tt => tt.id === e.target.value); if (t?.columns?.[0]) { setXCol(t.columns[0]); setYCol(t.columns[1] || t.columns[0]); } }}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-indigo-400 focus:outline-none">
                 {allTables.map(t => <option key={t.id} value={t.id}>{t.dbIcon} {t.tableName} ({t.rowCount})</option>)}

@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import BackButton from '../components/BackButton';
 import { NODE_TYPES, CATEGORIES } from './nodeTypes';
 import { getAllTables } from './sampleData';
 import TableExplorer from './TableExplorer';
@@ -104,12 +106,12 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
               </div>
             ) : null;
           })()}
-          {!isTable && label && label !== '__foreach_emojis__' && <span className="text-[8px] text-indigo-500 font-medium">{label}</span>}
-          {!isTable && !label && isSource && <span className="text-[8px] text-amber-500 font-medium">Clic droit: configurer</span>}
-          {!isTable && !label && !isSource && <span className="text-[8px] text-slate-400 font-medium">Clic droit: configurer</span>}
+          {!isTable && label && label !== '__foreach_emojis__' && <span className="text-[10px] text-indigo-500 font-medium">{label}</span>}
+          {!isTable && !label && isSource && <span className="text-[10px] text-amber-600 font-medium">À configurer</span>}
+          {!isTable && !label && !isSource && <span className="text-[10px] text-slate-500 font-medium">À configurer</span>}
           {isTable && outputRowCount > 0 && (() => {
             const colCount = outputData && outputData.length > 0 ? Object.keys(outputData[0]).length : 0;
-            return <span className="text-[8px] text-slate-400">{colCount} col × {outputRowCount} lignes</span>;
+            return <span className="text-[10px] text-slate-500">{colCount} col × {outputRowCount} lignes</span>;
           })()}
         </div>
       </foreignObject>
@@ -571,7 +573,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         const selNodes = new Set();
         const selConns = new Set();
         nodes.forEach(n => {
-          // Skip lakehouse children in rectangle selection
+          // Skip lakehouse children in rectangle sélection
           if (nodeConfigs[n.id]?.parentId) return;
           const nw = NODE_TYPES[n.type]?.category === 'storage' ? LAKE_W : NODE_W;
           const nh = NODE_TYPES[n.type]?.category === 'storage' ? getLakehouseHeight(getLakehouseChildren(n.id).length) : NODE_H;
@@ -1229,16 +1231,33 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
   const selRect = getNormalizedRect();
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50">
-      <div className="flex-none flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 shadow-sm">
+    <div className="h-screen flex flex-col bg-[#FAFBFC]">
+      <div className="flex-none flex items-center justify-between px-4 py-2 bg-white border-b border-[#EDE3D2] shadow-sm flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="game-btn px-3 py-1.5 text-sm font-semibold">← Accueil</button>
-          <h1 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">Pipeline Dojo</h1>
+          <BackButton onClick={onBack} label="Accueil" />
+          <h1 className="font-display text-xl text-[#2B2D42] tracking-tight flex items-center gap-2">
+            Pipeline <span className="font-display-italic text-[#6BA4FF]">Dojo</span>
+          </h1>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">{nodes.length} noeud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
-          {totalSelected > 0 && <button onClick={handleDelete} className="game-btn px-3 py-1 text-xs text-red-500 font-semibold">Supprimer ({totalSelected})</button>}
-          <button onClick={handleClear} className="game-btn px-3 py-1 text-xs text-slate-500 font-semibold">Tout effacer</button>
+          <span className="text-xs text-slate-500">{nodes.length} nœud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
+          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Suppr : supprimer">
+            Clic droit = configurer
+          </span>
+          {totalSelected > 0 && (
+            <button
+              onClick={() => { if (window.confirm(`Supprimer ${totalSelected} élément(s) ? L'action est irréversible.`)) handleDelete(); }}
+              className="game-btn px-3 py-1 text-xs text-red-600 font-semibold"
+            >
+              Supprimer ({totalSelected})
+            </button>
+          )}
+          <button
+            onClick={() => { if (nodes.length === 0 || window.confirm('Effacer tout le canvas ? Cette action est irréversible.')) handleClear(); }}
+            className="game-btn px-3 py-1 text-xs text-slate-600 font-semibold"
+          >
+            Tout effacer
+          </button>
           {exercise && onExerciseValidate && (
             <button onClick={() => onExerciseValidate(nodeOutputs, nodes, connections, nodeConfigs)}
               className="px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors shadow">
@@ -1264,6 +1283,38 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
             setPan(p => ({ x: mx - scale * (mx - p.x), y: my - scale * (my - p.y) }));
             setZoom(newZoom);
           }}>
+
+          {/* Canvas controls (zoom & reset) */}
+          <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1 bg-white border border-slate-200 rounded-lg shadow-md p-1" onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.stopPropagation()}>
+            <button
+              onClick={() => setZoom(z => Math.min(2, z + 0.1))}
+              className="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600"
+              title="Zoomer"
+              aria-label="Zoomer"
+            >
+              <ZoomIn className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <div className="text-center text-[10px] text-slate-500 font-medium py-0.5 border-y border-slate-100">
+              {Math.round(zoom * 100)}%
+            </div>
+            <button
+              onClick={() => setZoom(z => Math.max(0.2, z - 0.1))}
+              className="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600"
+              title="Dézoomer"
+              aria-label="Dézoomer"
+            >
+              <ZoomOut className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+              className="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600"
+              title="Réinitialiser le zoom et le pan"
+              aria-label="Réinitialiser le zoom et le pan"
+            >
+              <Maximize className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+
 
           <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
             {zoom >= 0.35 && (<>
@@ -1513,7 +1564,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
 
       {/* Table rename dialog (connection-based add) */}
       {tableRenameDialog && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setTableRenameDialog(null)}>
+        <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50" onClick={() => setTableRenameDialog(null)}>
           <div className="bg-white rounded-2xl shadow-2xl p-5 w-80" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-bold text-slate-800 mb-3">Nom de la table dans le lakehouse</h3>
             <input type="text" value={tableRenameDialog.name}
@@ -1535,7 +1586,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         const lhType = lhNode ? NODE_TYPES[lhNode.type] : null;
         const children = getLakehouseChildren(lakehouseRenameMenu.lakehouseId);
         return (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setLakehouseRenameMenu(null)}>
+          <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50" onClick={() => setLakehouseRenameMenu(null)}>
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-96 max-h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-lg">{lhType?.icon}</span>
@@ -1604,7 +1655,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
 
       {/* Save to BI Dojo dialog */}
       {biSaveDialog && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setBiSaveDialog(null)}>
+        <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50" onClick={() => setBiSaveDialog(null)}>
           <div className="bg-white rounded-2xl shadow-2xl p-5 w-80" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-bold text-slate-800 mb-1">Exporter vers BI Dojo</h3>
             <p className="text-[10px] text-slate-400 mb-3">{biSaveDialog.data.length} lignes · {biSaveDialog.data.length > 0 ? Object.keys(biSaveDialog.data[0]).length : 0} colonnes</p>

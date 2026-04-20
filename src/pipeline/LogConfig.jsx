@@ -13,7 +13,7 @@ export default function LogConfig({ columns, initialParams, onConfirm, onCancel 
   const [message, setMessage] = useState(initialParams?.message || '');
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
+    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-2 mb-4">
           <span className="text-2xl">📋</span>

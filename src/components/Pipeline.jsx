@@ -10,7 +10,7 @@ function PipelineStartZone() {
   return (
     <div
       ref={setNodeRef}
-      className={`w-4 shrink-0 rounded-l-lg transition-colors ${isOver ? 'bg-indigo-200' : ''}`}
+      className={`w-4 shrink-0 rounded-l-lg transition-colors ${isOver ? 'bg-[#FFE5DC]' : ''}`}
     />
   );
 }
@@ -20,9 +20,9 @@ function PipelineEndZone() {
   return (
     <div
       ref={setNodeRef}
-      className={`w-8 shrink-0 rounded-r-lg transition-colors flex items-center justify-center ${isOver ? 'bg-indigo-200' : ''}`}
+      className={`w-8 shrink-0 rounded-r-lg transition-colors flex items-center justify-center ${isOver ? 'bg-[#FFE5DC]' : ''}`}
     >
-      {isOver && <span className="text-indigo-400 text-xl font-bold">+</span>}
+      {isOver && <span className="text-[#FF8066] text-xl font-bold">+</span>}
     </div>
   );
 }
@@ -32,12 +32,15 @@ function EmptyPipelineDrop() {
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 border-2 border-dashed rounded-lg flex items-center justify-center min-h-[60px] sm:min-h-[80px] md:min-h-[140px] transition-colors ${
-        isOver ? 'border-indigo-400 bg-indigo-50' : 'border-slate-300 bg-slate-50'
+      className={`flex-1 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 min-h-[60px] sm:min-h-[80px] md:min-h-[140px] transition-colors ${
+        isOver ? 'border-[#FF8066] bg-[#FFE5DC]' : 'border-slate-300 bg-slate-50'
       }`}
     >
-      <p className="text-slate-500 text-xs sm:text-sm font-medium text-center px-2">
-        Glissez ou selectionnez des cartes
+      <p className="text-slate-600 text-sm font-medium text-center px-2">
+        Glissez une carte ici, ou cliquez sur une carte pour l'ajouter.
+      </p>
+      <p className="text-slate-400 text-xs text-center px-2">
+        Les transformations s'exécutent dans l'ordre, de gauche à droite.
       </p>
     </div>
   );
@@ -46,7 +49,7 @@ function EmptyPipelineDrop() {
 function InsertPlaceholder() {
   return (
     <div className="flex items-center shrink-0 mx-1">
-      <div className="w-1.5 h-20 sm:h-24 md:h-32 bg-indigo-400 rounded-full animate-pulse" />
+      <div className="w-1.5 h-20 sm:h-24 md:h-32 bg-[#FF8066] rounded-full animate-pulse" />
     </div>
   );
 }
@@ -56,12 +59,18 @@ function MiniTable({ data }) {
   const cols = Object.keys(data[0]);
   const rows = data.slice(0, 4);
   return (
-    <div className="bg-white border border-slate-200 rounded-lg shadow-lg p-2 max-w-[280px]">
-      <table className="text-[9px] border-collapse w-full">
+    <div className="bg-white border border-slate-200 rounded-lg shadow-lg p-2 max-w-[320px]">
+      <table className="text-[11px] border-collapse w-full">
         <thead>
           <tr>
             {cols.map(c => (
-              <th key={c} className="px-1 py-0.5 bg-slate-100 text-slate-600 font-semibold border border-slate-200 whitespace-nowrap truncate max-w-[60px]">{c}</th>
+              <th
+                key={c}
+                title={c}
+                className="px-1.5 py-1 bg-slate-100 text-slate-700 font-semibold border border-slate-200 whitespace-nowrap truncate max-w-[90px]"
+              >
+                {c}
+              </th>
             ))}
           </tr>
         </thead>
@@ -69,7 +78,11 @@ function MiniTable({ data }) {
           {rows.map((row, i) => (
             <tr key={i}>
               {cols.map(c => (
-                <td key={c} className="px-1 py-0.5 text-slate-700 border border-slate-200 whitespace-nowrap truncate max-w-[60px]">
+                <td
+                  key={c}
+                  title={row[c] === '' || row[c] === null || row[c] === undefined ? 'vide' : String(row[c])}
+                  className="px-1.5 py-1 text-slate-700 border border-slate-200 whitespace-nowrap truncate max-w-[90px]"
+                >
                   {row[c] === '' || row[c] === null || row[c] === undefined
                     ? <span className="text-slate-400 italic">vide</span>
                     : String(row[c])}
@@ -80,7 +93,7 @@ function MiniTable({ data }) {
         </tbody>
       </table>
       {data.length > 4 && (
-        <p className="text-[8px] text-slate-400 text-center mt-1">+{data.length - 4} lignes...</p>
+        <p className="text-[10px] text-slate-500 text-center mt-1">+{data.length - 4} lignes…</p>
       )}
     </div>
   );
@@ -162,15 +175,17 @@ export default function Pipeline({ cards, onRemoveCard, onReset, onEditCard, onU
               <button
                 onClick={onUndo}
                 className="game-btn px-2 sm:px-3 py-1 text-xs text-slate-500 hover:text-slate-700 font-semibold"
-                title="Annuler la derniere carte"
+                title="Annuler la dernière action (Ctrl+Z)"
+                aria-label="Annuler la dernière action"
               >
                 Annuler
               </button>
               <button
                 onClick={onReset}
                 className="game-btn px-2 sm:px-3 py-1 text-xs text-red-500 hover:text-red-600 font-semibold"
+                title="Vider le pipeline (annulable avec Ctrl+Z)"
               >
-                Reset
+                Vider
               </button>
             </>
           )}

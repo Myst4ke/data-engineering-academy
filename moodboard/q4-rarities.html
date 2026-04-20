@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q4 · Raretés visuelles pour les tiers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1F2937; background: #F8FAFC; min-height: 100vh; }
+    .nav { padding: 16px 24px; border-bottom: 1px solid #E2E8F0; background: #fff; position: sticky; top: 0; z-index: 10; display: flex; gap: 16px; align-items: center; }
+    .nav a { color: #475569; text-decoration: none; font-size: 13px; font-weight: 500; }
+    .nav a:hover { color: #6366F1; }
+    .nav .sep { color: #CBD5E1; }
+
+    .page-title { text-align: center; padding: 48px 20px 24px; }
+    .page-title h1 { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+    .page-title p { color: #64748B; font-size: 14px; max-width: 720px; margin: 0 auto; line-height: 1.5; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+    .spec { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 28px; margin-bottom: 20px; position: relative; }
+    .spec-tag { position: absolute; top: -10px; left: 24px; background: #6366F1; color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .spec-tag.rec { background: #059669; }
+    .spec-hdr { margin-bottom: 20px; }
+    .spec-hdr h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .spec-hdr p { color: #64748B; font-size: 13px; }
+
+    .tier { margin-top: 24px; }
+    .tier-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .tier-head .name { font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; }
+    .tier-head .count { font-size: 11px; color: #64748B; }
+    .stars { letter-spacing: 2px; }
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+
+    .ex {
+      aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 10px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;
+      background: #fff; border: 2px solid #E2E8F0; font-weight: 700;
+    }
+    .ex:hover { transform: translateY(-2px) scale(1.03); }
+    .ex .n { font-size: 20px; color: #1F2937; }
+    .ex .t { font-size: 9px; color: #94A3B8; margin-top: 2px; font-weight: 500; }
+    .ex.done::after { content: '✓'; position: absolute; top: 4px; right: 6px; color: #10B981; font-size: 14px; font-weight: 800; }
+    .ex.locked { background: #F1F5F9; opacity: 0.55; cursor: not-allowed; }
+    .ex.locked::after { content: '🔒'; position: absolute; top: 4px; right: 4px; font-size: 10px; opacity: 0.7; }
+
+    /* ============================================== */
+    /* OPTION A — full rarities (commun/rare/épique/légendaire) */
+    /* ============================================== */
+    .opt-a .tier.common .ex     { border-color: #B1B5C4; }
+    .opt-a .tier.common .name   { color: #6B7280; }
+    .opt-a .tier.common .stars  { color: #9CA3AF; }
+    .opt-a .tier.rare .ex       { border-color: #60A5FA; background: linear-gradient(180deg, #EFF6FF, #fff); }
+    .opt-a .tier.rare .name     { color: #2563EB; }
+    .opt-a .tier.rare .stars    { color: #60A5FA; }
+    .opt-a .tier.epic .ex       { border-color: #C084FC; background: linear-gradient(180deg, #F5F3FF, #fff); box-shadow: 0 2px 12px rgba(168, 85, 247, 0.12); }
+    .opt-a .tier.epic .name     { color: #9333EA; }
+    .opt-a .tier.epic .stars    { color: #A855F7; }
+    .opt-a .tier.legendary .ex  { border-color: #F59E0B; background: linear-gradient(180deg, #FFFBEB, #fff); box-shadow: 0 2px 16px rgba(245, 158, 11, 0.25); }
+    .opt-a .tier.legendary .name{ color: #B45309; }
+    .opt-a .tier.legendary .stars { color: #F59E0B; }
+    .opt-a .ex.done {
+      background: linear-gradient(135deg, var(--rarity-glow-1), var(--rarity-glow-2)) !important;
+      position: relative;
+    }
+    .opt-a .ex.done::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .opt-a .ex.done:hover::before { opacity: 1; } /* foil effect */
+    .opt-a .tier.common .ex.done     { --rarity-glow-1: #F3F4F6; --rarity-glow-2: #E5E7EB; }
+    .opt-a .tier.rare .ex.done       { --rarity-glow-1: #DBEAFE; --rarity-glow-2: #BFDBFE; }
+    .opt-a .tier.epic .ex.done       { --rarity-glow-1: #EDE9FE; --rarity-glow-2: #DDD6FE; }
+    .opt-a .tier.legendary .ex.done  { --rarity-glow-1: #FEF3C7; --rarity-glow-2: #FDE68A; }
+
+    .opt-a .rarity-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      margin-left: 6px;
+    }
+    .opt-a .tier.common .rarity-badge     { background: #F3F4F6; color: #6B7280; }
+    .opt-a .tier.rare .rarity-badge       { background: #DBEAFE; color: #2563EB; }
+    .opt-a .tier.epic .rarity-badge       { background: #EDE9FE; color: #9333EA; }
+    .opt-a .tier.legendary .rarity-badge  { background: #FEF3C7; color: #B45309; }
+
+    /* ============================================== */
+    /* OPTION B — couleur par tier, sobre */
+    /* ============================================== */
+    .opt-b .tier.debutant .ex    { border-color: #A7F3D0; }
+    .opt-b .tier.debutant .name  { color: #059669; }
+    .opt-b .tier.debutant .ex.done { background: #ECFDF5; border-color: #10B981; }
+    .opt-b .tier.intermediaire .ex    { border-color: #FCD34D; }
+    .opt-b .tier.intermediaire .name  { color: #B45309; }
+    .opt-b .tier.intermediaire .ex.done { background: #FFFBEB; border-color: #F59E0B; }
+    .opt-b .tier.difficile .ex    { border-color: #FDA4AF; }
+    .opt-b .tier.difficile .name  { color: #E11D48; }
+    .opt-b .tier.difficile .ex.done { background: #FFF1F2; border-color: #F43F5E; }
+    .opt-b .tier.expert .ex    { border-color: #C4B5FD; }
+    .opt-b .tier.expert .name  { color: #7C3AED; }
+    .opt-b .tier.expert .ex.done { background: #F5F3FF; border-color: #8B5CF6; }
+
+    /* ============================================== */
+    /* OPTION C — uniforme, status quo */
+    /* ============================================== */
+    .opt-c .tier .ex { border-color: #E2E8F0; }
+    .opt-c .tier .ex.done { background: #ECFDF5; border-color: #10B981; }
+    .opt-c .tier .name { color: #475569; }
+
+    .note { margin-top: 20px; padding: 16px; background: #F1F5F9; border-left: 3px solid #6366F1; font-size: 12px; color: #475569; line-height: 1.6; border-radius: 4px; }
+    .note strong { color: #1F2937; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">← Retour moodboard</a>
+    <span class="sep">·</span>
+    <span>Q4 — Raretés visuelles</span>
+  </nav>
+
+  <div class="page-title">
+    <h1>Trois traitements des tiers</h1>
+    <p>Même contenu (36 exercices, 4 niveaux) avec trois façons de rendre la progression visible. Survolez les cartes réussies dans l'option A pour voir l'effet "foil".</p>
+  </div>
+
+  <div class="wrap">
+
+    <!-- OPTION A — Raretés complètes -->
+    <div class="spec opt-a">
+      <span class="spec-tag rec">Option A · Recommandé</span>
+      <div class="spec-hdr">
+        <h2>Raretés complètes · commun → légendaire</h2>
+        <p>Chaque tier = une rareté distincte (bord + fond + glow). Exercices réussis → effet foil au survol (brillance). Fort mémoriel : l'utilisateur "collectionne".</p>
+      </div>
+
+      <div class="tier common">
+        <div class="tier-head">
+          <span class="name">Débutant</span>
+          <span class="stars">★</span>
+          <span class="rarity-badge">Commun</span>
+          <span class="count">2 / 6</span>
+        </div>
+        <div class="grid">
+          <div class="ex done"><span class="n">1</span><span class="t">Doublons</span></div>
+          <div class="ex done"><span class="n">2</span><span class="t">Articles</span></div>
+          <div class="ex"><span class="n">3</span><span class="t">Catalogue</span></div>
+          <div class="ex"><span class="n">4</span><span class="t">Alliage</span></div>
+          <div class="ex"><span class="n">5</span><span class="t">Sapeurs</span></div>
+          <div class="ex"><span class="n">6</span><span class="t">Cartes</span></div>
+        </div>
+      </div>
+
+      <div class="tier rare">
+        <div class="tier-head">
+          <span class="name">Intermédiaire</span>
+          <span class="stars">★★</span>
+          <span class="rarity-badge">Rare</span>
+          <span class="count">0 / 12</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">7</span></div>
+          <div class="ex locked"><span class="n">8</span></div>
+          <div class="ex locked"><span class="n">9</span></div>
+          <div class="ex locked"><span class="n">10</span></div>
+          <div class="ex locked"><span class="n">11</span></div>
+          <div class="ex locked"><span class="n">12</span></div>
+        </div>
+      </div>
+
+      <div class="tier epic">
+        <div class="tier-head">
+          <span class="name">Difficile</span>
+          <span class="stars">★★★</span>
+          <span class="rarity-badge">Épique</span>
+          <span class="count">0 / 12</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">19</span></div>
+          <div class="ex locked"><span class="n">20</span></div>
+          <div class="ex locked"><span class="n">21</span></div>
+          <div class="ex locked"><span class="n">22</span></div>
+          <div class="ex locked"><span class="n">23</span></div>
+          <div class="ex locked"><span class="n">24</span></div>
+        </div>
+      </div>
+
+      <div class="tier legendary">
+        <div class="tier-head">
+          <span class="name">Expert</span>
+          <span class="stars">★★★★</span>
+          <span class="rarity-badge">Légendaire</span>
+          <span class="count">0 / 6</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">31</span></div>
+          <div class="ex locked"><span class="n">32</span></div>
+          <div class="ex locked"><span class="n">33</span></div>
+          <div class="ex locked"><span class="n">34</span></div>
+          <div class="ex locked"><span class="n">35</span></div>
+          <div class="ex locked"><span class="n">36</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>Pour :</strong> Forte progression perçue, sensation "collection", chaque tier franchi = vrai cap visuel.<br>
+        <strong>Contre :</strong> Risque de paraître "gamer" (si la direction Q1 n'est pas Dojo/MTG). À doser finement.
+      </div>
+    </div>
+
+    <!-- OPTION B — couleur sobre par tier -->
+    <div class="spec opt-b">
+      <span class="spec-tag">Option B</span>
+      <div class="spec-hdr">
+        <h2>Couleur sobre par tier</h2>
+        <p>Chaque tier reçoit une couleur d'accent (bord + fond léger). Pas d'effet foil, pas de vocabulaire de rareté. Plus sobre, très lisible.</p>
+      </div>
+
+      <div class="tier debutant">
+        <div class="tier-head">
+          <span class="name">Débutant</span>
+          <span class="stars" style="color:#10B981">★</span>
+          <span class="count">2 / 6</span>
+        </div>
+        <div class="grid">
+          <div class="ex done"><span class="n">1</span><span class="t">Doublons</span></div>
+          <div class="ex done"><span class="n">2</span><span class="t">Articles</span></div>
+          <div class="ex"><span class="n">3</span><span class="t">Catalogue</span></div>
+          <div class="ex"><span class="n">4</span><span class="t">Alliage</span></div>
+          <div class="ex"><span class="n">5</span><span class="t">Sapeurs</span></div>
+          <div class="ex"><span class="n">6</span><span class="t">Cartes</span></div>
+        </div>
+      </div>
+
+      <div class="tier intermediaire">
+        <div class="tier-head">
+          <span class="name">Intermédiaire</span>
+          <span class="stars" style="color:#F59E0B">★★</span>
+          <span class="count">0 / 12</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">7</span></div>
+          <div class="ex locked"><span class="n">8</span></div>
+          <div class="ex locked"><span class="n">9</span></div>
+          <div class="ex locked"><span class="n">10</span></div>
+          <div class="ex locked"><span class="n">11</span></div>
+          <div class="ex locked"><span class="n">12</span></div>
+        </div>
+      </div>
+
+      <div class="tier difficile">
+        <div class="tier-head">
+          <span class="name">Difficile</span>
+          <span class="stars" style="color:#F43F5E">★★★</span>
+          <span class="count">0 / 12</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">19</span></div>
+          <div class="ex locked"><span class="n">20</span></div>
+          <div class="ex locked"><span class="n">21</span></div>
+          <div class="ex locked"><span class="n">22</span></div>
+          <div class="ex locked"><span class="n">23</span></div>
+          <div class="ex locked"><span class="n">24</span></div>
+        </div>
+      </div>
+
+      <div class="tier expert">
+        <div class="tier-head">
+          <span class="name">Expert</span>
+          <span class="stars" style="color:#8B5CF6">★★★★</span>
+          <span class="count">0 / 6</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">31</span></div>
+          <div class="ex locked"><span class="n">32</span></div>
+          <div class="ex locked"><span class="n">33</span></div>
+          <div class="ex locked"><span class="n">34</span></div>
+          <div class="ex locked"><span class="n">35</span></div>
+          <div class="ex locked"><span class="n">36</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>Pour :</strong> Très lisible, compatible avec toutes les directions Q1, aucun vocabulaire "gaming".<br>
+        <strong>Contre :</strong> Progression moins spectaculaire, moins mémoriel.
+      </div>
+    </div>
+
+    <!-- OPTION C — uniforme, status quo -->
+    <div class="spec opt-c">
+      <span class="spec-tag">Option C</span>
+      <div class="spec-hdr">
+        <h2>Uniforme · status quo</h2>
+        <p>Aucune distinction visuelle entre tiers autre que le nom et le nombre d'étoiles. Ultra-minimaliste.</p>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <span class="name">Débutant</span>
+          <span class="stars" style="color:#F59E0B">★</span>
+          <span class="count">2 / 6</span>
+        </div>
+        <div class="grid">
+          <div class="ex done"><span class="n">1</span><span class="t">Doublons</span></div>
+          <div class="ex done"><span class="n">2</span><span class="t">Articles</span></div>
+          <div class="ex"><span class="n">3</span><span class="t">Catalogue</span></div>
+          <div class="ex"><span class="n">4</span><span class="t">Alliage</span></div>
+          <div class="ex"><span class="n">5</span><span class="t">Sapeurs</span></div>
+          <div class="ex"><span class="n">6</span><span class="t">Cartes</span></div>
+        </div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <span class="name">Intermédiaire</span>
+          <span class="stars" style="color:#F59E0B">★★</span>
+          <span class="count">0 / 12</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">7</span></div>
+          <div class="ex locked"><span class="n">8</span></div>
+          <div class="ex locked"><span class="n">9</span></div>
+          <div class="ex locked"><span class="n">10</span></div>
+          <div class="ex locked"><span class="n">11</span></div>
+          <div class="ex locked"><span class="n">12</span></div>
+        </div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <span class="name">Expert</span>
+          <span class="stars" style="color:#F59E0B">★★★★</span>
+          <span class="count">0 / 6</span>
+        </div>
+        <div class="grid">
+          <div class="ex locked"><span class="n">31</span></div>
+          <div class="ex locked"><span class="n">32</span></div>
+          <div class="ex locked"><span class="n">33</span></div>
+          <div class="ex locked"><span class="n">34</span></div>
+          <div class="ex locked"><span class="n">35</span></div>
+          <div class="ex locked"><span class="n">36</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>Pour :</strong> Impeccablement sobre, aucun parti pris.<br>
+        <strong>Contre :</strong> L'expérience de progression est plate, rien ne signale visuellement la montée en difficulté.
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

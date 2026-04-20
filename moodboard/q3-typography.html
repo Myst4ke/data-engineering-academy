@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q3 · Typographie</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:wght@500;600;700&family=Cinzel:wght@600;700&family=Rubik:wght@600;800&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1F2937; background: #F8FAFC; min-height: 100vh; }
+    .nav { padding: 16px 24px; border-bottom: 1px solid #E2E8F0; background: #fff; position: sticky; top: 0; z-index: 10; display: flex; gap: 16px; align-items: center; }
+    .nav a { color: #475569; text-decoration: none; font-size: 13px; font-weight: 500; }
+    .nav a:hover { color: #6366F1; }
+    .nav .sep { color: #CBD5E1; }
+
+    .page-title { text-align: center; padding: 48px 20px 24px; }
+    .page-title h1 { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+    .page-title p { color: #64748B; font-size: 14px; max-width: 720px; margin: 0 auto; line-height: 1.5; }
+
+    .tabs { display: flex; justify-content: center; gap: 8px; padding: 0 24px 32px; flex-wrap: wrap; }
+    .tab { padding: 8px 14px; background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 12px; color: #64748B; cursor: pointer; font-weight: 600; }
+    .tab.active { background: #6366F1; color: #fff; border-color: #6366F1; }
+
+    .specs { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+    .spec { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 32px; margin-bottom: 20px; position: relative; }
+    .spec-tag { position: absolute; top: -10px; left: 24px; background: #6366F1; color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .spec-tag.rec { background: #059669; }
+    .spec-hdr { margin-bottom: 24px; }
+    .spec-hdr h2 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .spec-hdr p { color: #64748B; font-size: 13px; }
+
+    .showcase { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start; }
+    .showcase-main { padding: 24px; background: #FAFBFC; border-radius: 12px; border: 1px solid #EDE9F5; }
+    .showcase-side { font-size: 12px; color: #64748B; }
+    .showcase-side h4 { color: #1F2937; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    .showcase-side ul { list-style: none; padding: 0; }
+    .showcase-side li { padding: 5px 0; border-bottom: 1px dashed #E2E8F0; display: flex; justify-content: space-between; gap: 10px; }
+    .showcase-side li strong { color: #1F2937; font-weight: 600; }
+
+    /* === Option A: Inter only === */
+    .opt-a .h1 { font-family: 'Inter'; font-weight: 800; font-size: 48px; letter-spacing: -0.02em; line-height: 1.1; color: #1F2937; margin-bottom: 10px; }
+    .opt-a .h2 { font-family: 'Inter'; font-weight: 700; font-size: 22px; color: #1F2937; margin-bottom: 6px; }
+    .opt-a .sub { font-family: 'Inter'; font-weight: 500; font-size: 14px; color: #6366F1; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .opt-a p { font-family: 'Inter'; font-size: 14px; line-height: 1.6; color: #475569; margin-bottom: 14px; }
+    .opt-a .tbl-hd { font-family: 'Inter'; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748B; }
+    .opt-a .tbl-cell { font-family: 'Inter'; font-size: 13px; color: #1F2937; }
+
+    /* === Option B: Inter + display duo === */
+    .opt-b .h1 { font-family: 'Fraunces'; font-weight: 700; font-size: 52px; letter-spacing: -0.02em; line-height: 1.05; color: #1F2937; margin-bottom: 10px; }
+    .opt-b .h2 { font-family: 'Fraunces'; font-weight: 600; font-size: 24px; color: #1F2937; margin-bottom: 6px; }
+    .opt-b .sub { font-family: 'Inter'; font-weight: 500; font-size: 13px; color: #B45309; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .opt-b p { font-family: 'Inter'; font-size: 14px; line-height: 1.6; color: #475569; margin-bottom: 14px; }
+    .opt-b .tbl-hd { font-family: 'Inter'; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748B; }
+    .opt-b .tbl-cell { font-family: 'Inter'; font-size: 13px; color: #1F2937; }
+
+    /* === Option C: trio with mono === */
+    .opt-c .h1 { font-family: 'Fraunces'; font-weight: 700; font-size: 52px; letter-spacing: -0.02em; line-height: 1.05; color: #1F2937; margin-bottom: 10px; }
+    .opt-c .h2 { font-family: 'Fraunces'; font-weight: 600; font-size: 24px; color: #1F2937; margin-bottom: 6px; }
+    .opt-c .sub { font-family: 'Inter'; font-weight: 500; font-size: 13px; color: #B45309; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .opt-c p { font-family: 'Inter'; font-size: 14px; line-height: 1.6; color: #475569; margin-bottom: 14px; }
+    .opt-c .tbl-hd { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: #64748B; }
+    .opt-c .tbl-cell { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #1F2937; }
+    .opt-c code { font-family: 'JetBrains Mono', monospace; background: #F1F5F9; color: #8B5CF6; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+
+    .example-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .example-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #CBD5E1; }
+    .example-table td { padding: 8px 10px; border-bottom: 1px solid #E2E8F0; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; background: #F1F5F9; border-radius: 999px;
+      font-size: 11px; font-weight: 600; color: #475569;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">← Retour moodboard</a>
+    <span class="sep">·</span>
+    <span>Q3 — Typographie</span>
+  </nav>
+
+  <div class="page-title">
+    <h1>Trois systèmes typographiques</h1>
+    <p>Chaque option affiche la même hiérarchie : titre de page, nom de dojo, paragraphe, et un exemple de table de données. Observez la personnalité apportée.</p>
+  </div>
+
+  <div class="specs">
+
+    <!-- Option A: Inter only -->
+    <div class="spec opt-a">
+      <span class="spec-tag">Option A</span>
+      <div class="spec-hdr">
+        <h2>Inter seul · conservateur</h2>
+        <p>Status quo. Rien à télécharger de plus. Aucune différenciation typographique.</p>
+      </div>
+      <div class="showcase">
+        <div class="showcase-main">
+          <div class="h1">Data Engineering Academy</div>
+          <div class="sub">Kata I</div>
+          <div class="h2">Data Dojo</div>
+          <p>Apprenez à nettoyer et transformer des données avec des cartes de transformation. Chaque exercice est un micro-problème métier tiré du quotidien des équipes data.</p>
+          <table class="example-table">
+            <thead><tr><th class="tbl-hd">SKU</th><th class="tbl-hd">PRODUIT</th><th class="tbl-hd">PRIX</th></tr></thead>
+            <tbody>
+              <tr><td class="tbl-cell">A001</td><td class="tbl-cell">Laptop Pro 15</td><td class="tbl-cell">999,00 €</td></tr>
+              <tr><td class="tbl-cell">A002</td><td class="tbl-cell">Souris ergonomique</td><td class="tbl-cell">25,00 €</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="showcase-side">
+          <h4>Fontes</h4>
+          <ul>
+            <li>Display <strong>Inter 800</strong></li>
+            <li>Titres <strong>Inter 700</strong></li>
+            <li>Body <strong>Inter 400–500</strong></li>
+            <li>Mono <strong>— (aucune)</strong></li>
+          </ul>
+          <h4 style="margin-top:14px">Coût réseau</h4>
+          <ul><li>Ajouté <strong>0 Ko</strong></li></ul>
+          <h4 style="margin-top:14px">Personnalité</h4>
+          <p style="margin-top:4px">Neutre, "SaaS 2023". Toutes les startups de la planète.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option B: duo display + Inter -->
+    <div class="spec opt-b">
+      <span class="spec-tag rec">Option B · Recommandé</span>
+      <div class="spec-hdr">
+        <h2>Duo : display Fraunces + Inter</h2>
+        <p>Fraunces (serif moderne élégant avec italiques expressifs) pour titres et noms de dojo. Inter reste pour le body et UI.</p>
+      </div>
+      <div class="showcase">
+        <div class="showcase-main">
+          <div class="h1">Data Engineering Academy</div>
+          <div class="sub">Kata I</div>
+          <div class="h2">Data Dojo</div>
+          <p>Apprenez à nettoyer et transformer des données avec des cartes de transformation. Chaque exercice est un micro-problème métier tiré du quotidien des équipes data.</p>
+          <table class="example-table">
+            <thead><tr><th class="tbl-hd">SKU</th><th class="tbl-hd">PRODUIT</th><th class="tbl-hd">PRIX</th></tr></thead>
+            <tbody>
+              <tr><td class="tbl-cell">A001</td><td class="tbl-cell">Laptop Pro 15</td><td class="tbl-cell">999,00 €</td></tr>
+              <tr><td class="tbl-cell">A002</td><td class="tbl-cell">Souris ergonomique</td><td class="tbl-cell">25,00 €</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="showcase-side">
+          <h4>Fontes</h4>
+          <ul>
+            <li>Display <strong>Fraunces 700</strong></li>
+            <li>Titres <strong>Fraunces 600</strong></li>
+            <li>Body <strong>Inter 400–500</strong></li>
+            <li>Mono <strong>— (aucune)</strong></li>
+          </ul>
+          <h4 style="margin-top:14px">Coût réseau</h4>
+          <ul><li>Ajouté <strong>~15 Ko</strong></li></ul>
+          <h4 style="margin-top:14px">Alternatives display</h4>
+          <p style="margin-top:4px;line-height:1.6">
+            <span class="pill">Recoleta</span>
+            <span class="pill">Tenor Sans</span>
+            <span class="pill">Cormorant</span>
+          </p>
+          <h4 style="margin-top:14px">Personnalité</h4>
+          <p style="margin-top:4px">Éditoriale, éducative sérieuse. Ton "académie" crédible.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option C: trio display + Inter + mono -->
+    <div class="spec opt-c">
+      <span class="spec-tag">Option C</span>
+      <div class="spec-hdr">
+        <h2>Trio : Fraunces + Inter + JetBrains Mono</h2>
+        <p>Comme l'option B, mais ajoute JetBrains Mono pour tous les contextes data : noms de colonnes, valeurs, IDs, code, n&oelig;uds du pipeline.</p>
+      </div>
+      <div class="showcase">
+        <div class="showcase-main">
+          <div class="h1">Data Engineering Academy</div>
+          <div class="sub">Kata I</div>
+          <div class="h2">Data Dojo</div>
+          <p>Apprenez à nettoyer et transformer des données avec des cartes de transformation. Le n&oelig;ud <code>drop_duplicates(column='sku')</code> s'applique à <code>sku</code>.</p>
+          <table class="example-table">
+            <thead><tr><th class="tbl-hd">SKU</th><th class="tbl-hd">PRODUIT</th><th class="tbl-hd">PRIX</th></tr></thead>
+            <tbody>
+              <tr><td class="tbl-cell">A001</td><td class="tbl-cell">Laptop Pro 15</td><td class="tbl-cell">999.00</td></tr>
+              <tr><td class="tbl-cell">A002</td><td class="tbl-cell">Souris ergo.</td><td class="tbl-cell">25.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="showcase-side">
+          <h4>Fontes</h4>
+          <ul>
+            <li>Display <strong>Fraunces 700</strong></li>
+            <li>Titres <strong>Fraunces 600</strong></li>
+            <li>Body <strong>Inter 400–500</strong></li>
+            <li>Data <strong>JetBrains Mono</strong></li>
+          </ul>
+          <h4 style="margin-top:14px">Coût réseau</h4>
+          <ul><li>Ajouté <strong>~30 Ko</strong></li></ul>
+          <h4 style="margin-top:14px">Où s'applique la mono ?</h4>
+          <ul>
+            <li><span class="pill">Tables data</span></li>
+            <li><span class="pill">Nœuds pipeline</span></li>
+            <li><span class="pill">Noms de colonnes</span></li>
+            <li><span class="pill">Code / params</span></li>
+          </ul>
+          <h4 style="margin-top:14px">Personnalité</h4>
+          <p style="margin-top:4px">Très pro, code-friendly. Distingue visuellement texte humain vs texte machine.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

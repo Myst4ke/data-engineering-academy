@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Option A · Dojo japonais sobre</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #F5F1E8;
+      --paper-dark: #EAE3D1;
+      --ink: #1F2937;
+      --ink-soft: #475569;
+      --ink-muted: #8B8070;
+      --gold: #B45309;
+      --gold-soft: #D97706;
+      --red: #991B1B;
+      --border: #D6CDB7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background-color: var(--paper);
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(31,41,55,0.06) 1px, transparent 0),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg fill='none' stroke='%231F2937' stroke-width='1' opacity='0.05'%3E%3Cpath d='M0 20 Q20 0 40 20 T80 20'/%3E%3Cpath d='M0 0 Q20 -20 40 0 T80 0'/%3E%3Cpath d='M0 40 Q20 20 40 40 T80 40'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 20px 20px, 80px 40px;
+    }
+    .nav { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 16px; align-items: center; background: rgba(245, 241, 232, 0.8); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10; }
+    .nav a { color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .nav a:hover { color: var(--gold); }
+    .nav .sep { color: var(--border); }
+
+    .wrap { max-width: 960px; margin: 0 auto; padding: 60px 24px 80px; }
+
+    .hero { text-align: center; margin-bottom: 56px; position: relative; }
+    .kanji { font-family: 'Fraunces', serif; font-weight: 500; font-size: 72px; color: var(--gold); display: block; margin-bottom: 8px; opacity: 0.9; font-style: italic; }
+    .kanji::after { content: '道'; }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 56px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .hero .sub { font-size: 16px; color: var(--ink-soft); font-weight: 400; letter-spacing: 0.01em; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 48px; }
+    .module {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px 20px;
+      position: relative;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .module::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .module:hover::before { opacity: 1; }
+    .module:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(180, 83, 9, 0.08); }
+    .module .icon { font-size: 32px; margin-bottom: 12px; display: block; filter: saturate(0.9); }
+    .module h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin-bottom: 4px; color: var(--ink); }
+    .module .sub { font-size: 12px; color: var(--gold); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .module p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 16px; }
+    .module .progress { margin-top: 12px; }
+    .module .progress-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-muted); margin-bottom: 4px; letter-spacing: 0.05em; }
+    .module .progress-bar { height: 2px; background: var(--paper-dark); position: relative; }
+    .module .progress-fill { height: 100%; background: var(--gold); width: 20%; }
+    .module .cta { margin-top: 14px; font-size: 12px; color: var(--gold); font-weight: 600; letter-spacing: 0.05em; }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-style: italic;
+      font-size: 28px;
+      color: var(--ink);
+      margin: 48px 0 8px;
+      letter-spacing: -0.01em;
+    }
+    .section-title::before { content: '—  '; color: var(--gold); }
+    .section-sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; }
+
+    .tier-label { display: flex; align-items: center; gap: 10px; margin: 24px 0 12px; }
+    .tier-label .tier-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; color: var(--ink); }
+    .tier-label .stars { color: var(--gold); font-size: 14px; letter-spacing: 2px; }
+    .tier-label .count { font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+    .tiers { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+    .ex { aspect-ratio: 1; background: #fff; border: 1px solid var(--border); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-weight: 600; color: var(--ink); cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .ex:hover { border-color: var(--gold); transform: scale(1.04); }
+    .ex.done { background: #FAF5E6; border-color: var(--gold); }
+    .ex.done::after { content: '✓'; position: absolute; top: 4px; right: 6px; color: var(--gold); font-size: 14px; font-family: 'Inter'; font-weight: 700; }
+    .ex.locked { background: var(--paper); color: var(--ink-muted); cursor: not-allowed; opacity: 0.5; }
+    .ex .n { font-size: 22px; line-height: 1; }
+    .ex .t { font-family: 'Inter', sans-serif; font-size: 9px; color: var(--ink-muted); margin-top: 4px; letter-spacing: 0.02em; font-weight: 400; }
+
+    .note { margin-top: 48px; padding: 20px; background: rgba(180, 83, 9, 0.04); border-left: 3px solid var(--gold); font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+    .note strong { color: var(--ink); font-family: 'Fraunces', serif; }
+    .seal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px; height: 44px;
+      background: var(--red);
+      color: var(--paper);
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      border-radius: 2px;
+      margin-left: 12px;
+      vertical-align: middle;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">← Retour moodboard</a>
+    <span class="sep">·</span>
+    <span>Option A — Dojo japonais sobre</span>
+  </nav>
+
+  <main class="wrap">
+    <header class="hero">
+      <span class="kanji"></span>
+      <h1>Data Engineering Academy<span class="seal">道</span></h1>
+      <p class="sub">L'art patient de transformer la donnée.</p>
+    </header>
+
+    <div class="grid">
+      <div class="module">
+        <span class="icon">🧹</span>
+        <div class="sub">Kata I</div>
+        <h3>Data Dojo</h3>
+        <p>Les gestes fondamentaux du nettoyage et de la transformation.</p>
+        <div class="progress">
+          <div class="progress-head"><span>PROGRESSION</span><span>7 / 36</span></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module">
+        <span class="icon">🔧</span>
+        <div class="sub">Kata II</div>
+        <h3>Pipeline Dojo</h3>
+        <p>L'orchestration des flux, de la source à la destination.</p>
+        <div class="progress">
+          <div class="progress-head"><span>PROGRESSION</span><span>0 / 32</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0"></div></div>
+        </div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module">
+        <span class="icon">📊</span>
+        <div class="sub">Kata III</div>
+        <h3>BI Dojo</h3>
+        <p>Lire la donnée, la mettre en récit, éclairer la décision.</p>
+        <div class="progress">
+          <div class="progress-head"><span>PROGRESSION</span><span>0 / 20</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0"></div></div>
+        </div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module" style="opacity:0.55;cursor:default">
+        <span class="icon">🌿</span>
+        <div class="sub" style="color:var(--ink-muted)">Kata IV</div>
+        <h3>Git Dojo</h3>
+        <p>Versionner, collaborer, garder l'histoire du code propre.</p>
+        <div class="cta" style="color:var(--ink-muted)">Bientôt</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Data Dojo · Sélection d'exercices</h2>
+    <p class="section-sub">Chaque niveau d'étoiles ouvre un nouveau kata.</p>
+
+    <div class="tier-label">
+      <span class="tier-name">Débutant</span>
+      <span class="stars">★</span>
+      <span class="count">2 / 6</span>
+    </div>
+    <div class="tiers">
+      <div class="ex done"><span class="n">1</span><span class="t">Doublons</span></div>
+      <div class="ex done"><span class="n">2</span><span class="t">Articles</span></div>
+      <div class="ex"><span class="n">3</span><span class="t">Catalogue</span></div>
+      <div class="ex"><span class="n">4</span><span class="t">Alliage</span></div>
+      <div class="ex"><span class="n">5</span><span class="t">Sapeurs</span></div>
+      <div class="ex"><span class="n">6</span><span class="t">Cartes</span></div>
+    </div>
+
+    <div class="tier-label">
+      <span class="tier-name">Intermédiaire</span>
+      <span class="stars">★★</span>
+      <span class="count">0 / 12</span>
+    </div>
+    <div class="tiers">
+      <div class="ex locked"><span class="n">7</span></div>
+      <div class="ex locked"><span class="n">8</span></div>
+      <div class="ex locked"><span class="n">9</span></div>
+      <div class="ex locked"><span class="n">10</span></div>
+      <div class="ex locked"><span class="n">11</span></div>
+      <div class="ex locked"><span class="n">12</span></div>
+    </div>
+
+    <div class="note">
+      <strong>Cette direction en un mot :</strong> la patience, le geste répété, la progression discrète.
+      Palette : papier crème, encre ardoise, or. Motif seigaiha très subtil (vagues).
+      Typographie : Fraunces (serif display italique pour accents poétiques) + Inter (body).
+      Cartes de transformation : bord fin doré, léger <em>foil</em> quand réussies.
+    </div>
+  </main>
+</body>
+</html>

@@ -1,19 +1,89 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap');
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Edtech chaleureux + Fraunces éditorial
+   ═══════════════════════════════════════════════════════════ */
+
 :root {
-  --bg-main: #e8f4fc;
-  --bg-panel: #ffffff;
-  --bg-table: #f8fafc;
-  --accent-gold: #f59e0b;
-  --accent-green: #10b981;
-  --accent-red: #ef4444;
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-orange: #f97316;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #cbd5e1;
+  /* Background (gradient subtil fixed) */
+  --bg-from: #FAFBFC;
+  --bg-to:   #F4F1FA;
+  --bg-panel: #FFFFFF;
+  --bg-table: #F8FAFC;
+
+  /* Ink palette (softer than pure black) */
+  --ink:        #2B2D42;
+  --ink-soft:   #5A6072;
+  --ink-muted:  #9CA3AF;
+  --border:     #EDE3D2;
+
+  /* Accents edtech par dojo — chaque module a son identité */
+  --coral:   #FF8066;
+  --coral-l: #FFE5DC;
+  --coral-d: #E85D41;
+  --mint:    #5ED6B4;
+  --mint-l:  #D4F4E9;
+  --mint-d:  #0F9B7A;
+  --sky:     #6BA4FF;
+  --sky-l:   #DCE8FF;
+  --sky-d:   #3B7ADB;
+  --sun:     #FFC857;
+  --sun-l:   #FFF2D1;
+  --sun-d:   #B88700;
+  --rose:    #F472B6;
+  --rose-l:  #FCE7F3;
+
+  /* Tier colors (Débutant → Expert) — couleurs seules, pas de vocabulaire rareté */
+  --t1:      #9CA3AF;   /* Débutant — gris doux */
+  --t1-l:    #F3F4F6;
+  --t1-ink:  #4B5563;
+  --t2:      #60A5FA;   /* Intermédiaire — bleu ciel */
+  --t2-l:    #EFF6FF;
+  --t2-ink:  #2563EB;
+  --t3:      #C084FC;   /* Difficile — violet */
+  --t3-l:    #F5F3FF;
+  --t3-ink:  #9333EA;
+  --t4:      #F59E0B;   /* Expert — or chaud */
+  --t4-l:    #FEF3C7;
+  --t4-ink:  #B45309;
+
+  /* States */
+  --success:    #10B981;
+  --success-l:  #ECFDF5;
+  --danger:     #EF4444;
+  --danger-l:   #FEF2F2;
+  --warning:    #F59E0B;
+  --warning-l:  #FEF3C7;
+
+  /* Radii */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   22px;
+  --radius-full: 9999px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  /* Shadows skeumorphiques (style edtech Brilliant/Duolingo) */
+  --shadow-sm:   0 3px 0 rgba(43, 45, 66, 0.06);
+  --shadow:      0 6px 0 rgba(43, 45, 66, 0.08);
+  --shadow-hv:   0 9px 0 rgba(43, 45, 66, 0.10);
+  --shadow-pr:   0 2px 0 rgba(43, 45, 66, 0.06);
+  --shadow-modal: 0 12px 0 rgba(43, 45, 66, 0.12), 0 24px 48px -8px rgba(43, 45, 66, 0.2);
+
+  /* Motion */
+  --motion-fast: 150ms cubic-bezier(0.2, 0, 0.13, 1);
+  --motion-base: 200ms cubic-bezier(0.2, 0, 0.13, 1);
+  --motion-slow: 400ms cubic-bezier(0.2, 0, 0.13, 1);
+
+  /* Overlay modal */
+  --overlay-bg: rgba(43, 45, 66, 0.35);
 }
 
 * {
@@ -27,30 +97,36 @@ html, body, #root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Game view - fixed on desktop, scrollable on mobile */
-.game-view {
-  min-height: 100vh;
-  overflow-y: auto;
-}
-
-@media (min-width: 768px) {
-  .game-view {
-    height: 100vh;
-    overflow: hidden;
-  }
-}
-
-.home-view {
-  min-height: 100vh;
-  overflow-y: auto;
-}
-
 body {
-  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #ddd6fe 100%);
-  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+  background-attachment: fixed;
+  color: var(--ink);
 }
 
-/* Card animations */
+/* Scrollables */
+.game-view { min-height: 100vh; overflow-y: auto; }
+.home-view { min-height: 100vh; overflow-y: auto; }
+
+/* ═══════════════════════════════════════════════════════════
+   TYPOGRAPHIE — Fraunces pour display/titres, Inter pour body
+   ═══════════════════════════════════════════════════════════ */
+
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.font-display-italic {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
 @keyframes cardSelect {
   0% { transform: scale(1) translateY(0); }
   50% { transform: scale(1.1) translateY(-20px); }
@@ -63,19 +139,14 @@ body {
 }
 
 @keyframes tableFlash {
-  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-  50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); }
-  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(107, 164, 255, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(107, 164, 255, 0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(107, 164, 255, 0); }
 }
 
 @keyframes successGlow {
-  0%, 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3); }
-  50% { box-shadow: 0 4px 30px rgba(16, 185, 129, 0.5); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { box-shadow: 0 4px 20px rgba(94, 214, 180, 0.3); }
+  50% { box-shadow: 0 4px 30px rgba(94, 214, 180, 0.5); }
 }
 
 @keyframes confetti {
@@ -83,8 +154,26 @@ body {
   100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENTS UTILITAIRES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Lift subtil au hover (remplace l'ancien float one-shot) */
+.card-hover {
+  transition: transform var(--motion-base);
+}
 .card-hover:hover {
-  animation: float 0.4s ease-in-out;
+  transform: translateY(-6px);
 }
 
 .card-select {
@@ -103,32 +192,140 @@ body {
   animation: successGlow 1.5s ease-in-out infinite;
 }
 
-/* Game panel style - bright */
+/* Modale unifiée */
+.modal-overlay {
+  background: var(--overlay-bg);
+  animation: overlayFadeIn var(--motion-fast) ease-out;
+}
+
+.modal-content {
+  animation: modalFadeIn var(--motion-base) ease-out;
+}
+
+/* Panel skeumorphique — surface principale (replace l'ancien game-panel) */
 .game-panel {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
 }
 
-/* Game button style */
+/* Bouton skeumorphique */
 .game-btn {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-weight: 600;
-  transition: all 0.2s ease;
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  transition: transform var(--motion-fast), box-shadow var(--motion-fast);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
 }
-
 .game-btn:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  border-color: var(--accent-blue);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.game-btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-pr);
+}
+.game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }
 
-/* Table styling - bright and clear */
+/* Boutons primaires par couleur (utilisables dans les composants) */
+.btn-coral { background: var(--coral); color: white; border-color: var(--coral); }
+.btn-coral:hover { background: var(--coral-d); border-color: var(--coral-d); }
+.btn-mint  { background: var(--mint);  color: white; border-color: var(--mint); }
+.btn-mint:hover { background: var(--mint-d); border-color: var(--mint-d); }
+.btn-sky   { background: var(--sky);   color: white; border-color: var(--sky); }
+.btn-sky:hover { background: var(--sky-d); border-color: var(--sky-d); }
+
+/* ═══════════════════════════════════════════════════════════
+   TIERS (exercices niveaux 1 à 4)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Exercise card — base */
+.ex-card {
+  aspect-ratio: 1;
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform var(--motion-fast), box-shadow var(--motion-fast);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+}
+.ex-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hv); }
+.ex-card.locked { background: #F4EADB; border-color: #E4D9C5; opacity: 0.55; cursor: not-allowed; }
+.ex-card.locked:hover { transform: none; box-shadow: var(--shadow); border-color: #E4D9C5; }
+
+/* Tier borders + subtle gradient backgrounds (apply on .tier-t1, .tier-t2, ...) */
+.tier-t1 .ex-card  { border-color: #D1D5DB; }
+.tier-t2 .ex-card  { border-color: rgba(96, 165, 250, 0.5); background: linear-gradient(180deg, var(--t2-l) 0%, var(--bg-panel) 100%); }
+.tier-t3 .ex-card  { border-color: rgba(192, 132, 252, 0.5); background: linear-gradient(180deg, var(--t3-l) 0%, var(--bg-panel) 100%); box-shadow: var(--shadow), 0 0 0 1px rgba(168, 85, 247, 0.06); }
+.tier-t4 .ex-card  { border-color: rgba(245, 158, 11, 0.6); background: linear-gradient(180deg, var(--t4-l) 0%, var(--bg-panel) 100%); box-shadow: var(--shadow), 0 0 18px rgba(245, 158, 11, 0.18); }
+
+/* Done state + foil effect */
+.ex-card.done {
+  background: linear-gradient(135deg, var(--done-bg-1, var(--mint-l)), var(--done-bg-2, #BFDBFE)) !important;
+  border-color: var(--done-border, var(--mint));
+}
+.ex-card.done::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.ex-card.done:hover::before { opacity: 1; }
+
+.tier-t1 .ex-card.done { --done-bg-1: #F3F4F6; --done-bg-2: #E5E7EB; --done-border: #9CA3AF; --done-check: #4B5563; }
+.tier-t2 .ex-card.done { --done-bg-1: #DBEAFE; --done-bg-2: #BFDBFE; --done-border: #3B82F6; --done-check: #1E40AF; }
+.tier-t3 .ex-card.done { --done-bg-1: #EDE9FE; --done-bg-2: #DDD6FE; --done-border: #8B5CF6; --done-check: #6D28D9; }
+.tier-t4 .ex-card.done { --done-bg-1: #FEF3C7; --done-bg-2: #FDE68A; --done-border: #F59E0B; --done-check: #92400E; }
+
+/* ═══════════════════════════════════════════════════════════
+   ACCESSIBILITÉ — focus visible + prefers-reduced-motion
+   ═══════════════════════════════════════════════════════════ */
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--coral);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card-hover:hover,
+  .ex-card:hover,
+  .game-btn:hover {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE STYLING
+   ═══════════════════════════════════════════════════════════ */
+
 .game-table {
   width: 100%;
   border-collapse: collapse;
@@ -136,48 +333,66 @@ body {
 }
 
 .game-table th {
-  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
-  color: var(--text-primary);
+  background: linear-gradient(180deg, #F8F5ED 0%, #EDE3D2 100%);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   font-size: 0.7rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
   padding: 12px 16px;
-  border-bottom: 2px solid var(--accent-blue);
+  border-bottom: 2px solid var(--coral);
   text-align: left;
 }
 
 .game-table td {
   padding: 10px 16px;
-  border-bottom: 1px solid #e2e8f0;
-  color: var(--text-primary);
+  border-bottom: 1px solid #E2E8F0;
+  color: var(--ink);
   background: white;
 }
 
 .game-table tr:nth-child(even) td {
-  background: #f8fafc;
+  background: #FAFAFA;
 }
 
 .game-table tr:hover td {
-  background: #dbeafe;
+  background: var(--coral-l);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ═══════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-to); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--ink-muted); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-soft); }
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+   ═══════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+/* Blobs décoratifs pour les heroes */
+.hero-blobs {
+  position: absolute;
+  inset: -40px -10% 0 -10%;
+  pointer-events: none;
+  z-index: -1;
 }
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.hero-blobs .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
 }

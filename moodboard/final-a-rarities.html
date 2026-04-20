@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Final A · Edtech + duo Fraunces/Inter + Raretés</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Background (Q2-C gradient subtil) */
+      --bg-from: #FAFBFC;
+      --bg-to:   #F4F1FA;
+      --card-bg: #FFFFFF;
+
+      /* Ink (Brilliant palette — softer than pure black) */
+      --ink:        #2B2D42;
+      --ink-soft:   #5A6072;
+      --ink-muted:  #9CA3AF;
+
+      /* Accents edtech (Q1-C) */
+      --coral:   #FF8066;
+      --coral-l: #FFE5DC;
+      --mint:    #5ED6B4;
+      --mint-l:  #D4F4E9;
+      --sky:     #6BA4FF;
+      --sky-l:   #DCE8FF;
+      --sun:     #FFC857;
+      --sun-l:   #FFF2D1;
+      --rose:    #F472B6;
+      --rose-l:  #FCE7F3;
+
+      /* Raretés (Q4-A) */
+      --r-common:    #9CA3AF;
+      --r-common-l:  #F3F4F6;
+      --r-rare:      #60A5FA;
+      --r-rare-l:    #EFF6FF;
+      --r-epic:      #C084FC;
+      --r-epic-l:    #F5F3FF;
+      --r-legend:    #F59E0B;
+      --r-legend-l:  #FEF3C7;
+
+      /* Skeumorphic shadows */
+      --shadow:     0 6px 0 rgba(43, 45, 66, 0.08);
+      --shadow-hv:  0 9px 0 rgba(43, 45, 66, 0.10);
+      --shadow-pr:  0 2px 0 rgba(43, 45, 66, 0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      background-attachment: fixed;
+    }
+
+    /* NAV */
+    .nav { padding: 14px 24px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(43,45,66,0.06); position: sticky; top: 0; z-index: 20; display: flex; gap: 16px; align-items: center; }
+    .nav a { color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 600; }
+    .nav a:hover { color: var(--coral); }
+    .nav .sep { color: #D6CCBE; }
+    .nav .variant { margin-left: auto; font-family: 'Fraunces', serif; font-size: 13px; font-style: italic; color: var(--ink-soft); }
+
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 52px 24px 96px; }
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 48px; position: relative; }
+    .blobs { position: absolute; inset: -40px -10% 0 -10%; pointer-events: none; z-index: -1; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.35; }
+    .blob.a { top: 0;   left: 8%;  width: 220px; height: 220px; background: var(--coral); }
+    .blob.b { top: 30px; right: 12%; width: 180px; height: 180px; background: var(--mint); }
+    .blob.c { top: 120px; left: 42%; width: 160px; height: 160px; background: var(--sun); }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 58px;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    h1 .italic { font-style: italic; font-weight: 500; color: var(--coral); }
+    .hero .sub { font-family: 'Inter'; font-size: 17px; font-weight: 500; color: var(--ink-soft); max-width: 520px; margin: 0 auto; line-height: 1.55; }
+    .streak {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 22px; padding: 10px 20px;
+      background: var(--coral-l); color: var(--coral);
+      border: 2px solid var(--coral);
+      border-radius: 32px;
+      font-weight: 700; font-size: 13px;
+      box-shadow: var(--shadow);
+    }
+
+    /* HUB MODULES */
+    .modules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 48px; margin-bottom: 72px; }
+    @media (max-width: 780px) { .modules { grid-template-columns: repeat(2, 1fr); } }
+    .module {
+      background: var(--card-bg);
+      border: 2px solid #EDE3D2;
+      border-radius: 22px;
+      padding: 22px 20px 20px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .module:hover { transform: translateY(-3px); box-shadow: var(--shadow-hv); }
+    .module:active { transform: translateY(4px); box-shadow: var(--shadow-pr); }
+    .module.a { border-color: var(--coral); }
+    .module.b { border-color: var(--sky); }
+    .module.c { border-color: var(--mint); }
+    .module.d { border-color: var(--sun); opacity: 0.65; cursor: default; }
+    .module.d:hover { transform: none; box-shadow: var(--shadow); }
+
+    .iso {
+      width: 64px; height: 64px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; margin-bottom: 14px;
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,0.08);
+    }
+    .module.a .iso { background: var(--coral-l); }
+    .module.b .iso { background: var(--sky-l); }
+    .module.c .iso { background: var(--mint-l); }
+    .module.d .iso { background: var(--sun-l); }
+
+    .module .tag {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-family: 'Inter'; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+    }
+    .module.a .tag { background: var(--coral-l); color: var(--coral); }
+    .module.b .tag { background: var(--sky-l); color: var(--sky); }
+    .module.c .tag { background: var(--mint-l); color: #0F9B7A; }
+    .module.d .tag { background: var(--sun-l); color: #B88700; }
+
+    .module h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 4px;
+      color: var(--ink);
+      letter-spacing: -0.015em;
+    }
+    .module p { font-family: 'Inter'; font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 14px; font-weight: 500; }
+    .xp-bar { height: 8px; background: #F4EADB; border-radius: 5px; overflow: hidden; margin-bottom: 6px; }
+    .xp-fill { height: 100%; border-radius: 5px; }
+    .module.a .xp-fill { background: var(--coral); width: 20%; }
+    .module.b .xp-fill { background: var(--sky); width: 0; }
+    .module.c .xp-fill { background: var(--mint); width: 0; }
+    .xp-label { font-family: 'Inter'; font-size: 11px; font-weight: 600; color: var(--ink-muted); display: flex; justify-content: space-between; }
+
+    .cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 12px; padding: 9px 18px; border-radius: 12px;
+      font-family: 'Inter'; font-weight: 700; font-size: 13px;
+      color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+    }
+    .module.a .cta { background: var(--coral); }
+    .module.b .cta { background: var(--sky); }
+    .module.c .cta { background: var(--mint); }
+    .module.d .cta { background: var(--ink-muted); opacity: 0.7; }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      margin: 56px 0 6px;
+    }
+    .section-title .italic { font-style: italic; color: var(--coral); font-weight: 500; }
+    .section-sub { font-family: 'Inter'; font-size: 14px; color: var(--ink-soft); margin-bottom: 32px; font-weight: 500; }
+
+    /* TIERS (RARITY — Q4-A) */
+    .tier { margin-top: 32px; }
+    .tier-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tier-head .name { font-family: 'Fraunces', serif; font-weight: 700; font-size: 22px; letter-spacing: -0.01em; }
+    .tier-head .stars { letter-spacing: 3px; font-size: 15px; }
+    .tier-head .rarity-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 999px;
+      font-family: 'Inter'; font-size: 10px; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .tier-head .count { font-family: 'Inter'; font-size: 12px; font-weight: 700; color: var(--ink-muted); margin-left: auto; letter-spacing: 0.04em; }
+
+    .tier.common .name { color: #6B7280; }
+    .tier.common .stars { color: var(--r-common); }
+    .tier.common .rarity-badge { background: var(--r-common-l); color: #6B7280; }
+
+    .tier.rare .name { color: #2563EB; }
+    .tier.rare .stars { color: var(--r-rare); }
+    .tier.rare .rarity-badge { background: var(--r-rare-l); color: #2563EB; }
+
+    .tier.epic .name { color: #9333EA; }
+    .tier.epic .stars { color: var(--r-epic); }
+    .tier.epic .rarity-badge { background: var(--r-epic-l); color: #9333EA; }
+
+    .tier.legend .name { color: #B45309; }
+    .tier.legend .stars { color: var(--r-legend); }
+    .tier.legend .rarity-badge { background: var(--r-legend-l); color: #B45309; }
+
+    .ex-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    @media (max-width: 640px) { .ex-grid { grid-template-columns: repeat(3, 1fr); } }
+    .ex {
+      aspect-ratio: 1;
+      background: var(--card-bg);
+      border: 2px solid #EDE3D2;
+      border-radius: 18px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s;
+      font-family: 'Fraunces', serif; font-weight: 700;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .ex:hover { transform: translateY(-3px); box-shadow: var(--shadow-hv); }
+    .ex .n { font-size: 22px; color: var(--ink); line-height: 1; }
+    .ex .t { font-family: 'Inter'; font-size: 10px; color: var(--ink-muted); margin-top: 4px; font-weight: 500; letter-spacing: 0.02em; }
+
+    /* Rarity borders / backgrounds */
+    .tier.common .ex    { border-color: #D1D5DB; }
+    .tier.rare .ex      { border-color: rgba(96, 165, 250, 0.5); background: linear-gradient(180deg, var(--r-rare-l) 0%, #fff 100%); }
+    .tier.epic .ex      { border-color: rgba(192, 132, 252, 0.5); background: linear-gradient(180deg, var(--r-epic-l) 0%, #fff 100%); box-shadow: var(--shadow), 0 0 0 1px rgba(168, 85, 247, 0.06); }
+    .tier.legend .ex    { border-color: rgba(245, 158, 11, 0.6); background: linear-gradient(180deg, var(--r-legend-l) 0%, #fff 100%); box-shadow: var(--shadow), 0 0 18px rgba(245, 158, 11, 0.18); }
+
+    /* Done state with FOIL effect */
+    .ex.done {
+      background: linear-gradient(135deg, var(--done-bg-1), var(--done-bg-2)) !important;
+      border-color: var(--done-border);
+    }
+    .ex.done::after {
+      content: '✓';
+      position: absolute; top: 6px; right: 8px;
+      color: var(--done-check);
+      font-family: 'Inter'; font-weight: 900;
+      font-size: 15px;
+    }
+    .ex.done::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+      opacity: 0; transition: opacity 0.35s ease; pointer-events: none;
+    }
+    .ex.done:hover::before { opacity: 1; }
+
+    .tier.common .ex.done    { --done-bg-1: #F3F4F6; --done-bg-2: #E5E7EB; --done-border: #9CA3AF; --done-check: #4B5563; }
+    .tier.rare .ex.done      { --done-bg-1: #DBEAFE; --done-bg-2: #BFDBFE; --done-border: #3B82F6; --done-check: #1E40AF; }
+    .tier.epic .ex.done      { --done-bg-1: #EDE9FE; --done-bg-2: #DDD6FE; --done-border: #8B5CF6; --done-check: #6D28D9; }
+    .tier.legend .ex.done    { --done-bg-1: #FEF3C7; --done-bg-2: #FDE68A; --done-border: #F59E0B; --done-check: #92400E; }
+
+    /* Locked state */
+    .ex.locked { background: #F4EADB; border-color: #E4D9C5; opacity: 0.55; cursor: not-allowed; }
+    .ex.locked::after { content: '🔒'; position: absolute; top: 4px; right: 4px; font-size: 12px; opacity: 0.6; }
+
+    /* Note footer */
+    .note { margin-top: 56px; padding: 24px; background: var(--coral-l); border-radius: 18px; font-family: 'Inter'; font-size: 13px; color: var(--ink); line-height: 1.65; border: 2px solid var(--coral); font-weight: 500; box-shadow: var(--shadow); }
+    .note strong { font-family: 'Fraunces', serif; font-weight: 700; color: var(--ink); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">← Retour moodboard</a>
+    <span class="sep">·</span>
+    <span>Final A · Edtech + Fraunces + Raretés</span>
+    <span class="variant">Q1-C · Q2-C · Q3-B · <strong>Q4-A</strong></span>
+  </nav>
+
+  <main class="wrap">
+
+    <header class="hero">
+      <div class="blobs" aria-hidden="true">
+        <div class="blob a"></div>
+        <div class="blob b"></div>
+        <div class="blob c"></div>
+      </div>
+      <h1>Apprenez la data,<br><span class="italic">à votre rythme.</span></h1>
+      <p class="sub">Des exercices courts, une progression claire, une collection à compléter.</p>
+      <div class="streak">🔥 Série de 3 jours · continue comme ça !</div>
+    </header>
+
+    <div class="modules">
+      <div class="module a">
+        <div class="iso">🧹</div>
+        <div class="tag">Kata I</div>
+        <h3>Data Dojo</h3>
+        <p>Nettoyez et transformez vos données avec des cartes magiques.</p>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+        <div class="xp-label"><span>XP gagnée</span><span>7 / 36</span></div>
+        <div class="cta">Continuer →</div>
+      </div>
+      <div class="module b">
+        <div class="iso">🔧</div>
+        <div class="tag">Kata II</div>
+        <h3>Pipeline Dojo</h3>
+        <p>Concevez des pipelines ETL comme un vrai data engineer.</p>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+        <div class="xp-label"><span>XP gagnée</span><span>0 / 32</span></div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module c">
+        <div class="iso">📊</div>
+        <div class="tag">Kata III</div>
+        <h3>BI Dojo</h3>
+        <p>Créez des dashboards clairs pour raconter vos données.</p>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+        <div class="xp-label"><span>XP gagnée</span><span>0 / 20</span></div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module d">
+        <div class="iso">🌿</div>
+        <div class="tag">Bientôt</div>
+        <h3>Git Dojo</h3>
+        <p>Versionner et collaborer sur du code, sans rien casser.</p>
+        <div class="cta">En préparation</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Data Dojo · <span class="italic">ta collection</span></h2>
+    <p class="section-sub">Chaque exercice complété débloque sa carte. Survolez les cartes réussies pour voir l'effet foil.</p>
+
+    <div class="tier common">
+      <div class="tier-head">
+        <span class="name">Débutant</span>
+        <span class="stars">★</span>
+        <span class="rarity-badge">Commun</span>
+        <span class="count">2 / 6</span>
+      </div>
+      <div class="ex-grid">
+        <div class="ex done"><span class="n">1</span><span class="t">Doublons</span></div>
+        <div class="ex done"><span class="n">2</span><span class="t">Articles</span></div>
+        <div class="ex"><span class="n">3</span><span class="t">Catalogue</span></div>
+        <div class="ex"><span class="n">4</span><span class="t">Alliage</span></div>
+        <div class="ex"><span class="n">5</span><span class="t">Sapeurs</span></div>
+        <div class="ex"><span class="n">6</span><span class="t">Cartes</span></div>
+      </div>
+    </div>
+
+    <div class="tier rare">
+      <div class="tier-head">
+        <span class="name">Intermédiaire</span>
+        <span class="stars">★★</span>
+        <span class="rarity-badge">Rare</span>
+        <span class="count">0 / 12</span>
+      </div>
+      <div class="ex-grid">
+        <div class="ex locked"><span class="n">7</span></div>
+        <div class="ex locked"><span class="n">8</span></div>
+        <div class="ex locked"><span class="n">9</span></div>
+        <div class="ex locked"><span class="n">10</span></div>
+        <div class="ex locked"><span class="n">11</span></div>
+        <div class="ex locked"><span class="n">12</span></div>
+      </div>
+    </div>
+
+    <div class="tier epic">
+      <div class="tier-head">
+        <span class="name">Difficile</span>
+        <span class="stars">★★★</span>
+        <span class="rarity-badge">Épique</span>
+        <span class="count">0 / 12</span>
+      </div>
+      <div class="ex-grid">
+        <div class="ex locked"><span class="n">19</span></div>
+        <div class="ex locked"><span class="n">20</span></div>
+        <div class="ex locked"><span class="n">21</span></div>
+        <div class="ex locked"><span class="n">22</span></div>
+        <div class="ex locked"><span class="n">23</span></div>
+        <div class="ex locked"><span class="n">24</span></div>
+      </div>
+    </div>
+
+    <div class="tier legend">
+      <div class="tier-head">
+        <span class="name">Expert</span>
+        <span class="stars">★★★★</span>
+        <span class="rarity-badge">Légendaire</span>
+        <span class="count">0 / 6</span>
+      </div>
+      <div class="ex-grid">
+        <div class="ex locked"><span class="n">31</span></div>
+        <div class="ex locked"><span class="n">32</span></div>
+        <div class="ex locked"><span class="n">33</span></div>
+        <div class="ex locked"><span class="n">34</span></div>
+        <div class="ex locked"><span class="n">35</span></div>
+        <div class="ex locked"><span class="n">36</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Final A en un mot :</strong> le principe edtech chaleureux tempéré par une typographie éditoriale élégante, et la progression renforcée par un système de raretés.
+      L'utilisateur "collectionne" ses cartes — chaque tier franchi offre un palier visuel distinct (commun gris → rare bleu → épique violet → légendaire or).
+      Les cartes réussies gagnent un effet foil discret au survol. Les titres Fraunces apportent une crédibilité éditoriale au langage pastel.
+    </div>
+
+  </main>
+</body>
+</html>

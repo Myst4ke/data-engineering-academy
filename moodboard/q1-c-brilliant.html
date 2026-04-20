@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Option C · Brilliant / Duolingo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FFF9F3;
+      --bg-card: #FFFFFF;
+      --ink: #2B2D42;
+      --ink-soft: #5A6072;
+      --ink-muted: #9CA3AF;
+      --coral: #FF8066;
+      --mint: #5ED6B4;
+      --sky: #6BA4FF;
+      --sun: #FFC857;
+      --rose: #F472B6;
+      --shadow: 0 6px 0 rgba(43, 45, 66, 0.08);
+      --shadow-active: 0 2px 0 rgba(43, 45, 66, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Rubik', 'Inter', sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background: var(--bg);
+    }
+    .nav { padding: 16px 24px; border-bottom: 2px solid #F0E7D8; display: flex; gap: 16px; align-items: center; background: #fff; position: sticky; top: 0; z-index: 10; }
+    .nav a { color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 600; }
+    .nav a:hover { color: var(--coral); }
+    .nav .sep { color: #D6CCBE; }
+
+    .wrap { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .hero { text-align: center; margin-bottom: 40px; position: relative; }
+    .hero .blobs {
+      position: absolute; inset: -30px -10% 0 -10%;
+      pointer-events: none; opacity: 0.5; z-index: -1;
+    }
+    .hero .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+    }
+    .hero .blob.a { top: 0; left: 10%; width: 200px; height: 200px; background: var(--coral); opacity: 0.35; }
+    .hero .blob.b { top: 40px; right: 15%; width: 160px; height: 160px; background: var(--mint); opacity: 0.35; }
+    .hero .blob.c { top: 120px; left: 40%; width: 140px; height: 140px; background: var(--sun); opacity: 0.3; }
+
+    h1 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 800;
+      font-size: 52px;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero .sub {
+      font-size: 18px; color: var(--ink-soft); font-weight: 500;
+      position: relative; z-index: 1;
+    }
+
+    .streak {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 20px;
+      padding: 10px 18px;
+      background: #FFF2E6; color: var(--coral);
+      border: 2px solid var(--coral);
+      border-radius: 32px;
+      font-weight: 700; font-size: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 44px; margin-bottom: 56px; }
+    .module {
+      background: var(--bg-card);
+      border: 2px solid #EDE3D2;
+      border-radius: 24px;
+      padding: 22px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: var(--shadow);
+    }
+    .module:hover { transform: translateY(-3px); box-shadow: 0 9px 0 rgba(43, 45, 66, 0.1); }
+    .module:active { transform: translateY(4px); box-shadow: var(--shadow-active); }
+    .module.a { border-color: var(--coral); }
+    .module.b { border-color: var(--sky); }
+    .module.c { border-color: var(--mint); }
+    .module.d { border-color: var(--sun); opacity: 0.7; cursor: default; }
+    .module.d:hover { transform: none; box-shadow: var(--shadow); }
+
+    .iso {
+      width: 72px; height: 72px; border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px; margin-bottom: 14px;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,0.08);
+    }
+    .module.a .iso { background: #FFE5DC; }
+    .module.b .iso { background: #DCE8FF; }
+    .module.c .iso { background: #D4F4E9; }
+    .module.d .iso { background: #FFEFD1; }
+
+    .module h3 { font-size: 20px; font-weight: 800; margin-bottom: 4px; color: var(--ink); letter-spacing: -0.01em; }
+    .module .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+    .module.a .tag { background: #FFE5DC; color: var(--coral); }
+    .module.b .tag { background: #DCE8FF; color: var(--sky); }
+    .module.c .tag { background: #D4F4E9; color: #0F9B7A; }
+    .module.d .tag { background: #FFEFD1; color: #B88700; }
+    .module p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 14px; font-weight: 500; }
+
+    .xp-bar { height: 10px; background: #F4EADB; border-radius: 6px; overflow: hidden; margin-bottom: 6px; }
+    .xp-fill { height: 100%; border-radius: 6px; }
+    .module.a .xp-fill { background: var(--coral); width: 20%; }
+    .module.b .xp-fill { background: var(--sky); width: 0; }
+    .module.c .xp-fill { background: var(--mint); width: 0; }
+    .xp-label { font-size: 11px; font-weight: 600; color: var(--ink-muted); display: flex; justify-content: space-between; }
+
+    .cta {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 20px;
+      border-radius: 14px;
+      font-weight: 700; font-size: 13px;
+      letter-spacing: 0.02em;
+      color: white;
+      text-decoration: none;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+    }
+    .module.a .cta { background: var(--coral); }
+    .module.b .cta { background: var(--sky); }
+    .module.c .cta { background: var(--mint); }
+    .module.d .cta { background: var(--ink-muted); opacity: 0.7; }
+
+    .section-title { font-weight: 800; font-size: 26px; color: var(--ink); letter-spacing: -0.01em; margin: 40px 0 8px; }
+    .section-sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; font-weight: 500; }
+
+    .tier-label { display: flex; align-items: center; gap: 12px; margin: 28px 0 12px; }
+    .tier-label .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 16px; font-weight: 800; font-size: 14px; letter-spacing: 0.02em; }
+    .tier-label .badge.a { background: var(--mint); color: #fff; }
+    .tier-label .badge.b { background: var(--sun); color: var(--ink); }
+    .tier-label .badge.c { background: var(--rose); color: #fff; }
+    .tier-label .badge.d { background: #A78BFA; color: #fff; }
+    .tier-label .count { font-size: 13px; color: var(--ink-muted); font-weight: 700; }
+
+    .ex-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .ex {
+      aspect-ratio: 1; background: var(--bg-card);
+      border: 2px solid #EDE3D2;
+      border-radius: 18px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; font-weight: 800; position: relative;
+      box-shadow: var(--shadow);
+    }
+    .ex:hover { transform: translateY(-3px); box-shadow: 0 9px 0 rgba(43, 45, 66, 0.1); }
+    .ex.done { background: #D4F4E9; border-color: var(--mint); }
+    .ex.done::after { content: '✓'; position: absolute; top: 6px; right: 8px; color: var(--mint); font-size: 16px; font-weight: 900; }
+    .ex.locked { background: #F4EADB; border-color: #E4D9C5; opacity: 0.55; cursor: not-allowed; }
+    .ex.locked::after { content: '🔒'; position: absolute; top: 6px; right: 6px; font-size: 14px; opacity: 0.7; }
+    .ex .n { font-size: 22px; color: var(--ink); }
+    .ex .t { font-family: 'Inter', sans-serif; font-size: 10px; color: var(--ink-muted); margin-top: 2px; font-weight: 500; }
+
+    .note { margin-top: 48px; padding: 20px; background: #FFE5DC; border-radius: 16px; font-size: 13px; color: var(--ink); line-height: 1.6; border: 2px solid var(--coral); font-weight: 500; }
+    .note strong { font-weight: 800; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">← Retour moodboard</a>
+    <span class="sep">·</span>
+    <span>Option C — Brilliant / Duolingo</span>
+  </nav>
+
+  <main class="wrap">
+    <header class="hero">
+      <div class="blobs" aria-hidden="true">
+        <div class="blob a"></div>
+        <div class="blob b"></div>
+        <div class="blob c"></div>
+      </div>
+      <h1>Apprenez la data, à votre rythme.</h1>
+      <p class="sub">Des exercices courts, ludiques, et une progression claire.</p>
+      <div class="streak">🔥 Série de 3 jours · continue comme ça !</div>
+    </header>
+
+    <div class="grid">
+      <div class="module a">
+        <div class="iso">🧹</div>
+        <div class="tag">Niveau 1</div>
+        <h3>Data Dojo</h3>
+        <p>Nettoyez et transformez vos données avec des cartes magiques.</p>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+        <div class="xp-label"><span>XP gagnée</span><span>7 / 36</span></div>
+        <div class="cta">Continuer →</div>
+      </div>
+      <div class="module b">
+        <div class="iso">🔧</div>
+        <div class="tag">Niveau 2</div>
+        <h3>Pipeline Dojo</h3>
+        <p>Concevez des pipelines ETL comme un vrai data engineer.</p>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+        <div class="xp-label"><span>XP gagnée</span><span>0 / 32</span></div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module c">
+        <div class="iso">📊</div>
+        <div class="tag">Niveau 3</div>
+        <h3>BI Dojo</h3>
+        <p>Créez des dashboards clairs pour raconter vos données.</p>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+        <div class="xp-label"><span>XP gagnée</span><span>0 / 20</span></div>
+        <div class="cta">Commencer →</div>
+      </div>
+      <div class="module d">
+        <div class="iso">🌿</div>
+        <div class="tag">Bientôt</div>
+        <h3>Git Dojo</h3>
+        <p>Versionner et collaborer sur du code, sans rien casser.</p>
+        <div class="cta">En préparation</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Data Dojo · Ton parcours</h2>
+    <p class="section-sub">Complète 6 exercices pour débloquer le niveau suivant.</p>
+
+    <div class="tier-label">
+      <span class="badge a">✨ Débutant · 2 / 6</span>
+    </div>
+    <div class="ex-grid">
+      <div class="ex done"><span class="n">1</span><span class="t">Doublons</span></div>
+      <div class="ex done"><span class="n">2</span><span class="t">Articles</span></div>
+      <div class="ex"><span class="n">3</span><span class="t">Catalogue</span></div>
+      <div class="ex"><span class="n">4</span><span class="t">Alliage</span></div>
+      <div class="ex"><span class="n">5</span><span class="t">Sapeurs</span></div>
+      <div class="ex"><span class="n">6</span><span class="t">Cartes</span></div>
+    </div>
+
+    <div class="tier-label">
+      <span class="badge b">🌅 Intermédiaire · 0 / 12</span>
+    </div>
+    <div class="ex-grid">
+      <div class="ex locked"><span class="n">7</span></div>
+      <div class="ex locked"><span class="n">8</span></div>
+      <div class="ex locked"><span class="n">9</span></div>
+      <div class="ex locked"><span class="n">10</span></div>
+      <div class="ex locked"><span class="n">11</span></div>
+      <div class="ex locked"><span class="n">12</span></div>
+    </div>
+
+    <div class="note">
+      <strong>Cette direction en un mot :</strong> chaleureuse, encourageante, edtech grand public.
+      Palette : corail, menthe, ciel, soleil. Grosses ombres portées "skeumorphiques".
+      Fonte : Rubik (rondes, sympathiques) + Inter. Tonalité tutoyante et encourageante,
+      streaks de feu, badges. Pouvoir d'adhésion élevé, risque : ressemblance avec
+      Duolingo / Brilliant → moins différenciant.
+    </div>
+  </main>
+</body>
+</html>

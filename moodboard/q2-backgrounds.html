@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q2 · Traitement du fond</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1F2937; background: #F8FAFC; min-height: 100vh; }
+    .nav { padding: 16px 24px; border-bottom: 1px solid #E2E8F0; background: #fff; position: sticky; top: 0; z-index: 10; display: flex; gap: 16px; align-items: center; }
+    .nav a { color: #475569; text-decoration: none; font-size: 13px; font-weight: 500; }
+    .nav a:hover { color: #6366F1; }
+    .nav .sep { color: #CBD5E1; }
+
+    .page-title { text-align: center; padding: 40px 20px 20px; }
+    .page-title h1 { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; color: #1F2937; margin-bottom: 8px; }
+    .page-title p { color: #64748B; font-size: 14px; max-width: 640px; margin: 0 auto; line-height: 1.5; }
+
+    .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 24px; }
+
+    .panel {
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      min-height: 520px;
+    }
+    .panel-label { position: absolute; top: 12px; left: 12px; background: #1F2937; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; z-index: 5; }
+
+    /* Option A — grain + motif seigaiha subtil */
+    .bg-a {
+      background-color: #F5F1E8;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg fill='none' stroke='%231F2937' stroke-width='1' opacity='0.06'%3E%3Cpath d='M0 20 Q20 0 40 20 T80 20'/%3E%3Cpath d='M0 0 Q20 -20 40 0 T80 0'/%3E%3Cpath d='M0 40 Q20 20 40 40 T80 40'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 200px 200px, 80px 40px;
+    }
+
+    /* Option B — couleur plate forte */
+    .bg-b {
+      background: #2B2356;
+    }
+    .bg-b .card { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #F5F0E8; }
+    .bg-b .card h3 { color: #fff; }
+    .bg-b .card .sub { color: #B8B2D0; }
+    .bg-b .card p { color: #B8B2D0; }
+    .bg-b .card .cta { color: #FCD34D; }
+    .bg-b .label { background: #F5F0E8; color: #2B2356; }
+
+    /* Option C — gradient subtil conservateur */
+    .bg-c {
+      background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%);
+    }
+
+    .demo { padding: 56px 24px 24px; }
+    .demo-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; color: inherit; }
+    .demo-sub { font-size: 12px; color: inherit; opacity: 0.7; margin-bottom: 20px; }
+    .card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .card .icon { font-size: 28px; margin-bottom: 10px; }
+    .card .sub { font-size: 11px; color: #6366F1; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 4px; }
+    .card h3 { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 6px; }
+    .card p { font-size: 12px; color: #64748B; line-height: 1.5; margin-bottom: 10px; }
+    .card .cta { font-size: 11px; font-weight: 700; color: #6366F1; letter-spacing: 0.04em; }
+
+    .verdict { padding: 24px; background: #fff; border-top: 1px solid #E2E8F0; }
+    .verdict-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .verdict h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .verdict .pro { color: #059669; }
+    .verdict .con { color: #DC2626; }
+    .verdict p { font-size: 12px; color: #475569; line-height: 1.5; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">← Retour moodboard</a>
+    <span class="sep">·</span>
+    <span>Q2 — Traitement du fond</span>
+  </nav>
+
+  <div class="page-title">
+    <h1>Trois fonds possibles, mêmes cartes</h1>
+    <p>Le même trio de modules placé sur trois traitements de fond différents. Comparez la chaleur, la lisibilité et la personnalité.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- Option A -->
+    <div class="panel bg-a">
+      <span class="panel-label">A · Grain + motif</span>
+      <div class="demo">
+        <div class="demo-title">Data Engineering Academy</div>
+        <div class="demo-sub">Fond papier crème, grain 5%, motif seigaiha 6% opacité.</div>
+
+        <div class="card">
+          <div class="icon">🧹</div>
+          <div class="sub">Kata I</div>
+          <h3>Data Dojo</h3>
+          <p>Les gestes fondamentaux du nettoyage et de la transformation de données.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+
+        <div class="card">
+          <div class="icon">🔧</div>
+          <div class="sub">Kata II</div>
+          <h3>Pipeline Dojo</h3>
+          <p>Orchestrez les flux de données, source → transformation → destination.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+
+        <div class="card">
+          <div class="icon">📊</div>
+          <div class="sub">Kata III</div>
+          <h3>BI Dojo</h3>
+          <p>Construisez des dashboards clairs pour raconter vos données.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option B -->
+    <div class="panel bg-b">
+      <span class="panel-label label">B · Couleur plate</span>
+      <div class="demo">
+        <div class="demo-title">Data Engineering Academy</div>
+        <div class="demo-sub">Fond uni indigo profond. Pas de gradient. Personnalité franche.</div>
+
+        <div class="card">
+          <div class="icon">🧹</div>
+          <div class="sub">Kata I</div>
+          <h3>Data Dojo</h3>
+          <p>Les gestes fondamentaux du nettoyage et de la transformation de données.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+
+        <div class="card">
+          <div class="icon">🔧</div>
+          <div class="sub">Kata II</div>
+          <h3>Pipeline Dojo</h3>
+          <p>Orchestrez les flux de données, source → transformation → destination.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+
+        <div class="card">
+          <div class="icon">📊</div>
+          <div class="sub">Kata III</div>
+          <h3>BI Dojo</h3>
+          <p>Construisez des dashboards clairs pour raconter vos données.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option C -->
+    <div class="panel bg-c">
+      <span class="panel-label">C · Gradient subtil</span>
+      <div class="demo">
+        <div class="demo-title">Data Engineering Academy</div>
+        <div class="demo-sub">Gradient doux blanc → indigo très pâle. Status quo nettoyé.</div>
+
+        <div class="card">
+          <div class="icon">🧹</div>
+          <div class="sub">Kata I</div>
+          <h3>Data Dojo</h3>
+          <p>Les gestes fondamentaux du nettoyage et de la transformation de données.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+
+        <div class="card">
+          <div class="icon">🔧</div>
+          <div class="sub">Kata II</div>
+          <h3>Pipeline Dojo</h3>
+          <p>Orchestrez les flux de données, source → transformation → destination.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+
+        <div class="card">
+          <div class="icon">📊</div>
+          <div class="sub">Kata III</div>
+          <h3>BI Dojo</h3>
+          <p>Construisez des dashboards clairs pour raconter vos données.</p>
+          <div class="cta">Commencer →</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="verdict">
+    <div class="verdict-grid">
+      <div>
+        <h4>A · Grain + motif (recommandé)</h4>
+        <p class="pro">+ Chaleureux, unique, motif thématique renforce la personnalité "Dojo"</p>
+        <p class="pro">+ Invisible en un clin d'œil, visible à l'examen</p>
+        <p class="con">− Risque de surcharge visuelle si mal dosé</p>
+      </div>
+      <div>
+        <h4>B · Couleur plate forte</h4>
+        <p class="pro">+ Identité franche, mémorisable, "style Monument Valley"</p>
+        <p class="pro">+ Contraste parfait, lisibilité excellente</p>
+        <p class="con">− Demande repenser tous les composants pour le fond sombre</p>
+      </div>
+      <div>
+        <h4>C · Gradient subtil</h4>
+        <p class="pro">+ Minimaliste, 0 risque, sûr pour du B2B classique</p>
+        <p class="con">− Faible différenciation, reste un template générique</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

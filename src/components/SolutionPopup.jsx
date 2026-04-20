@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Lightbulb, X, Play } from 'lucide-react';
 import { getCardDisplayInfo } from '../utils/cardDefinitions';
 
 export default function SolutionPopup({ solution, onClose, onApply }) {
@@ -25,26 +26,30 @@ export default function SolutionPopup({ solution, onClose, onApply }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="solution-title"
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col"
+        className="game-panel modal-content max-w-2xl w-full max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="text-xl">💡</span>
-            <span className="text-lg font-bold text-slate-700">
-              Solution Précédente
+            <Lightbulb className="w-5 h-5 text-amber-500" aria-hidden="true" />
+            <span id="solution-title" className="text-lg font-bold text-slate-700">
+              Solution précédente
             </span>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-800 transition-colors text-lg font-bold"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-800 transition-colors"
+            aria-label="Fermer"
           >
-            ×
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -65,7 +70,7 @@ export default function SolutionPopup({ solution, onClose, onApply }) {
                 </div>
                 {/* Arrow */}
                 {index < solutionCards.length - 1 && (
-                  <span className="mx-2 text-2xl text-amber-500 font-bold">→</span>
+                  <span className="mx-2 text-2xl text-amber-500 font-bold" aria-hidden="true">→</span>
                 )}
               </div>
             ))}
@@ -85,9 +90,9 @@ export default function SolutionPopup({ solution, onClose, onApply }) {
               onApply(solutionCards);
               onClose();
             }}
-            className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-medium transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-lg bg-[#FF8066] hover:bg-[#E85D41] text-white font-medium transition-colors flex items-center gap-2"
           >
-            <span>▶</span> Appliquer
+            <Play className="w-4 h-4" aria-hidden="true" /> Appliquer
           </button>
         </div>
       </div>

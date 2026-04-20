@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moodboard — Data Engineering Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 40px 20px; }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    h1 { font-family: 'Fraunces', serif; font-weight: 700; font-size: 40px; margin-bottom: 8px; color: #fff; letter-spacing: -0.02em; }
+    .subtitle { color: #94a3b8; font-size: 15px; margin-bottom: 32px; }
+    h2 { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #94a3b8; margin: 32px 0 12px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .card { display: block; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; text-decoration: none; color: inherit; transition: all 0.2s; }
+    .card:hover { border-color: #6366f1; background: #253449; transform: translateY(-2px); }
+    .card .tag { font-size: 11px; color: #6366f1; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+    .card h3 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #f1f5f9; }
+    .card p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+    .rec { background: #4f46e5; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; margin-left: 8px; vertical-align: middle; }
+    .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #1e293b; color: #64748b; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Moodboard — Identité visuelle</h1>
+    <p class="subtitle">4 directions stylistiques + 3 déclinaisons (fond, typo, raretés). Ouvre chaque page pour comparer en live.</p>
+
+    <h2>✅ Direction retenue</h2>
+    <div class="grid">
+      <a class="card" href="final-retenu.html" style="border-color:#059669;background:#0F2E22">
+        <div class="tag" style="color:#34D399">Retenu <span class="rec" style="background:#059669">À implémenter</span></div>
+        <h3>Edtech + Fraunces + couleurs / foil</h3>
+        <p>Brillant pastel tempéré par Fraunces éditorial. Chaque niveau a son aspect visuel (bordure + fond). Effet foil au survol des cartes réussies. Sans vocabulaire de rareté.</p>
+      </a>
+    </div>
+
+    <h2>⭐ Explorations finales · Q1-C + Q2-C + Q3-B + variante Q4</h2>
+    <div class="grid">
+      <a class="card" href="final-a-rarities.html" style="border-color:#4f46e5">
+        <div class="tag">Final A <span class="rec">Q4-A · Raretés</span></div>
+        <h3>Edtech · Raretés foil</h3>
+        <p>Version avec vocabulaire Commun → Légendaire. Version retenue au-dessus mais sans ces labels.</p>
+      </a>
+      <a class="card" href="final-b-colored.html" style="border-color:#4f46e5">
+        <div class="tag">Final B <span class="rec">Q4-B · Couleur/tier</span></div>
+        <h3>Edtech · Couleur par niveau</h3>
+        <p>Chaque niveau a sa couleur (menthe → soleil → rose → violet). Sobre.</p>
+      </a>
+      <a class="card" href="final-c-uniform.html" style="border-color:#4f46e5">
+        <div class="tag">Final C <span class="rec">Q4-C · Uniforme</span></div>
+        <h3>Edtech · Uniforme</h3>
+        <p>Brillant pastel + Fraunces au Hub. Intérieur neutre.</p>
+      </a>
+    </div>
+
+    <h2>Question 1 — Direction stylistique (exploration initiale)</h2>
+    <div class="grid">
+      <a class="card" href="q1-a-dojo.html">
+        <div class="tag">Option A <span class="rec">Recommandé</span></div>
+        <h3>Dojo japonais sobre</h3>
+        <p>Papier washi, encres sumi-e, motif seigaiha, accents or. Ancrage fort "Dojo".</p>
+      </a>
+      <a class="card" href="q1-b-mtg.html">
+        <div class="tag">Option B</div>
+        <h3>Carte collectionnable</h3>
+        <p>Pousse le langage cartes : raretés, foils, trame sombre. MTG / Hearthstone.</p>
+      </a>
+      <a class="card" href="q1-c-brilliant.html">
+        <div class="tag">Option C</div>
+        <h3>Brilliant / Duolingo</h3>
+        <p>Illustrations iso, pastels doux, tonalité edtech. Standard du marché.</p>
+      </a>
+      <a class="card" href="q1-d-monument.html">
+        <div class="tag">Option D</div>
+        <h3>Monument Valley</h3>
+        <p>Géométrie, 1 couleur forte par dojo, minimalisme poétique.</p>
+      </a>
+    </div>
+
+    <h2>Question 2 — Traitement du fond</h2>
+    <div class="grid">
+      <a class="card" href="q2-backgrounds.html">
+        <div class="tag">Comparaison</div>
+        <h3>3 backgrounds côte à côte</h3>
+        <p>Grain+motif · Couleur plate · Gradient subtil. Appliqués à la même carte.</p>
+      </a>
+    </div>
+
+    <h2>Question 3 — Typographie</h2>
+    <div class="grid">
+      <a class="card" href="q3-typography.html">
+        <div class="tag">Comparaison</div>
+        <h3>3 couples typographiques</h3>
+        <p>Inter seul · Duo display + Inter · Trio display + Inter + mono.</p>
+      </a>
+    </div>
+
+    <h2>Question 4 — Raretés visuelles</h2>
+    <div class="grid">
+      <a class="card" href="q4-rarities.html">
+        <div class="tag">Comparaison</div>
+        <h3>3 traitements des tiers</h3>
+        <p>Raretés (commun/rare/épique/légendaire) · Couleur/tier · Uniforme.</p>
+      </a>
+    </div>
+
+    <div class="footer">
+      Maquettes statiques — les vraies pages React de l'app ne sont pas touchées.<br>
+      Chemin : <code>moodboard/index.html</code>
+    </div>
+  </div>
+</body>
+</html>

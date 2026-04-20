@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { Check } from 'lucide-react';
 
 export default function ParamInputPopup({ cardType, cardName, cardIcon, columns, tableData, onConfirm, onCancel, initialParams = null }) {
   const [column, setColumn] = useState('');
@@ -130,7 +131,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
       case 'delete':
         return 'Quelle colonne supprimer ?';
       case 'filter':
-        return 'Definir le filtre';
+        return 'Définir le filtre';
       case 'sort':
         return 'Trier par quelle colonne ?';
       case 'join':
@@ -140,28 +141,37 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
       case 'select':
         return 'Quelles colonnes garder ?';
       case 'fill_na':
-        return 'Remplir les vides';
+        return 'Remplir les cellules vides';
       case 'concat':
         return 'Empiler les tables';
       default:
-        return 'Parametres';
+        return 'Paramètres';
     }
   };
 
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onCancel(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
       onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="param-title"
     >
       <div
-        className="game-panel max-w-sm w-full p-6"
+        className="game-panel modal-content max-w-sm w-full p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-3xl">{cardIcon}</span>
+          <span className="text-3xl" aria-hidden="true">{cardIcon}</span>
           <div>
-            <h3 className="text-lg font-bold text-indigo-600">{cardName}</h3>
+            <h3 id="param-title" className="text-lg font-bold text-[#E85D41]">{cardName}</h3>
             <p className="text-slate-500 text-sm">{getTitle()}</p>
           </div>
         </div>
@@ -170,14 +180,14 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
         {cardType === 'drop_duplicates' && (
           <div className="mb-4">
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Mode de deduplication
+              Mode de déduplication
             </label>
             <div className="flex gap-2 mb-3">
               <button
                 onClick={() => setDedupMode('all')}
                 className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${
                   dedupMode === 'all'
-                    ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
+                    ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                 }`}
               >
@@ -187,7 +197,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
                 onClick={() => setDedupMode('subset')}
                 className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${
                   dedupMode === 'subset'
-                    ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
+                    ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                 }`}
               >
@@ -195,20 +205,26 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
               </button>
             </div>
             {dedupMode === 'subset' && (
-              <div className="flex flex-wrap gap-2">
-                {columns.map((col) => (
-                  <button
-                    key={col}
-                    onClick={() => toggleDedupColumn(col)}
-                    className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm ${
-                      dedupColumns.includes(col)
-                        ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    {dedupColumns.includes(col) ? '+ ' : ''}{col}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Colonnes à considérer pour la déduplication">
+                {columns.map((col) => {
+                  const selected = dedupColumns.includes(col);
+                  return (
+                    <button
+                      key={col}
+                      type="button"
+                      onClick={() => toggleDedupColumn(col)}
+                      aria-pressed={selected}
+                      className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm inline-flex items-center gap-1.5 ${
+                        selected
+                          ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {selected && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
+                      {col}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -218,36 +234,44 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
         {cardType === 'delete_na' && (
           <div className="mb-4">
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Colonnes a verifier
+              Colonnes à vérifier
             </label>
             <div className="flex gap-2 mb-3">
               <button onClick={() => setCleanNaMode('all')}
-                className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaMode === 'all' ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaMode === 'all' ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
                 Toutes les colonnes
               </button>
               <button onClick={() => setCleanNaMode('subset')}
-                className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaMode === 'subset' ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaMode === 'subset' ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
                 Colonnes choisies
               </button>
             </div>
             {cleanNaMode === 'subset' && (
-              <div className="flex flex-wrap gap-2">
-                {columns.map((col) => (
-                  <button key={col}
-                    onClick={() => setCleanNaColumns(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col])}
-                    className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm ${cleanNaColumns.includes(col) ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
-                    {cleanNaColumns.includes(col) ? '+ ' : ''}{col}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Colonnes à vérifier">
+                {columns.map((col) => {
+                  const selected = cleanNaColumns.includes(col);
+                  return (
+                    <button
+                      key={col}
+                      type="button"
+                      onClick={() => setCleanNaColumns(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col])}
+                      aria-pressed={selected}
+                      className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm inline-flex items-center gap-1.5 ${selected ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
+                    >
+                      {selected && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
+                      {col}
+                    </button>
+                  );
+                })}
               </div>
             )}
-            <p className="text-[10px] text-slate-400 mt-2">
-              {cleanNaMode === 'all' ? 'Supprime les lignes ou n\'importe quelle cellule est vide.' : `Supprime les lignes vides dans : ${cleanNaColumns.join(', ') || '(aucune selectionnee)'}`}
+            <p className="text-xs text-slate-500 mt-2">
+              {cleanNaMode === 'all' ? 'Supprime les lignes où n\'importe quelle cellule est vide.' : `Supprime les lignes vides dans : ${cleanNaColumns.join(', ') || '(aucune sélectionnée)'}`}
             </p>
           </div>
         )}
 
-        {/* Column Selection */}
+        {/* Column Sélection */}
         {showColumnDropdown && (
           <div className="mb-4">
             <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -256,9 +280,9 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
             <select
               value={column}
               onChange={(e) => handleColumnChange(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-indigo-400 focus:outline-none transition-colors"
+              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-[#FF8066] focus:outline-none transition-colors"
             >
-              <option value="">-- Selectionner --</option>
+              <option value="">— Sélectionner —</option>
               {columns.map((col) => (
                 <option key={col} value={col}>{col}</option>
               ))}
@@ -266,7 +290,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
           </div>
         )}
 
-        {/* Filter Value Selection (dropdown with column values) */}
+        {/* Filter Value Sélection (dropdown with column values) */}
         {cardType === 'filter' && (
           <div className="mb-4">
             <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -276,15 +300,15 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
               value={value}
               onChange={(e) => setValue(e.target.value)}
               disabled={!column}
-              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-indigo-400 focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-400"
+              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-[#FF8066] focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-500"
             >
-              <option value="">-- Selectionner une valeur --</option>
+              <option value="">— Sélectionner une valeur —</option>
               {columnValues.map((val) => (
                 <option key={val} value={val}>{val}</option>
               ))}
             </select>
             {!column && (
-              <p className="text-xs text-slate-400 mt-1">Selectionnez d'abord une colonne</p>
+              <p className="text-xs text-slate-500 mt-1">Sélectionnez d'abord une colonne.</p>
             )}
           </div>
         )}
@@ -300,7 +324,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
                 onClick={() => setOrder('asc')}
                 className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all ${
                   order === 'asc'
-                    ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
+                    ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                 }`}
               >
@@ -310,11 +334,11 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
                 onClick={() => setOrder('desc')}
                 className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium transition-all ${
                   order === 'desc'
-                    ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
+                    ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                 }`}
               >
-                Decroissant
+                Décroissant
               </button>
             </div>
           </div>
@@ -331,31 +355,37 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Entrez le nouveau nom..."
-              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-indigo-400 focus:outline-none transition-colors"
+              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-[#FF8066] focus:outline-none transition-colors"
             />
           </div>
         )}
 
-        {/* Select - Multiple Column Selection */}
+        {/* Select - Multiple Column Sélection */}
         {cardType === 'select' && (
           <div className="mb-4">
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Colonnes a garder
+              Colonnes à garder
             </label>
-            <div className="flex flex-wrap gap-2">
-              {columns.map((col) => (
-                <button
-                  key={col}
-                  onClick={() => toggleColumnSelection(col)}
-                  className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm ${
-                    selectedColumns.includes(col)
-                      ? 'border-indigo-400 bg-indigo-50 text-indigo-600'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                  }`}
-                >
-                  {selectedColumns.includes(col) ? '+ ' : ''}{col}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Colonnes à conserver">
+              {columns.map((col) => {
+                const selected = selectedColumns.includes(col);
+                return (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => toggleColumnSelection(col)}
+                    aria-pressed={selected}
+                    className={`px-3 py-1.5 rounded-lg border-2 font-medium transition-all text-sm inline-flex items-center gap-1.5 ${
+                      selected
+                        ? 'border-[#FF8066] bg-[#FFE5DC] text-[#E85D41]'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    {selected && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
+                    {col}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -371,7 +401,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="Entrez la valeur..."
-              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-indigo-400 focus:outline-none transition-colors"
+              className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-[#FF8066] focus:outline-none transition-colors"
             />
           </div>
         )}
@@ -380,7 +410,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
         {cardType === 'concat' && (
           <div className="mb-4 p-3 bg-slate-50 rounded-lg">
             <p className="text-sm text-slate-600">
-              Les lignes de la table secondaire seront ajoutees sous la table actuelle.
+              Les lignes de la table secondaire seront ajoutées sous la table actuelle.
             </p>
           </div>
         )}
@@ -398,7 +428,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
             disabled={!isValid()}
             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${
               isValid()
-                ? 'bg-indigo-500 text-white hover:bg-indigo-600'
+                ? 'bg-[#FF8066] text-white hover:bg-[#E85D41]'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }`}
           >

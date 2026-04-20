@@ -171,9 +171,11 @@ export default function Card({
               {cardInfo.icon}
             </div>
 
-            {/* Name */}
-            <div className={`text-center font-bold ${s.name} mt-1 drop-shadow-md leading-tight`}>
-              {cardInfo.name}
+            {/* Name — min-height réservé pour 2 lignes : position du paramLabel cohérente entre cartes à nom court/long */}
+            <div
+              className={`text-center font-bold ${s.name} mt-1 drop-shadow-md leading-tight min-h-[2.4em] flex items-center justify-center`}
+            >
+              <span>{cardInfo.name}</span>
             </div>
 
             {/* Technical name - hide on small/medium */}
@@ -185,9 +187,9 @@ export default function Card({
 
             {/* Parameters - only show in pipeline */}
             {cardInfo.paramLabel && isInPipeline && (
-              <div className="mt-auto">
+              <div className="mt-auto mx-0.5 mb-0.5">
                 <div
-                  className="bg-white/30 rounded px-1.5 py-1 text-[10px] text-center truncate font-medium"
+                  className="bg-white/30 rounded-md px-1.5 py-1 text-[10px] text-center truncate font-medium"
                   title={cardInfo.paramLabel}
                 >
                   {cardInfo.paramLabel}

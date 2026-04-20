@@ -1456,7 +1456,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
 
           {nodes.length >= 2 && (
             <button onClick={handleAutoLayout}
-              className="absolute bottom-4 right-4 bg-white border border-slate-200 shadow-lg rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center gap-1.5" style={{ zIndex: 3 }} title="Réorganiser automatiquement">
+              className="absolute bottom-4 left-4 bg-white border border-slate-200 shadow-lg rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center gap-1.5 z-20" title="Réorganiser automatiquement">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
               Réorganiser
             </button>

@@ -249,7 +249,9 @@ body {
    TIERS (exercices niveaux 1 à 4)
    ═══════════════════════════════════════════════════════════ */
 
-/* Exercise card — base */
+/* Exercise card — base
+   NB: pas d'overflow:hidden sur la carte elle-même pour ne pas couper les badges
+   qui débordent (-top-2 -right-2). Le foil effect est clippé via clip-path. */
 .ex-card {
   aspect-ratio: 1;
   background: var(--bg-panel);
@@ -259,7 +261,6 @@ body {
   cursor: pointer;
   transition: transform var(--motion-fast), box-shadow var(--motion-fast);
   position: relative;
-  overflow: hidden;
   font-family: 'Fraunces', serif;
   font-weight: 700;
 }
@@ -286,6 +287,9 @@ body {
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
+  border-radius: inherit;
+  /* Clip le foil aux coins arrondis sans cacher les badges */
+  clip-path: inset(0 round var(--radius-lg));
 }
 .ex-card.done:hover::before { opacity: 1; }
 

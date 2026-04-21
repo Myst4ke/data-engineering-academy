@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Lightbulb, FileText, Star, Lock, Unlock, Wrench, PartyPopper } from 'lucide-react';
 import BiDojo from './BiDojo';
 import { BI_EXERCISES, BI_TIERS, getBiExercisesByTier, getBiProgress, saveBiProgress, isBiTierUnlocked, getBiTierProgress } from './biExercises';
 import DojoIntro, { useDojoIntro, BI_DOJO_INTRO } from '../components/DojoIntro';
 import BackButton from '../components/BackButton';
+import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
 
 // ── Exercise popup ──
 function ExercisePopup({ exercise, onClose }) {
@@ -120,7 +121,26 @@ function Stars({ count }) {
 // ── Exercise selector ──
 function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
   const [, forceUpdate] = useState(0);
+  const [hovered, setHovered] = useState(null);
+  const [hoverRect, setHoverRect] = useState(null);
+  const hoverTimerRef = useRef(null);
   const progress = getBiProgress();
+
+  const handleHover = (ex, e) => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    const rect = e.currentTarget.getBoundingClientRect();
+    hoverTimerRef.current = setTimeout(() => {
+      setHovered(ex);
+      setHoverRect(rect);
+    }, 300);
+  };
+
+  const handleLeave = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setHovered(null);
+    setHoverRect(null);
+  };
+
   const unlockAll = () => {
     if (!window.confirm('Débloquer tous les exercices ?')) return;
     const p = getBiProgress();
@@ -200,7 +220,11 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
                       <button
                         key={ex.id}
                         onClick={() => onSelect(ex)}
-                        title={ex.title}
+                        onMouseEnter={(e) => unlocked && handleHover(ex, e)}
+                        onMouseLeave={handleLeave}
+                        onFocus={(e) => unlocked && handleHover(ex, e)}
+                        onBlur={handleLeave}
+                        aria-label={`${ex.title}. ${ex.description.split('\n')[0].slice(0, 120)}`}
                         className={`ex-card ${stars > 0 ? 'done' : ''} ${!unlocked ? 'locked' : ''} group relative text-left p-3`}
                         style={{ aspectRatio: 'auto' }}
                       >
@@ -222,6 +246,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
           })}
         </div>
       </div>
+      {hovered && <ExerciseHoverTooltip exercise={hovered} anchorRect={hoverRect} accentColor="#5ED6B4" />}
     </div>
   );
 }

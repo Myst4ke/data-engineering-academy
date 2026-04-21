@@ -390,9 +390,10 @@ textarea:focus-visible {
 /* Blobs décoratifs pour les heroes */
 .hero-blobs {
   position: absolute;
-  inset: -40px -10% 0 -10%;
+  inset: -40px -10% -40px -10%;
   pointer-events: none;
   z-index: -1;
+  overflow: hidden;
 }
 .hero-blobs .blob {
   position: absolute;

@@ -126,11 +126,16 @@ export default function Hub() {
 
   return (
     <div className="home-view flex flex-col items-center p-6 relative overflow-x-hidden">
-      {/* Decorative blobs */}
+      {/* Decorative blobs — repeated pattern down the page */}
       <div className="hero-blobs" aria-hidden="true">
         <div className="blob" style={{ top: 20, left: '8%', width: 260, height: 260, background: '#FF8066' }} />
         <div className="blob" style={{ top: 50, right: '10%', width: 220, height: 220, background: '#5ED6B4' }} />
         <div className="blob" style={{ top: 180, left: '42%', width: 180, height: 180, background: '#FFC857' }} />
+        <div className="blob" style={{ top: '45%', right: '4%', width: 240, height: 240, background: '#FF8066' }} />
+        <div className="blob" style={{ top: '55%', left: '6%', width: 200, height: 200, background: '#5ED6B4' }} />
+        <div className="blob" style={{ top: '70%', left: '45%', width: 220, height: 220, background: '#FFC857' }} />
+        <div className="blob" style={{ top: '85%', left: '10%', width: 200, height: 200, background: '#FF8066' }} />
+        <div className="blob" style={{ top: '90%', right: '8%', width: 220, height: 220, background: '#5ED6B4' }} />
       </div>
 
       <div className="max-w-5xl w-full mx-auto pt-12 sm:pt-16 pb-12">

@@ -319,7 +319,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
           })}
         </div>
       </div>
-      {hovered && <ExerciseHoverTooltip exercise={hovered} anchorRect={hoverRect} accentColor="#6BA4FF" />}
+      {hovered && <ExerciseHoverTooltip exercise={hovered} anchorRect={hoverRect} />}
     </div>
   );
 }

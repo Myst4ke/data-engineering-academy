@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom';
 import { Star, Lightbulb } from 'lucide-react';
 
-export default function ExerciseHoverTooltip({ exercise, anchorRect, accentColor = '#6BA4FF' }) {
+export default function ExerciseHoverTooltip({ exercise, anchorRect }) {
   if (!anchorRect || !exercise) return null;
 
   const viewportW = window.innerWidth;
@@ -58,10 +58,6 @@ export default function ExerciseHoverTooltip({ exercise, anchorRect, accentColor
       {placeHorizontal === 'right' && (
         <div className="absolute top-4 -left-1 w-2 h-2 rotate-45 bg-white border-l border-b border-[#EDE3D2]" />
       )}
-      <div
-        className="absolute top-1 left-0 right-0 h-0.5 rounded-full"
-        style={{ background: accentColor }}
-      />
     </div>,
     document.body
   );

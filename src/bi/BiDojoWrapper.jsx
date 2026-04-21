@@ -246,7 +246,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
           })}
         </div>
       </div>
-      {hovered && <ExerciseHoverTooltip exercise={hovered} anchorRect={hoverRect} accentColor="#5ED6B4" />}
+      {hovered && <ExerciseHoverTooltip exercise={hovered} anchorRect={hoverRect} />}
     </div>
   );
 }

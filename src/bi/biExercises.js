@@ -386,6 +386,7 @@ export const BI_TIERS = [
 ];
 
 const BI_PROGRESS_KEY = 'biDojo_exerciseProgress';
+const BI_UNLOCK_ALL_KEY = 'biDojo_unlockAll';
 
 export function getBiProgress() {
   try { return JSON.parse(localStorage.getItem(BI_PROGRESS_KEY) || '{}'); } catch { return {}; }
@@ -398,7 +399,16 @@ export function saveBiProgress(exerciseId, stars) {
   localStorage.setItem(BI_PROGRESS_KEY, JSON.stringify(p));
 }
 
+export function getBiUnlockAll() {
+  try { return localStorage.getItem(BI_UNLOCK_ALL_KEY) === '1'; } catch { return false; }
+}
+
+export function setBiUnlockAll(value) {
+  try { localStorage.setItem(BI_UNLOCK_ALL_KEY, value ? '1' : '0'); } catch { /* ignore */ }
+}
+
 export function isBiTierUnlocked(tier) {
+  if (getBiUnlockAll()) return true;
   if (tier === 1) return true;
   const p = getBiProgress();
   const prevExercises = BI_EXERCISES.filter(e => e.difficulty === tier - 1);

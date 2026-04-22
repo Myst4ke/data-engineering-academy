@@ -760,6 +760,8 @@ export function getExercisesByTier(tier) {
 // Progress helpers (localStorage)
 const PROGRESS_KEY = 'pipelineDojo_progress';
 
+const UNLOCK_ALL_KEY = 'pipelineDojo_unlockAll';
+
 export function getProgress() {
   try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); } catch { return {}; }
 }
@@ -771,7 +773,16 @@ export function saveProgress(exerciseId, stars) {
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
 }
 
+export function getUnlockAll() {
+  try { return localStorage.getItem(UNLOCK_ALL_KEY) === '1'; } catch { return false; }
+}
+
+export function setUnlockAll(value) {
+  try { localStorage.setItem(UNLOCK_ALL_KEY, value ? '1' : '0'); } catch { /* ignore */ }
+}
+
 export function isTierUnlocked(tier) {
+  if (getUnlockAll()) return true;
   if (tier === 1) return true;
   const p = getProgress();
   const prevTierExercises = EXERCISES.filter(e => e.difficulty === tier - 1);

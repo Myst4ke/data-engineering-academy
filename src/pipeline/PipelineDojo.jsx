@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Lightbulb, FileText, Star, Lock, Unlock, Wrench, PartyPopper } from 'lucide-react';
 import PipelineCanvas from './PipelineCanvas';
-import { EXERCISES, TIERS, getExercisesByTier, getProgress, saveProgress, isTierUnlocked, getTierProgress } from './exercises';
+import { TIERS, getExercisesByTier, getProgress, saveProgress, isTierUnlocked, getTierProgress, getUnlockAll, setUnlockAll } from './exercises';
 import DojoIntro, { useDojoIntro, PIPELINE_DOJO_INTRO } from '../components/DojoIntro';
 import BackButton from '../components/BackButton';
 import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
@@ -211,11 +211,9 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
     setHoverRect(null);
   };
 
-  const unlockAll = () => {
-    if (!window.confirm('Débloquer tous les exercices ? Vous pourrez toujours tester les niveaux avancés ; votre score d\'étoiles ne sera pas comptabilisé.')) return;
-    const p = getProgress();
-    EXERCISES.forEach(ex => { if (!p[ex.id]) p[ex.id] = { stars: 1, date: new Date().toISOString() }; });
-    localStorage.setItem('pipelineDojo_progress', JSON.stringify(p));
+  const allUnlocked = getUnlockAll();
+  const toggleUnlockAll = () => {
+    setUnlockAll(!allUnlocked);
     forceUpdate(v => v + 1);
   };
 
@@ -231,12 +229,14 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={unlockAll}
-            className="game-btn px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"
-            title="Débloquer tous les exercices"
+            onClick={toggleUnlockAll}
+            role="switch"
+            aria-checked={allUnlocked}
+            className={`game-btn px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 ${allUnlocked ? 'bg-[#DCE8FF] text-[#3B7ADB] border-[#6BA4FF]' : ''}`}
+            title={allUnlocked ? 'Rétablir la progression normale' : 'Accéder à tous les exercices sans les compléter'}
           >
-            <Unlock className="w-3.5 h-3.5" aria-hidden="true" />
-            Tout débloquer
+            {allUnlocked ? <Lock className="w-3.5 h-3.5" aria-hidden="true" /> : <Unlock className="w-3.5 h-3.5" aria-hidden="true" />}
+            {allUnlocked ? 'Verrouiller' : 'Tout débloquer'}
           </button>
           <button
             onClick={onSandbox}

@@ -342,6 +342,353 @@ function Brain() {
   );
 }
 
+// ── V2 COMPONENTS ────────────────────────────────────────────
+
+function Api() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="24" {...SFill(DD.sky)} />
+      <ellipse cx="40" cy="40" rx="10" ry="24" {...S} stroke={PAPER} strokeWidth="2" />
+      <ellipse cx="40" cy="40" rx="24" ry="10" {...S} stroke={PAPER} strokeWidth="2" />
+      <path d="M16 40 L64 40" stroke={PAPER} strokeWidth="2" strokeLinecap="round" />
+      <path d="M40 16 L40 64" stroke={PAPER} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Concat() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="18" y="14" width="44" height="14" rx="3" {...SFill(DD.sky)} />
+      <rect x="18" y="32" width="44" height="14" rx="3" {...SFill(DD.skyL)} />
+      <path d="M40 52 L40 64 M32 58 L40 66 L48 58" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+function Trash() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="22" width="52" height="6" rx="3" {...SFill(DD.rose)} />
+      <rect x="32" y="16" width="16" height="6" rx="2" {...SFill(DD.rose)} />
+      <path d="M20 30 L60 30 L56 66 Q56 68 54 68 L26 68 Q24 68 24 66 Z" {...SFill(DD.roseL)} />
+      <path d="M32 38 L32 60 M40 38 L40 60 M48 38 L48 60" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Pencil() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(-35 40 40)">
+        <rect x="18" y="34" width="36" height="12" {...SFill(DD.sun)} />
+        <rect x="12" y="34" width="8" height="12" rx="1.5" {...SFill(DD.rose)} />
+        <rect x="20" y="34" width="4" height="12" fill={INK} opacity="0.15" stroke={INK} strokeWidth={SW} />
+        <path d="M54 34 L66 40 L54 46 Z" {...SFill(PAPER)} />
+        <path d="M62 38 L66 40 L62 42 Z" fill={INK} />
+      </g>
+    </svg>
+  );
+}
+
+function Cycle() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M23.09 33.84 A18 18 0 0 1 56.91 33.84" stroke={DD.mintD} strokeWidth="4.6" strokeLinecap="round" fill="none" />
+      <path d="M59.65 41.36 L53.15 35.21 L60.67 32.47 Z" fill={DD.mintD} />
+      <path d="M56.91 46.16 A18 18 0 0 1 23.09 46.16" stroke={DD.mint} strokeWidth="4.6" strokeLinecap="round" fill="none" />
+      <path d="M20.35 38.64 L26.85 44.79 L19.33 47.53 Z" fill={DD.mint} />
+    </svg>
+  );
+}
+
+function MapIco() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 22 L30 16 L50 22 L66 16 L66 58 L50 64 L30 58 L14 64 Z" {...SFill(DD.mintL)} />
+      <path d="M30 16 L30 58 M50 22 L50 64" {...S} />
+      <path d="M40 30 Q34 30 34 38 Q34 44 40 50 Q46 44 46 38 Q46 30 40 30 Z" {...SFill(DD.coral)} />
+      <circle cx="40" cy="38" r="3" fill={PAPER} />
+    </svg>
+  );
+}
+
+function WindowIco() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 60 L66 60" {...S} />
+      <rect x="18" y="48" width="6" height="12" rx="1" {...SFill(DD.skyL)} />
+      <rect x="26" y="42" width="6" height="18" rx="1" fill={DD.sky} stroke={INK} strokeWidth={SW} />
+      <rect x="34" y="36" width="6" height="24" rx="1" fill={DD.sky} stroke={INK} strokeWidth={SW} />
+      <rect x="42" y="44" width="6" height="16" rx="1" fill={DD.sky} stroke={INK} strokeWidth={SW} />
+      <rect x="50" y="40" width="6" height="20" rx="1" {...SFill(DD.skyL)} />
+      <rect x="58" y="50" width="6" height="10" rx="1" {...SFill(DD.skyL)} />
+      <rect x="24" y="30" width="26" height="36" rx="3" fill="none" stroke={DD.coralD} strokeWidth="2.4" strokeDasharray="4 3" />
+    </svg>
+  );
+}
+
+function Dice() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(-8 40 40)">
+        <rect x="16" y="16" width="48" height="48" rx="10" {...SFill(DD.sun)} />
+        <circle cx="28" cy="28" r="3.4" fill={INK} />
+        <circle cx="52" cy="28" r="3.4" fill={INK} />
+        <circle cx="40" cy="40" r="3.4" fill={INK} />
+        <circle cx="28" cy="52" r="3.4" fill={INK} />
+        <circle cx="52" cy="52" r="3.4" fill={INK} />
+      </g>
+    </svg>
+  );
+}
+
+function Loop() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M35.34 22.61 A18 18 0 1 0 44.66 22.61" stroke={DD.sky} strokeWidth="4.6" strokeLinecap="round" fill="none" />
+      <path d="M52.39 24.68 L43.75 25.99 L45.57 19.23 Z" fill={DD.skyD} />
+    </svg>
+  );
+}
+
+function Note() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22 14 L50 14 L60 24 L60 66 Q60 68 58 68 L22 68 Q20 68 20 66 L20 16 Q20 14 22 14 Z" {...SFill(PAPER)} />
+      <path d="M50 14 L50 24 L60 24" {...S} />
+      <path d="M27 34 L50 34 M27 44 L50 44 M27 54 L44 54" stroke={INK} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.25" />
+      <path d="M32 34 L52 34 Q58 34 58 39 Q58 44 52 44 L30 44 Q24 44 24 49 Q24 54 30 54 L48 54" stroke={DD.coralD} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M44 50 L52 54 L44 58 Z" fill={DD.coralD} stroke={DD.coralD} strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Search() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="34" cy="34" r="18" {...SFill(DD.skyL)} />
+      <path d="M47 47 L62 62" stroke={INK} strokeWidth="5" strokeLinecap="round" />
+      <path d="M47 47 L62 62" stroke={DD.sky} strokeWidth="2.8" strokeLinecap="round" />
+      <circle cx="34" cy="34" r="10" fill="none" stroke={INK} strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function Warehouse() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 30 L40 16 L68 30 L68 36 L12 36 Z" {...SFill(DD.skyD)} />
+      <rect x="14" y="36" width="52" height="30" {...SFill(DD.sky)} />
+      <path d="M12 66 L68 66" {...S} />
+      <rect x="22" y="44" width="10" height="14" rx="1" fill={PAPER} stroke={INK} strokeWidth="1.6" />
+      <rect x="36" y="44" width="10" height="14" rx="1" fill={PAPER} stroke={INK} strokeWidth="1.6" />
+      <rect x="50" y="44" width="10" height="14" rx="1" fill={PAPER} stroke={INK} strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function Gear() {
+  const teeth = 8;
+  const pts = [];
+  for (let i = 0; i < teeth * 2; i++) {
+    const a = (i * Math.PI) / teeth - Math.PI / 2;
+    const r = i % 2 === 0 ? 26 : 20;
+    pts.push(`${40 + r * Math.cos(a)},${40 + r * Math.sin(a)}`);
+  }
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <polygon points={pts.join(' ')} {...SFill(DD.sun)} />
+      <circle cx="40" cy="40" r="9" {...SFill(PAPER)} />
+    </svg>
+  );
+}
+
+function FileBox() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="26" width="52" height="40" rx="4" {...SFill(DD.sun)} />
+      <rect x="14" y="26" width="52" height="10" {...SFill(DD.sunD)} />
+      <rect x="33" y="30" width="14" height="4" rx="2" fill={INK} opacity="0.6" />
+      <rect x="22" y="20" width="12" height="8" rx="1.5" {...SFill(PAPER)} />
+      <rect x="38" y="18" width="12" height="10" rx="1.5" {...SFill(PAPER)} />
+      <rect x="54" y="22" width="10" height="6" rx="1.5" {...SFill(PAPER)} />
+    </svg>
+  );
+}
+
+function Medal({ color, colorDark, label }) {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M26 12 L34 42 L20 32 Z" {...SFill(DD.sky)} />
+      <path d="M54 12 L46 42 L60 32 Z" {...SFill(DD.coral)} />
+      <circle cx="40" cy="52" r="16" fill={color} stroke={INK} strokeWidth={SW} />
+      <circle cx="40" cy="52" r="11" fill="none" stroke={colorDark} strokeWidth="1.6" />
+      <text x="40" y="58" textAnchor="middle" fontFamily="Fraunces, serif" fontWeight="700" fontSize="18" fill={colorDark}>{label}</text>
+    </svg>
+  );
+}
+function Bronze() { return <Medal color="#C97B4E" colorDark="#8B4F24" label="3" />; }
+function Silver() { return <Medal color="#B8BEC9" colorDark="#6B7280" label="2" />; }
+function Gold()   { return <Medal color="#E9B931" colorDark="#B88700" label="1" />; }
+
+function Kpi() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="12" y="18" width="56" height="44" rx="6" {...SFill(PAPER)} />
+      <path d="M12 28 L68 28" {...S} />
+      <circle cx="18" cy="23" r="1.6" fill={INK} opacity="0.4" />
+      <circle cx="24" cy="23" r="1.6" fill={INK} opacity="0.4" />
+      <text x="40" y="53" textAnchor="middle" fontFamily="Fraunces, serif" fontWeight="700" fontSize="22" fill={DD.mintD}>42K</text>
+    </svg>
+  );
+}
+
+function Scatter() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 16 L16 62 L66 62" {...S} />
+      {[
+        [24,54],[34,46],[30,38],[42,40],[50,32],[44,28],[58,26],[62,38],
+      ].map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r="3" {...SFill(DD.rose)} />
+      ))}
+    </svg>
+  );
+}
+
+function Treemap() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="16" width="52" height="48" rx="3" {...SFill(PAPER)} />
+      <rect x="14" y="16" width="30" height="30" fill={DD.mint} />
+      <rect x="44" y="16" width="22" height="18" fill={DD.mintL} />
+      <rect x="44" y="34" width="12" height="12" fill={DD.coral} />
+      <rect x="56" y="34" width="10" height="12" fill={DD.sun} />
+      <rect x="14" y="46" width="20" height="18" fill={DD.sky} />
+      <rect x="34" y="46" width="32" height="18" fill={DD.skyL} />
+      <rect x="14" y="16" width="52" height="48" rx="3" {...S} />
+      <path d="M14 46 L66 46 M34 46 L34 64 M44 16 L44 34 M56 34 L56 46 M44 34 L66 34" {...S} strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function Funnel() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 18 L66 18 L58 32 L22 32 Z" {...SFill(DD.sky)} />
+      <path d="M22 34 L58 34 L52 48 L28 48 Z" {...SFill(DD.coral)} />
+      <path d="M28 50 L52 50 L46 64 L34 64 Z" {...SFill(DD.mint)} />
+    </svg>
+  );
+}
+
+function Slicer() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="36" width="60" height="10" rx="5" {...SFill(DD.skyL)} />
+      <rect x="10" y="36" width="32" height="10" rx="5" fill={DD.sky} />
+      <circle cx="42" cy="41" r="10" fill={PAPER} stroke={INK} strokeWidth={SW} />
+      <circle cx="42" cy="41" r="4" fill={DD.sky} />
+    </svg>
+  );
+}
+
+function Separator() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="36" width="52" height="8" rx="4" {...SFill(DD.coralL)} />
+      <circle cx="20" cy="40" r="2" fill={DD.coralD} />
+      <circle cx="40" cy="40" r="2" fill={DD.coralD} />
+      <circle cx="60" cy="40" r="2" fill={DD.coralD} />
+    </svg>
+  );
+}
+
+function Diamond() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 30 L30 16 L50 16 L60 30 L40 64 Z" {...SFill(DD.sky)} />
+      <path d="M20 30 L60 30 M30 16 L40 30 L50 16 M40 30 L40 64" {...S} strokeWidth="1.8" stroke={PAPER} />
+      <path d="M20 30 L60 30" {...S} />
+    </svg>
+  );
+}
+
+function StarEmpty() {
+  const pts = [];
+  const cx = 40, cy = 40;
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? 24 : 11;
+    const a = (-Math.PI / 2) + (i * Math.PI / 5);
+    pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
+  }
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <polygon points={pts.join(' ')} fill={DD.sunL} stroke={INK} strokeWidth={SW} strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Info() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="24" {...SFill(DD.sky)} />
+      <circle cx="40" cy="28" r="3.2" fill={PAPER} />
+      <rect x="36" y="36" width="8" height="20" rx="3" fill={PAPER} />
+    </svg>
+  );
+}
+
+function Warn() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 14 L70 64 L10 64 Z" {...SFill(DD.sun)} strokeLinejoin="round" />
+      <rect x="37" y="30" width="6" height="18" rx="3" fill={INK} />
+      <circle cx="40" cy="56" r="3" fill={INK} />
+    </svg>
+  );
+}
+
+function ErrorIco() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="24" {...SFill(DD.rose)} />
+      <path d="M30 30 L50 50 M50 30 L30 50" stroke={PAPER} strokeWidth="4.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Office() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="22" width="36" height="44" rx="2" {...SFill(DD.sky)} />
+      <rect x="50" y="34" width="18" height="32" rx="2" {...SFill(DD.skyD)} />
+      {[[19,28],[29,28],[39,28],[19,40],[29,40],[39,40],[19,52],[29,52],[39,52]].map(([x,y],i)=>(
+        <rect key={i} x={x} y={y} width="6" height="6" rx="1" fill={PAPER} />
+      ))}
+      {[[55,40],[62,40],[55,50],[62,50]].map(([x,y],i)=>(
+        <rect key={`r${i}`} x={x} y={y} width="4" height="4" rx="1" fill={PAPER} opacity="0.85" />
+      ))}
+      <path d="M10 66 L70 66" {...S} />
+    </svg>
+  );
+}
+
+function PlayingCard() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="22" y="14" width="36" height="52" rx="5" {...SFill(DD.coralL)} transform="rotate(-8 40 40)" />
+      <rect x="22" y="14" width="36" height="52" rx="5" {...SFill(PAPER)} transform="rotate(6 40 40)" />
+      <g transform="rotate(6 40 40)">
+        <text x="28" y="26" fontFamily="Fraunces, serif" fontWeight="700" fontSize="11" fill={DD.coralD}>A</text>
+        <path d="M40 32 Q32 38 34 46 Q36 52 40 52 Q44 52 46 46 Q48 38 40 32 Z" fill={DD.coralD} />
+        <text x="50" y="52" fontFamily="Fraunces, serif" fontWeight="700" fontSize="11" fill={DD.coralD} transform="rotate(180 50 52)">A</text>
+      </g>
+    </svg>
+  );
+}
+
 // ── REGISTRY ─────────────────────────────────────────────────
 export const EMOJI_COMPONENTS = {
   broom:     { C: Broom,     label: 'Broom',     fr: 'Balai',             use: 'Data Dojo · nettoyage',    replaces: '🧹',  tile: 'coral' },
@@ -372,12 +719,59 @@ export const EMOJI_COMPONENTS = {
   pieChart:  { C: PieChart,  label: 'Pie',       fr: 'Répartition',       use: 'Dashboard KPI',             replaces: '🥧',  tile: 'mint'  },
   link:      { C: LinkIco,   label: 'Link',      fr: 'Lien',              use: 'Relation / FK',             replaces: '🔗',  tile: 'sky'   },
   brain:     { C: Brain,     label: 'Apprendre', fr: 'Savoir',            use: 'Niveau / connaissance',     replaces: '🧠',  tile: 'rose'  },
+
+  // v2 — Pipeline
+  api:       { C: Api,       label: 'API',       fr: 'API REST',          use: 'Source externe',            replaces: '🌐',  tile: 'sky'   },
+  concat:    { C: Concat,    label: 'Concat',    fr: 'Concaténer',        use: 'Empiler deux tables',       replaces: '⬇️',  tile: 'sky'   },
+  trash:     { C: Trash,     label: 'Trash',     fr: 'Supprimer',         use: 'Supprimer colonne',         replaces: '🗑️',  tile: 'rose'  },
+  pencil:    { C: Pencil,    label: 'Pencil',    fr: 'Renommer',          use: 'Renommer colonne',          replaces: '✏️',  tile: 'sun'   },
+  cycle:     { C: Cycle,     label: 'Cycle',     fr: 'Dédoublonner',      use: 'Logic / unique',            replaces: '🔄',  tile: 'mint'  },
+  mapIco:    { C: MapIco,    label: 'Map',       fr: 'Mapping',           use: 'Correspondance géo',        replaces: '🗺️',  tile: 'mint'  },
+  windowFn:  { C: WindowIco, label: 'Window',    fr: 'Fenêtre',           use: 'Window function',           replaces: '📐',  tile: 'sky'   },
+  dice:      { C: Dice,      label: 'Dice',      fr: 'Échantillon',       use: 'Sampling aléatoire',        replaces: '🎲',  tile: 'sun'   },
+  loop:      { C: Loop,      label: 'Loop',      fr: 'Boucle',            use: 'ForEach',                   replaces: '🔁',  tile: 'sky'   },
+  note:      { C: Note,      label: 'Note',      fr: 'Lignes',            use: 'ForEachRow / texte BI',     replaces: '📝',  tile: 'coral' },
+  search:    { C: Search,    label: 'Search',    fr: 'Recherche',         use: 'Lookup / exists',           replaces: '🔎',  tile: 'sky'   },
+  warehouse: { C: Warehouse, label: 'DWH',       fr: 'Entrepôt',          use: 'Data Warehouse',            replaces: '🏭',  tile: 'sky'   },
+  gear:      { C: Gear,      label: 'Gear',      fr: 'Transformer',       use: 'Catégorie transformations', replaces: '⚙️',  tile: 'sun'   },
+  fileBox:   { C: FileBox,   label: 'Box',       fr: 'Archive',           use: 'Stockage / Medallion',      replaces: '🗃️',  tile: 'sun'   },
+
+  // v2 — Lakehouse tiers
+  bronze:    { C: Bronze,    label: 'Bronze',    fr: 'Bronze',            use: 'Tier Bronze',               replaces: '🥉',  tile: 'coral' },
+  silver:    { C: Silver,    label: 'Silver',    fr: 'Argent',            use: 'Tier Silver',               replaces: '🥈',  tile: 'sky'   },
+  gold:      { C: Gold,      label: 'Gold',      fr: 'Or',                use: 'Tier Gold',                 replaces: '🥇',  tile: 'sun'   },
+
+  // v2 — BI widgets
+  kpi:       { C: Kpi,       label: 'KPI',       fr: 'KPI',               use: 'Indicateur chiffré',        replaces: '🔢',  tile: 'mint'  },
+  scatter:   { C: Scatter,   label: 'Scatter',   fr: 'Nuage',             use: 'Nuage de points',           replaces: '⚬',   tile: 'rose'  },
+  treemap:   { C: Treemap,   label: 'Treemap',   fr: 'Arborescence',      use: 'Répartition proportionnelle', replaces: '🟩', tile: 'mint' },
+  funnel:    { C: Funnel,    label: 'Funnel',    fr: 'Entonnoir',         use: 'Conversion par étape',      replaces: '🔻',  tile: 'coral' },
+  slicer:    { C: Slicer,    label: 'Slicer',    fr: 'Slicer',            use: 'Filtre interactif',         replaces: '🔘',  tile: 'sky'   },
+  separator: { C: Separator, label: 'Sep.',      fr: 'Séparateur',        use: 'Divider layout',            replaces: '➖',  tile: 'coral' },
+
+  // v2 — Statuses
+  diamond:   { C: Diamond,   label: 'Diamond',   fr: 'Diamant',           use: 'Tier Expert',               replaces: '💎',  tile: 'sky'   },
+  starEmpty: { C: StarEmpty, label: 'Empty',     fr: 'Étoile vide',       use: 'Étoile non-gagnée',         replaces: '☆',   tile: 'sun'   },
+  info:      { C: Info,      label: 'Info',      fr: 'Info',              use: 'Log INFO',                  replaces: 'ℹ️',  tile: 'sky'   },
+  warn:      { C: Warn,      label: 'Attention', fr: 'Attention',         use: 'Log WARN',                  replaces: '⚠️',  tile: 'sun'   },
+  errorIco:  { C: ErrorIco,  label: 'Error',     fr: 'Erreur',            use: 'Log ERROR',                 replaces: '❌',  tile: 'rose'  },
+
+  // v2 — Dojo Intro
+  office:    { C: Office,    label: 'Office',    fr: 'Immeuble',          use: 'Dans le monde réel',        replaces: '🏢',  tile: 'sky'   },
+  card:      { C: PlayingCard, label: 'Card',    fr: 'Carte',             use: 'Comment ça marche',         replaces: '🃏',  tile: 'coral' },
 };
 
-// Reverse-lookup : emoji natif → clé de registre ('🧹' → 'broom')
-export const NATIVE_TO_KEY = Object.fromEntries(
-  Object.entries(EMOJI_COMPONENTS).map(([key, v]) => [v.replaces, key])
-);
+// Normalisation FE0F pour que '↕' (sans sélecteur) matche '↕️' (avec sélecteur)
+const stripFe0f = (s) => (s ? s.replace(/\ufe0f/g, '') : s);
+
+// Reverse-lookup : emoji natif → clé de registre ('🧹' → 'broom').
+// On indexe chaque emoji deux fois : avec et sans FE0F pour matcher les deux formes.
+export const NATIVE_TO_KEY = Object.entries(EMOJI_COMPONENTS).reduce((acc, [key, v]) => {
+  if (!v.replaces) return acc;
+  acc[v.replaces] = key;
+  acc[stripFe0f(v.replaces)] = key;
+  return acc;
+}, {});
 
 const TILE_BG = {
   coral: DD.coralL,
@@ -435,7 +829,7 @@ export function DojoEmojiTile({ name, size = 64, tile, className = '', style = {
  *   <DojoEmojiAuto native="🧹" size={32} />
  */
 export function DojoEmojiAuto({ native, size = 32, fallback = true }) {
-  const key = NATIVE_TO_KEY[native];
+  const key = NATIVE_TO_KEY[native] || NATIVE_TO_KEY[stripFe0f(native)];
   if (key) return <DojoEmoji name={key} size={size} />;
   if (!fallback) return null;
   return <span style={{ fontSize: size }} aria-hidden="true">{native}</span>;

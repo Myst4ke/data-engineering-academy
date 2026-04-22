@@ -7,6 +7,7 @@ import DojoIntro, { useDojoIntro, PIPELINE_DOJO_INTRO } from '../components/Dojo
 import BackButton from '../components/BackButton';
 import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
 import { DojoEmojiAuto } from '../components/DojoEmoji';
+import { NODE_TYPES } from './nodeTypes';
 
 // ── Tutorial (5 steps, spotlight) ──
 const TUTORIAL_STEPS = [
@@ -438,11 +439,16 @@ export default function PipelineDojo({ onBackToHub }) {
               {currentExercise.hintNodes && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {currentExercise.hintNodes.map((nt, i) => {
-                    const icons = { csv_source: '📄 Source CSV', db_source: '🗄️ Base SQL', api_source: '🌐 API REST', filter: '🔍 Filtrer', sort: '↕️ Trier', join: '🔗 Joindre', concat: '⬇️ Concaténer', aggregate: '📊 Agréger', select_cols: '✅ Sélectionner', delete_col: '🗑️ Suppr. col.', rename_col: '✏️ Renommer', deduplicate: '🔄 Dédup', clean_na: '🧹 Suppr. vides', fill_na: '🔧 Remplir', mapping: '🗺️ Mapping', window_func: '📐 Fenêtre', sample: '🎲 Échantillon', foreach: '🔁 ForEach', foreach_row: '📝 ForEachRow', if_condition: '⚡ Si/Sinon', lookup: '🔎 Lookup', log: '📋 Journal', lakehouse_bronze: '🥉 Bronze', lakehouse_silver: '🥈 Silver', lakehouse_gold: '🥇 Gold', warehouse: '🏭 Warehouse', dashboard: '📈 Dashboard', csv_export: '💾 Export CSV' };
+                    const def = NODE_TYPES[nt];
                     return (
                       <span key={i} className="inline-flex items-center gap-1 bg-white border border-amber-200 rounded-lg px-2 py-0.5 text-xs font-medium text-amber-700">
                         {i > 0 && <span className="text-amber-300 -ml-1 mr-0.5" aria-hidden="true">→</span>}
-                        {icons[nt] || nt}
+                        {def ? (
+                          <>
+                            <DojoEmojiAuto native={def.icon} size={14} />
+                            <span>{def.name}</span>
+                          </>
+                        ) : nt}
                       </span>
                     );
                   })}

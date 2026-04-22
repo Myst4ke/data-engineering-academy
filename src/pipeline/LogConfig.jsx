@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 const LEVELS = [
   { id: 'info', label: 'INFO', color: '#3B82F6', icon: 'ℹ️' },
@@ -16,7 +17,7 @@ export default function LogConfig({ columns, initialParams, onConfirm, onCancel 
     <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">📋</span>
+          <DojoEmojiAuto native="📋" size={26} />
           <div>
             <h3 className="text-lg font-bold text-slate-800">Journal (Log)</h3>
             <p className="text-xs text-slate-500">Écrit un message dans le journal d'exécution</p>
@@ -29,10 +30,11 @@ export default function LogConfig({ columns, initialParams, onConfirm, onCancel 
             <div className="flex gap-2">
               {LEVELS.map(l => (
                 <button key={l.id} onClick={() => setLevel(l.id)}
-                  className={`flex-1 py-2 px-2 rounded-lg border-2 text-xs font-semibold transition-all text-center ${
+                  className={`flex-1 py-2 px-2 rounded-lg border-2 text-xs font-semibold transition-all flex items-center justify-center gap-1 ${
                     level === l.id ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'
                   }`}>
-                  {l.icon} {l.label}
+                  <DojoEmojiAuto native={l.icon} size={14} />
+                  <span>{l.label}</span>
                 </button>
               ))}
             </div>

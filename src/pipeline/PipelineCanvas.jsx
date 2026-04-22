@@ -249,7 +249,10 @@ function NodePalette({ onAddNode }) {
       <div className="flex-1 overflow-y-auto">
         {CATEGORIES.map(cat => (
           <div key={cat.id} className="p-2">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1 px-1 sticky top-0 bg-white">{cat.icon} {cat.name}</p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1 px-1 sticky top-0 bg-white flex items-center gap-1.5">
+              <DojoEmojiAuto native={cat.icon} size={14} />
+              <span>{cat.name}</span>
+            </p>
             {Object.entries(NODE_TYPES).filter(([, d]) => d.category === cat.id).map(([typeId, def]) => (
               <button key={typeId} onClick={() => onAddNode(typeId)}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-slate-50 transition-colors mb-0.5 group">

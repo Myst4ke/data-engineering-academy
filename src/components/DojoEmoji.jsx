@@ -675,6 +675,26 @@ function Office() {
   );
 }
 
+function Inbox() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 38 L26 18 L54 18 L66 38 L66 60 Q66 64 62 64 L18 64 Q14 64 14 60 Z" {...SFill(DD.skyL)} />
+      <path d="M14 38 L28 38 Q30 38 30 40 Q30 46 40 46 Q50 46 50 40 Q50 38 52 38 L66 38" {...S} fill={DD.sky} />
+      <path d="M40 14 L40 30 M34 24 L40 30 L46 24" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+function Outbox() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 38 L26 18 L54 18 L66 38 L66 60 Q66 64 62 64 L18 64 Q14 64 14 60 Z" {...SFill(DD.coralL)} />
+      <path d="M14 38 L28 38 Q30 38 30 40 Q30 46 40 46 Q50 46 50 40 Q50 38 52 38 L66 38" {...S} fill={DD.coral} />
+      <path d="M40 30 L40 14 M34 20 L40 14 L46 20" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
 function PlayingCard() {
   return (
     <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
@@ -759,6 +779,10 @@ export const EMOJI_COMPONENTS = {
   // v2 — Dojo Intro
   office:    { C: Office,    label: 'Office',    fr: 'Immeuble',          use: 'Dans le monde réel',        replaces: '🏢',  tile: 'sky'   },
   card:      { C: PlayingCard, label: 'Card',    fr: 'Carte',             use: 'Comment ça marche',         replaces: '🃏',  tile: 'coral' },
+
+  // v2 — Pipeline categories
+  inbox:     { C: Inbox,     label: 'Inbox',     fr: 'Entrée',            use: 'Catégorie Sources',         replaces: '📥',  tile: 'sky'   },
+  outbox:    { C: Outbox,    label: 'Outbox',    fr: 'Sortie',            use: 'Catégorie Destinations',    replaces: '📤',  tile: 'coral' },
 };
 
 // Normalisation FE0F pour que '↕' (sans sélecteur) matche '↕️' (avec sélecteur)

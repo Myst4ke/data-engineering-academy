@@ -2,16 +2,28 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { HelpCircle, X } from 'lucide-react';
 
-/**
- * DojoIntro — popup explicative affichée à la première visite d'un dojo.
- * Peut être rouverte via un bouton "?" dans le dojo.
- */
-export default function DojoIntro({ dojoId, title, icon, color, sections, onClose }) {
+// Palette alignée sur celle du Hub (Hub.jsx ACCENT_CLASSES)
+const ACCENTS = {
+  coral: { main: '#FF8066', dark: '#E85D41', isoBg: '#FFE5DC', border: '#FF8066', tagText: '#E85D41' },
+  sky:   { main: '#6BA4FF', dark: '#3B7ADB', isoBg: '#DCE8FF', border: '#6BA4FF', tagText: '#3B7ADB' },
+  mint:  { main: '#5ED6B4', dark: '#0F9B7A', isoBg: '#D4F4E9', border: '#5ED6B4', tagText: '#0F9B7A' },
+};
+
+const KATA_BY_DOJO = {
+  'data-dojo':     'Kata I',
+  'pipeline-dojo': 'Kata II',
+  'bi-dojo':       'Kata III',
+};
+
+export default function DojoIntro({ dojoId, title, icon, accent = 'coral', sections, onClose }) {
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
+
+  const a = ACCENTS[accent] || ACCENTS.coral;
+  const kata = KATA_BY_DOJO[dojoId];
 
   return createPortal(
     <div
@@ -21,56 +33,81 @@ export default function DojoIntro({ dojoId, title, icon, color, sections, onClos
       aria-modal="true"
       aria-labelledby="dojo-intro-title"
     >
-      <div className="modal-content game-panel w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className={`px-6 py-5 bg-gradient-to-r ${color} text-white relative`}>
+      <div
+        className="modal-content bg-white rounded-[22px] w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden"
+        style={{ border: `2px solid ${a.border}`, boxShadow: '0 12px 0 rgba(43,45,66,0.08)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header — carte d'accueil à l'esprit hub */}
+        <div className="relative px-6 pt-6 pb-5">
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#F4EADB] hover:bg-[#E4D9C5] text-[#5A6072] flex items-center justify-center transition-colors"
             aria-label="Fermer"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
-          <div className="flex items-center gap-3 pr-8">
-            <span className="text-3xl" aria-hidden="true">{icon}</span>
-            <div>
-              <h2 id="dojo-intro-title" className="text-xl font-black">{title}</h2>
-              <p className="text-white/80 text-xs font-medium mt-0.5">Guide d'introduction</p>
+          <div className="flex items-start gap-4 pr-10">
+            <div
+              className="w-14 h-14 rounded-[16px] flex items-center justify-center text-3xl flex-none"
+              style={{ background: a.isoBg, boxShadow: 'inset 0 -4px 0 rgba(0,0,0,0.08)' }}
+              aria-hidden="true"
+            >
+              {icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              {kata && (
+                <div
+                  className="inline-block px-2.5 py-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider mb-1.5"
+                  style={{ background: a.isoBg, color: a.tagText }}
+                >
+                  {kata}
+                </div>
+              )}
+              <h2 id="dojo-intro-title" className="font-display text-2xl sm:text-[26px] text-[#2B2D42] tracking-tight leading-tight">
+                {title}
+              </h2>
+              <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-wider mt-1">Guide d'introduction</p>
             </div>
           </div>
         </div>
 
+        {/* Séparateur doux */}
+        <div className="mx-6 border-t border-dashed border-[#EDE3D2]" />
+
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {sections.map((section, i) => (
             <div key={i}>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg" aria-hidden="true">{section.icon}</span>
-                <h3 className="text-sm font-bold text-slate-800">{section.title}</h3>
+                <h3 className="font-display text-base text-[#2B2D42] tracking-tight">{section.title}</h3>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed pl-7">{section.content}</p>
+              <p className="text-[13px] text-[#5A6072] leading-relaxed pl-8 font-medium">{section.content}</p>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="px-6 py-4 border-t border-[#EDE3D2] bg-white flex items-center justify-between gap-3 flex-wrap">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               id={`${dojoId}-dont-show`}
               type="checkbox"
               defaultChecked
-              className="rounded border-slate-300 text-indigo-500"
+              className="rounded border-[#E4D9C5]"
+              style={{ accentColor: a.main }}
               onChange={e => {
                 if (e.target.checked) localStorage.setItem(`${dojoId}_introSeen`, '1');
                 else localStorage.removeItem(`${dojoId}_introSeen`);
               }}
             />
-            <span className="text-xs text-slate-600">Ne plus afficher à l'ouverture</span>
+            <span className="text-xs text-[#5A6072] font-medium">Ne plus afficher à l'ouverture</span>
           </label>
           <button
             onClick={onClose}
-            className={`px-6 py-2 rounded-lg bg-gradient-to-r ${color} text-white text-sm font-bold hover:opacity-90 transition-opacity`}
+            className="px-5 py-2 rounded-xl text-white text-sm font-bold shadow-[0_4px_0_rgba(0,0,0,0.08)] transition-transform hover:-translate-y-[1px] active:translate-y-[1px]"
+            style={{ background: a.main }}
           >
             Commencer
           </button>
@@ -98,7 +135,7 @@ export function useDojoIntro(dojoId) {
   const IntroButton = ({ className = '' }) => (
     <button
       onClick={() => setShow(true)}
-      className={`w-7 h-7 rounded-full bg-slate-100 hover:bg-indigo-100 text-slate-500 hover:text-indigo-600 flex items-center justify-center transition-colors ${className}`}
+      className={`w-7 h-7 rounded-full bg-[#F4EADB] hover:bg-[#E4D9C5] text-[#5A6072] hover:text-[#2B2D42] flex items-center justify-center transition-colors ${className}`}
       title="À propos de ce module"
       aria-label="Revoir la présentation du module"
     >
@@ -117,7 +154,7 @@ export const DATA_DOJO_INTRO = {
   dojoId: 'data-dojo',
   title: 'Data Dojo',
   icon: '🧹',
-  color: 'from-[#FF8066] to-[#E85D41]',
+  accent: 'coral',
   sections: [
     {
       icon: '🎯',
@@ -146,7 +183,7 @@ export const PIPELINE_DOJO_INTRO = {
   dojoId: 'pipeline-dojo',
   title: 'Pipeline Dojo',
   icon: '🔧',
-  color: 'from-[#6BA4FF] to-[#3B7ADB]',
+  accent: 'sky',
   sections: [
     {
       icon: '🎯',
@@ -180,7 +217,7 @@ export const BI_DOJO_INTRO = {
   dojoId: 'bi-dojo',
   title: 'BI Dojo',
   icon: '📊',
-  color: 'from-[#5ED6B4] to-[#0F9B7A]',
+  accent: 'mint',
   sections: [
     {
       icon: '🎯',

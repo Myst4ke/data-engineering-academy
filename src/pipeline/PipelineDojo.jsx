@@ -6,6 +6,7 @@ import { TIERS, getExercisesByTier, getProgress, saveProgress, isTierUnlocked, g
 import DojoIntro, { useDojoIntro, PIPELINE_DOJO_INTRO } from '../components/DojoIntro';
 import BackButton from '../components/BackButton';
 import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 // ── Tutorial (5 steps, spotlight) ──
 const TUTORIAL_STEPS = [
@@ -98,7 +99,7 @@ function ExercisePopup({ exercise, onClose }) {
                 <div className="flex flex-wrap gap-1 mt-2" aria-label="Nœuds suggérés">
                   {exercise.hintNodes.map((nt, i) => {
                     const def = { csv_source: '📄', db_source: '🗄️', api_source: '🌐', filter: '🔍', sort: '↕️', join: '🔗', concat: '⬇️', aggregate: '📊', select_cols: '✅', delete_col: '🗑️', rename_col: '✏️', deduplicate: '🔄', clean_na: '🧹', fill_na: '🔧', mapping: '🗺️', window_func: '📐', sample: '🎲', foreach: '🔁', foreach_row: '📝', if_condition: '⚡', lookup: '🔎', log: '📋', lakehouse_bronze: '🥉', lakehouse_silver: '🥈', lakehouse_gold: '🥇', warehouse: '🏭', dashboard: '📈', csv_export: '💾' };
-                    return <span key={i} className="text-base" title={nt} aria-label={nt}>{def[nt] || '?'}</span>;
+                    return <span key={i} title={nt} aria-label={nt}><DojoEmojiAuto native={def[nt] || '?'} size={18} /></span>;
                   })}
                 </div>
               )}

@@ -4,6 +4,7 @@ import { getAllTables } from '../pipeline/sampleData';
 import { BarChart, LineChart, PieChart, KpiCard, ScatterPlot, Gauge, Treemap, MapChart, FunnelChart, DataTable, TextWidget, Slicer, recommendChart } from './charts';
 import ChartConfig from './ChartConfig';
 import BackButton from '../components/BackButton';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 function aggregateData(data, xCol, yCol, aggFunc) {
   if (aggFunc === 'none' || !aggFunc) return data;
@@ -670,21 +671,21 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
               {WIDGET_TYPES.map(item => (
                 <button key={item.type} onClick={() => addWidget(item.type)}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-slate-50 transition-colors group mb-0.5">
-                  <span className="text-sm">{item.icon}</span>
+                  <DojoEmojiAuto native={item.icon} size={18} />
                   <span className="font-medium text-slate-700 group-hover:text-indigo-600">{item.label}</span>
                 </button>
               ))}
               <p className="text-[10px] font-semibold text-slate-400 uppercase mt-3 mb-1 px-1">Génération</p>
               <button onClick={autoGenerate}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-purple-50 transition-colors group mb-0.5">
-                <span className="text-sm">✨</span>
+                <DojoEmojiAuto native="✨" size={18} />
                 <span className="font-medium text-slate-700 group-hover:text-purple-600">Auto-dashboard</span>
               </button>
               <p className="text-[10px] font-semibold text-slate-400 uppercase mt-3 mb-1 px-1">Templates</p>
               {TEMPLATES.map(t => (
                 <button key={t.name} onClick={() => applyTemplate(t)}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-emerald-50 transition-colors group mb-0.5">
-                  <span className="text-sm">{t.icon}</span>
+                  <DojoEmojiAuto native={t.icon} size={18} />
                   <span className="font-medium text-slate-700 group-hover:text-emerald-600">{t.name}</span>
                 </button>
               ))}

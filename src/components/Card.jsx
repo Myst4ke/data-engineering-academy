@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HelpCircle, X } from 'lucide-react';
 import CardInfo from './CardInfo';
+import { DojoEmojiAuto } from './DojoEmoji';
 
 const CARD_COLORS = {
   drop_duplicates: { bg: 'from-violet-500 to-purple-600', border: '#a78bfa', glow: 'rgba(167, 139, 250, 0.3)' },
@@ -167,8 +168,8 @@ export default function Card({
             </div>
 
             {/* Icon */}
-            <div className={`text-center ${s.icon} drop-shadow-lg`}>
-              {cardInfo.icon}
+            <div className={`flex justify-center ${s.icon}`}>
+              <DojoEmojiAuto native={cardInfo.icon} size={effectiveSize === 'small' ? 32 : effectiveSize === 'medium' ? 38 : 48} />
             </div>
 
             {/* Name — min-height réservé pour 2 lignes : position du paramLabel cohérente entre cartes à nom court/long */}

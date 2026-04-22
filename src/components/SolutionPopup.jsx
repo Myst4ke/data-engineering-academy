@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Lightbulb, X, Play } from 'lucide-react';
 import { getCardDisplayInfo } from '../utils/cardDefinitions';
+import { DojoEmojiAuto } from './DojoEmoji';
 
 export default function SolutionPopup({ solution, onClose, onApply }) {
   // Close on escape key
@@ -60,7 +61,7 @@ export default function SolutionPopup({ solution, onClose, onApply }) {
               <div key={card.id} className="flex items-center">
                 {/* Card preview */}
                 <div className="bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl p-3 border-2 border-slate-300 shadow-sm min-w-[100px]">
-                  <div className="text-2xl text-center mb-1">{card.icon}</div>
+                  <div className="flex justify-center mb-1"><DojoEmojiAuto native={card.icon} size={28} /></div>
                   <div className="text-xs font-bold text-center text-slate-700">{card.name}</div>
                   {card.paramLabel && (
                     <div className="mt-1 text-[10px] text-center text-slate-500 bg-white/50 rounded px-1 py-0.5 truncate">

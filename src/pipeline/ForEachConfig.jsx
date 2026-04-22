@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NODE_TYPES } from './nodeTypes';
 import ParamInputPopup from '../components/ParamInputPopup';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 // Transform types available inside ForEach
 const AVAILABLE_TRANSFORMS = [
@@ -96,7 +97,7 @@ export default function ForEachConfig({ initialSteps, sampleColumns, sampleData,
                 if (!typeDef) return null;
                 return (
                   <div key={i} className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 group">
-                    <span className="text-lg">{typeDef.icon}</span>
+                    <DojoEmojiAuto native={typeDef.icon} size={20} />
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium text-slate-700">{typeDef.name}</span>
                       {step.params && (
@@ -136,7 +137,7 @@ export default function ForEachConfig({ initialSteps, sampleColumns, sampleData,
                 return (
                   <button key={typeId} onClick={() => addStep(typeId)}
                     className="flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-200 text-xs hover:bg-indigo-50 hover:border-indigo-300 transition-colors">
-                    <span>{def.icon}</span>
+                    <DojoEmojiAuto native={def.icon} size={18} />
                     <span className="text-slate-700">{def.name}</span>
                   </button>
                 );
@@ -153,7 +154,7 @@ export default function ForEachConfig({ initialSteps, sampleColumns, sampleData,
               {steps.map((s, i) => (
                 <span key={i} className="flex items-center gap-1">
                   {i > 0 && <span className="text-xs text-slate-300">→</span>}
-                  <span title={NODE_TYPES[s.nodeType]?.name}>{NODE_TYPES[s.nodeType]?.icon}</span>
+                  <span title={NODE_TYPES[s.nodeType]?.name}><DojoEmojiAuto native={NODE_TYPES[s.nodeType]?.icon} size={16} /></span>
                 </span>
               ))}
             </div>

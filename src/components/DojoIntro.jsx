@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { HelpCircle, X } from 'lucide-react';
+import { DojoEmojiAuto } from './DojoEmoji';
 
 // Palette alignée sur celle du Hub (Hub.jsx ACCENT_CLASSES)
 const ACCENTS = {
@@ -49,11 +50,11 @@ export default function DojoIntro({ dojoId, title, icon, accent = 'coral', secti
           </button>
           <div className="flex items-start gap-4 pr-10">
             <div
-              className="w-14 h-14 rounded-[16px] flex items-center justify-center text-3xl flex-none"
+              className="w-14 h-14 rounded-[16px] flex items-center justify-center flex-none"
               style={{ background: a.isoBg, boxShadow: 'inset 0 -4px 0 rgba(0,0,0,0.08)' }}
               aria-hidden="true"
             >
-              {icon}
+              <DojoEmojiAuto native={icon} size={40} />
             </div>
             <div className="flex-1 min-w-0">
               {kata && (
@@ -80,7 +81,7 @@ export default function DojoIntro({ dojoId, title, icon, accent = 'coral', secti
           {sections.map((section, i) => (
             <div key={i}>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg" aria-hidden="true">{section.icon}</span>
+                <DojoEmojiAuto native={section.icon} size={22} />
                 <h3 className="font-display text-base text-[#2B2D42] tracking-tight">{section.title}</h3>
               </div>
               <p className="text-[13px] text-[#5A6072] leading-relaxed pl-8 font-medium">{section.content}</p>

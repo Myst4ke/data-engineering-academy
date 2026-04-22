@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { DATABASES, getAllTables } from './sampleData';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 function PreviewTable({ table }) {
   if (!table || table.rows.length === 0) return <p className="text-slate-400 text-sm p-4">Aucune donnée</p>;
@@ -110,7 +111,7 @@ export default function TableExplorer({ onSelect, onClose, initialSelectedIds, c
                     <button onClick={() => toggleDb(dbId)}
                       className="w-full flex items-center gap-1.5 px-2 py-1 rounded text-left text-xs font-semibold text-slate-700 hover:bg-slate-50">
                       <span className="text-[10px] text-slate-400">{expandedDbs.has(dbId) ? '▼' : '▶'}</span>
-                      <span>{group.icon}</span>
+                      <DojoEmojiAuto native={group.icon} size={18} />
                       <span className="truncate">{group.name}</span>
                     </button>
                     {expandedDbs.has(dbId) && group.tables.map(table => (

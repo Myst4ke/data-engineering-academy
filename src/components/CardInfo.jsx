@@ -1,3 +1,5 @@
+import { DojoEmojiAuto } from './DojoEmoji';
+
 export default function CardInfo({ cardInfo, onClose }) {
   if (!cardInfo) return null;
 
@@ -16,7 +18,7 @@ export default function CardInfo({ cardInfo, onClose }) {
         <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-[#FFE5DC] to-transparent">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-4xl">{cardInfo.icon}</span>
+              <DojoEmojiAuto native={cardInfo.icon} size={44} />
               <div>
                 <h2 className="text-xl font-bold text-[#E85D41]">{cardInfo.name}</h2>
                 <p className="text-slate-500 font-mono text-sm">{cardInfo.shortName}</p>

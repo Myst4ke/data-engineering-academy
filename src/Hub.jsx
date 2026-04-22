@@ -3,6 +3,7 @@ import { Flame, ArrowRight, Sprout } from 'lucide-react';
 import App from './App';
 import PipelineDojo from './pipeline/PipelineDojo';
 import BiDojoWrapper from './bi/BiDojoWrapper';
+import { DojoEmojiAuto } from './components/DojoEmoji';
 
 // Les 3 modules actifs — chacun avec sa couleur d'accent edtech
 const MODULES = [
@@ -170,8 +171,8 @@ export default function Hub() {
                 aria-label={`Ouvrir ${mod.name}`}
                 className={`group relative bg-white border-2 ${a.border} rounded-[22px] p-6 text-left transition-all duration-150 cursor-pointer shadow-[0_6px_0_rgba(43,45,66,0.08)] hover:-translate-y-[3px] hover:shadow-[0_9px_0_rgba(43,45,66,0.10)] active:translate-y-[4px] active:shadow-[0_2px_0_rgba(43,45,66,0.06)]`}
               >
-                <div className={`w-16 h-16 rounded-[18px] flex items-center justify-center text-3xl mb-4 ${a.isoBg}`} style={{ boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.08)' }} aria-hidden="true">
-                  {mod.icon}
+                <div className={`w-16 h-16 rounded-[18px] flex items-center justify-center mb-4 ${a.isoBg}`} style={{ boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.08)' }} aria-hidden="true">
+                  <DojoEmojiAuto native={mod.icon} size={44} />
                 </div>
                 <div className={`inline-block px-3 py-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider mb-2 ${a.tagBg}`}>
                   {mod.kata}
@@ -223,7 +224,7 @@ export default function Hub() {
                   className="bg-white/60 border-2 border-dashed border-[#EDE3D2] rounded-[18px] p-4 opacity-80"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl" aria-hidden="true">{mod.icon}</span>
+                    <DojoEmojiAuto native={mod.icon} size={28} />
                     <div>
                       <h3 className="font-display text-base text-[#2B2D42]">{mod.name}</h3>
                       <p className="text-xs text-[#9CA3AF] font-semibold uppercase tracking-wider">{mod.subtitle}</p>

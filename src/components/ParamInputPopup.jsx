@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Check } from 'lucide-react';
+import { DojoEmojiAuto } from './DojoEmoji';
 
 export default function ParamInputPopup({ cardType, cardName, cardIcon, columns, tableData, onConfirm, onCancel, initialParams = null }) {
   const [column, setColumn] = useState('');
@@ -169,7 +170,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-3xl" aria-hidden="true">{cardIcon}</span>
+          <DojoEmojiAuto native={cardIcon} size={36} />
           <div>
             <h3 id="param-title" className="text-lg font-bold text-[#E85D41]">{cardName}</h3>
             <p className="text-slate-500 text-sm">{getTitle()}</p>

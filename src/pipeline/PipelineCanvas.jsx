@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 import { NODE_TYPES, CATEGORIES } from './nodeTypes';
 import { getAllTables } from './sampleData';
 import TableExplorer from './TableExplorer';
@@ -90,7 +91,7 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
           }`}
           style={{ background: bgColor, borderColor: typeDef.color, borderLeftWidth: '4px', overflow: 'visible' }}
         >
-          {!isTable && <span className="text-lg leading-none">{typeDef.icon}</span>}
+          {!isTable && <span className="leading-none inline-flex"><DojoEmojiAuto native={typeDef.icon} size={22} /></span>}
           {isTable && <span className="text-[10px] font-bold text-emerald-700">📋 {label || 'Table'}</span>}
           {!isTable && <span className="text-[10px] font-bold text-slate-700 mt-0.5">{typeDef.name}</span>}
           {!isTable && label === '__foreach_emojis__' && (() => {
@@ -100,7 +101,7 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
                 {steps.map((s, i) => (
                   <span key={i} className="flex items-center gap-0.5">
                     {i > 0 && <span className="text-[8px] text-slate-300">→</span>}
-                    <span className="text-sm">{NODE_TYPES[s.nodeType]?.icon}</span>
+                    <DojoEmojiAuto native={NODE_TYPES[s.nodeType]?.icon} size={16} />
                   </span>
                 ))}
               </div>
@@ -184,7 +185,7 @@ function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, is
         >
           {/* Header */}
           <div className="shrink-0 flex items-center justify-center gap-1.5" style={{ height: LAKE_HEADER_H, background: typeDef.color }}>
-            <span className="text-base">{typeDef.icon}</span>
+            <DojoEmojiAuto native={typeDef.icon} size={20} />
             <span className="text-xs font-bold" style={{ color: typeDef.color === '#FFD700' ? '#1E293B' : 'white' }}>
               {typeDef.name.toUpperCase()}
             </span>
@@ -252,7 +253,7 @@ function NodePalette({ onAddNode }) {
             {Object.entries(NODE_TYPES).filter(([, d]) => d.category === cat.id).map(([typeId, def]) => (
               <button key={typeId} onClick={() => onAddNode(typeId)}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-slate-50 transition-colors mb-0.5 group">
-                <span className="text-base shrink-0">{def.icon}</span>
+                <span className="shrink-0 inline-flex"><DojoEmojiAuto native={def.icon} size={18} /></span>
                 <span className="font-medium text-slate-700 group-hover:text-indigo-600 truncate">{def.name}</span>
               </button>
             ))}
@@ -1589,7 +1590,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
           <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50" onClick={() => setLakehouseRenameMenu(null)}>
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-96 max-h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-lg">{lhType?.icon}</span>
+                <DojoEmojiAuto native={lhType?.icon} size={20} />
                 <h3 className="text-sm font-bold text-slate-800">Tables dans {lhType?.name}</h3>
               </div>
               <div className="flex-1 overflow-y-auto space-y-2">

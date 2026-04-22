@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { recommendChart } from './charts';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 const CHART_TYPES = [
   { id: 'bar', label: 'Barres', icon: '📊' },
@@ -72,7 +73,7 @@ export default function ChartConfig({ columns: defaultColumns, data: defaultData
                   className={`py-1.5 px-1 rounded-lg border-2 text-[10px] font-medium text-center transition-all relative ${
                     chartType === ct.id ? 'border-indigo-400 bg-indigo-50 text-indigo-600' : 'border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}>
-                  <span className="text-base block">{ct.icon}</span>{ct.label}
+                  <span className="flex justify-center mb-0.5"><DojoEmojiAuto native={ct.icon} size={18} /></span>{ct.label}
                   {ct.id === recommended && <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" title="Recommandé" />}
                 </button>
               ))}

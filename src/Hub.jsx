@@ -169,38 +169,42 @@ export default function Hub() {
                 key={mod.id}
                 onClick={() => setActiveModule(mod.id)}
                 aria-label={`Ouvrir ${mod.name}`}
-                className={`group relative bg-white border-2 ${a.border} rounded-[22px] p-6 text-left transition-all duration-150 cursor-pointer shadow-[0_6px_0_rgba(43,45,66,0.08)] hover:-translate-y-[3px] hover:shadow-[0_9px_0_rgba(43,45,66,0.10)] active:translate-y-[4px] active:shadow-[0_2px_0_rgba(43,45,66,0.06)]`}
+                className={`group relative bg-white border-2 ${a.border} rounded-[22px] p-6 text-left transition-all duration-150 cursor-pointer shadow-[0_6px_0_rgba(43,45,66,0.08)] hover:-translate-y-[3px] hover:shadow-[0_9px_0_rgba(43,45,66,0.10)] active:translate-y-[4px] active:shadow-[0_2px_0_rgba(43,45,66,0.06)] flex flex-col h-full`}
               >
-                <div className={`w-16 h-16 rounded-[18px] flex items-center justify-center mb-4 ${a.isoBg}`} style={{ boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.08)' }} aria-hidden="true">
-                  <DojoEmojiAuto native={mod.icon} size={44} />
-                </div>
-                <div className={`inline-block px-3 py-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider mb-2 ${a.tagBg}`}>
-                  {mod.kata}
-                </div>
-                <h3 className="font-display text-xl sm:text-2xl text-[#2B2D42] mb-1.5 tracking-tight">
-                  {mod.name}
-                </h3>
-                <p className={`text-xs font-semibold ${a.subtitle} mb-2 uppercase tracking-wider`}>
-                  {mod.subtitle}
-                </p>
-                <p className="text-sm text-[#5A6072] leading-relaxed mb-4 font-medium">
-                  {mod.description}
-                </p>
-
-                {/* XP bar */}
-                <div className="mt-2">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-[#9CA3AF] mb-1">
-                    <span>Progression</span>
-                    <span className="text-[#2B2D42]">{completed} / {mod.totalExercises}</span>
+                <div>
+                  <div className={`w-16 h-16 rounded-[18px] flex items-center justify-center mb-4 ${a.isoBg}`} style={{ boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.08)' }} aria-hidden="true">
+                    <DojoEmojiAuto native={mod.icon} size={44} />
                   </div>
-                  <div className="h-2 bg-[#F4EADB] rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${a.xpFill} transition-all duration-500`} style={{ width: `${Math.min(100, pct)}%` }} />
+                  <div className={`inline-block px-3 py-0.5 rounded-xl text-[10px] font-bold uppercase tracking-wider mb-2 ${a.tagBg}`}>
+                    {mod.kata}
                   </div>
+                  <h3 className="font-display text-xl sm:text-2xl text-[#2B2D42] mb-1.5 tracking-tight">
+                    {mod.name}
+                  </h3>
+                  <p className={`text-xs font-semibold ${a.subtitle} mb-2 uppercase tracking-wider`}>
+                    {mod.subtitle}
+                  </p>
+                  <p className="text-sm text-[#5A6072] leading-relaxed font-medium">
+                    {mod.description}
+                  </p>
                 </div>
 
-                <div className={`mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs text-white shadow-[0_4px_0_rgba(0,0,0,0.08)] ${a.cta}`}>
-                  {completed > 0 ? 'Continuer' : 'Commencer'}
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                <div className="mt-auto pt-4">
+                  {/* XP bar */}
+                  <div>
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[#9CA3AF] mb-1">
+                      <span>Progression</span>
+                      <span className="text-[#2B2D42]">{completed} / {mod.totalExercises}</span>
+                    </div>
+                    <div className="h-2 bg-[#F4EADB] rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${a.xpFill} transition-all duration-500`} style={{ width: `${Math.min(100, pct)}%` }} />
+                    </div>
+                  </div>
+
+                  <div className={`mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs text-white shadow-[0_4px_0_rgba(0,0,0,0.08)] ${a.cta}`}>
+                    {completed > 0 ? 'Continuer' : 'Commencer'}
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </div>
                 </div>
               </button>
             );

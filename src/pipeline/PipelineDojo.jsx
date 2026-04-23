@@ -250,7 +250,7 @@ function ExerciseSelector({ onSelect, onSandbox, onBack, introButton }) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-        <div className="max-w-5xl mx-auto space-y-10">
+        <div className="max-w-5xl mx-auto space-y-10 pb-48">
           {TIERS.map(tier => {
             const exercises = getExercisesByTier(tier.id);
             const unlocked = isTierUnlocked(tier.id);

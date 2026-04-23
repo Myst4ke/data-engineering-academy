@@ -7,6 +7,9 @@ import TableNode, { TABLE_W, getTableHeight, getColumnPortPos } from './TableNod
 import RelationLine from './RelationLine';
 import ColumnEditor from './ColumnEditor';
 import TableConfig from './TableConfig';
+import ExerciseChecklist from '../components/ExerciseChecklist';
+import ExerciseNote from '../components/ExerciseNote';
+import { buildDmChecklist } from './checklistBuilder';
 
 let idSeed = 1;
 const nextId = (prefix) => `${prefix}-${Date.now().toString(36)}-${idSeed++}`;
@@ -84,6 +87,12 @@ export default function DataModelCanvas({
     }
     return map;
   }, [relations]);
+
+  // Live checklist items (Tier 1 exercises only)
+  const checklistItems = useMemo(() => {
+    if (!exercise || exercise.difficulty !== 1) return [];
+    return buildDmChecklist(exercise, tables, relations);
+  }, [exercise, tables, relations]);
 
   const getCanvasCoords = useCallback((e) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -458,6 +467,14 @@ export default function DataModelCanvas({
                 <p className="text-slate-300 text-xs mt-1">Drag entre les ronds pour relier deux colonnes ; clic droit pour configurer</p>
               </div>
             </div>
+          )}
+
+          {/* Live checklist for easy exercises ; free-form note otherwise */}
+          {exercise && exercise.difficulty === 1 && checklistItems.length > 0 && (
+            <ExerciseChecklist items={checklistItems} topOffset={48} leftOffset={16} />
+          )}
+          {exercise && exercise.difficulty > 1 && (
+            <ExerciseNote exerciseId={`dm-${exercise.id}`} topOffset={48} leftOffset={16} />
           )}
 
           {/* Zoom controls */}

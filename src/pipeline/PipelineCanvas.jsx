@@ -17,6 +17,9 @@ import IfConfig from './IfConfig';
 import WindowConfig from './WindowConfig';
 import SampleConfig from './SampleConfig';
 import LogConfig from './LogConfig';
+import ExerciseChecklist from '../components/ExerciseChecklist';
+import ExerciseNote from '../components/ExerciseNote';
+import { buildPipelineChecklist } from './pipelineChecklistBuilder';
 
 function mapNodeTypeToTransform(nodeType) {
   const map = {
@@ -1184,6 +1187,12 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     return outputs;
   }, [nodes, connections, nodeConfigs]);
 
+  // Live checklist items (Tier 1 exercises only)
+  const checklistItems = useMemo(() => {
+    if (!exercise || exercise.difficulty !== 1) return [];
+    return buildPipelineChecklist(exercise, nodes, connections, nodeConfigs, nodeOutputs);
+  }, [exercise, nodes, connections, nodeConfigs, nodeOutputs]);
+
   // Generate logs
   useEffect(() => {
     const logNodes = nodes.filter(n => n.type === 'log');
@@ -1631,6 +1640,13 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
               onNavigate={setPan}
               topOffset={exercise ? 48 : 16}
             />
+          )}
+
+          {exercise && exercise.difficulty === 1 && checklistItems.length > 0 && (
+            <ExerciseChecklist items={checklistItems} topOffset={48} leftOffset={16} />
+          )}
+          {exercise && exercise.difficulty > 1 && (
+            <ExerciseNote exerciseId={`pipe-${exercise.id}`} topOffset={48} leftOffset={16} />
           )}
 
           {logs.length > 0 && (

@@ -271,6 +271,89 @@ function NodePalette({ onAddNode }) {
   );
 }
 
+function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate }) {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const topLevel = nodes.filter(n => !nodeConfigs[n.id]?.parentId);
+  if (topLevel.length === 0) return null;
+
+  const MM_W = 180;
+  const MM_H = 120;
+  const PAD = 20;
+
+  const rect = canvasRef.current?.getBoundingClientRect();
+  const vw = rect ? rect.width : 800;
+  const vh = rect ? rect.height : 600;
+
+  const viewMinX = -pan.x / zoom;
+  const viewMinY = -pan.y / zoom;
+  const viewW = vw / zoom;
+  const viewH = vh / zoom;
+
+  const widthOf = (n) => (NODE_TYPES[n.type]?.category === 'storage' ? LAKE_W : NODE_W);
+  const heightOf = (n) => (NODE_TYPES[n.type]?.category === 'storage'
+    ? getLakehouseHeight(nodes.filter(c => nodeConfigs[c.id]?.parentId === n.id).length)
+    : NODE_H);
+
+  const nodesMinX = Math.min(...topLevel.map(n => n.x));
+  const nodesMinY = Math.min(...topLevel.map(n => n.y));
+  const nodesMaxX = Math.max(...topLevel.map(n => n.x + widthOf(n)));
+  const nodesMaxY = Math.max(...topLevel.map(n => n.y + heightOf(n)));
+
+  const bbMinX = Math.min(nodesMinX, viewMinX);
+  const bbMinY = Math.min(nodesMinY, viewMinY);
+  const bbMaxX = Math.max(nodesMaxX, viewMinX + viewW);
+  const bbMaxY = Math.max(nodesMaxY, viewMinY + viewH);
+
+  const contentW = (bbMaxX - bbMinX) + PAD * 2;
+  const contentH = (bbMaxY - bbMinY) + PAD * 2;
+  const scale = Math.min(MM_W / contentW, MM_H / contentH);
+
+  const proj = (x, y) => ({ x: (x - bbMinX + PAD) * scale, y: (y - bbMinY + PAD) * scale });
+
+  const centerOn = (e, el) => {
+    const mrect = el.getBoundingClientRect();
+    const mx = e.clientX - mrect.left;
+    const my = e.clientY - mrect.top;
+    const cx = mx / scale + bbMinX - PAD;
+    const cy = my / scale + bbMinY - PAD;
+    onNavigate({ x: -cx * zoom + vw / 2, y: -cy * zoom + vh / 2 });
+  };
+
+  return (
+    <div
+      className="absolute top-4 right-4 bg-white/95 border border-slate-200 rounded-lg shadow-md overflow-hidden"
+      style={{ width: MM_W, height: MM_H, zIndex: 20, cursor: isDragging ? 'grabbing' : 'pointer' }}
+      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); setIsDragging(true); centerOn(e, e.currentTarget); }}
+      onMouseMove={(e) => { if (isDragging) centerOn(e, e.currentTarget); }}
+      onMouseUp={() => setIsDragging(false)}
+      onMouseLeave={() => setIsDragging(false)}
+      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+      onWheel={(e) => e.stopPropagation()}
+      title="Minimap — clic ou glisser pour naviguer"
+      aria-label="Minimap du canvas"
+    >
+      <svg width={MM_W} height={MM_H} style={{ display: 'block', pointerEvents: 'none' }}>
+        {topLevel.map(n => {
+          const p = proj(n.x, n.y);
+          const w = Math.max(2, widthOf(n) * scale);
+          const h = Math.max(2, heightOf(n) * scale);
+          return <rect key={n.id} x={p.x} y={p.y} width={w} height={h} fill={NODE_TYPES[n.type]?.color || '#94A3B8'} opacity={0.85} rx={1} />;
+        })}
+        <rect
+          x={proj(viewMinX, viewMinY).x}
+          y={proj(viewMinX, viewMinY).y}
+          width={Math.max(1, viewW * scale)}
+          height={Math.max(1, viewH * scale)}
+          fill="rgba(99,102,241,0.12)"
+          stroke="#6366F1"
+          strokeWidth={1.5}
+        />
+      </svg>
+    </div>
+  );
+}
+
 export default function PipelineCanvas({ onBack, exercise, onExerciseValidate }) {
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
@@ -311,6 +394,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
 
   const canvasRef = useRef(null);
   const nextId = useRef(1);
+  const clipboardRef = useRef(null);
 
   const clearSelection = () => { setSelectedNodes(new Set()); setSelectedConns(new Set()); };
 
@@ -435,16 +519,76 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     clearSelection();
   }, [selectedNodes, selectedConns, connections, nodes, nodeConfigs]);
 
+  // ── Copy / Paste ──
+  const handleCopy = useCallback(() => {
+    if (selectedNodes.size === 0) return;
+    // Include lakehouse children whose parent is selected
+    const ids = new Set(selectedNodes);
+    nodes.forEach(n => {
+      const parentId = nodeConfigs[n.id]?.parentId;
+      if (parentId && ids.has(parentId)) ids.add(n.id);
+    });
+    const copiedNodes = nodes.filter(n => ids.has(n.id));
+    if (copiedNodes.length === 0) return;
+    const copiedConns = connections.filter(c => ids.has(c.from) && ids.has(c.to));
+    const copiedConfigs = {};
+    ids.forEach(id => { if (nodeConfigs[id]) copiedConfigs[id] = nodeConfigs[id]; });
+    const minX = Math.min(...copiedNodes.map(n => n.x));
+    const minY = Math.min(...copiedNodes.map(n => n.y));
+    clipboardRef.current = {
+      nodes: copiedNodes.map(n => ({ ...n, x: n.x - minX, y: n.y - minY })),
+      connections: copiedConns,
+      configs: copiedConfigs,
+    };
+  }, [selectedNodes, nodes, connections, nodeConfigs]);
+
+  const handlePaste = useCallback(() => {
+    const clip = clipboardRef.current;
+    if (!clip || clip.nodes.length === 0) return;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    const defaultX = rect ? (rect.width / 2 - pan.x) / zoom : mousePos.x + 40;
+    const defaultY = rect ? (rect.height / 2 - pan.y) / zoom : mousePos.y + 40;
+    const offsetX = mousePos.x || defaultX;
+    const offsetY = mousePos.y || defaultY;
+    const idMap = {};
+    const newNodes = clip.nodes.map(n => {
+      const newId = `node-${nextId.current++}`;
+      idMap[n.id] = newId;
+      return { ...n, id: newId, x: n.x + offsetX, y: n.y + offsetY };
+    });
+    const newConns = clip.connections
+      .filter(c => idMap[c.from] && idMap[c.to])
+      .map(c => ({ ...c, from: idMap[c.from], to: idMap[c.to] }));
+    const newConfigs = {};
+    for (const [oldId, cfg] of Object.entries(clip.configs)) {
+      const newId = idMap[oldId];
+      if (!newId) continue;
+      const copy = { ...cfg };
+      if (copy.parentId && idMap[copy.parentId]) copy.parentId = idMap[copy.parentId];
+      else if (copy.parentId && !idMap[copy.parentId]) delete copy.parentId;
+      newConfigs[newId] = copy;
+    }
+    setNodes(prev => [...prev, ...newNodes]);
+    setConnections(prev => [...prev, ...newConns]);
+    setNodeConfigs(prev => ({ ...prev, ...newConfigs }));
+    setSelectedNodes(new Set(Object.values(idMap)));
+    setSelectedConns(new Set());
+  }, [mousePos, pan, zoom]);
+
   useEffect(() => {
     const handler = (e) => {
       const tag = e.target?.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable) return;
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && (e.key === 'c' || e.key === 'C')) { e.preventDefault(); handleCopy(); return; }
+      if (mod && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); handlePaste(); return; }
+      if (mod && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); handleCopy(); handlePaste(); return; }
       if (e.key === 'Delete' || e.key === 'Backspace') handleDelete();
       if (e.key === 'Escape') { setConnectingFrom(null); clearSelection(); setSelectionRect(null); setIsSelecting(false); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [handleDelete]);
+  }, [handleDelete, handleCopy, handlePaste]);
 
   const getNormalizedRect = () => {
     if (!selectionRect) return null;
@@ -1249,7 +1393,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500">{nodes.length} nœud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
-          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Suppr : supprimer">
+          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Suppr : supprimer · Ctrl+C / Ctrl+V : copier / coller la sélection · Ctrl+D : dupliquer">
             Clic droit = configurer
           </span>
           {totalSelected > 0 && (
@@ -1431,9 +1575,20 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
               <div className="text-center">
                 <p className="text-slate-400 text-sm font-medium">Cliquez sur une activité à gauche pour l'ajouter</p>
-                <p className="text-slate-300 text-xs mt-1">Clic droit pour configurer · Glissez entre les ports pour connecter</p>
+                <p className="text-slate-300 text-xs mt-1">Clic droit pour configurer · Glissez entre les ports pour connecter · Ctrl+C/V : copier-coller</p>
               </div>
             </div>
+          )}
+
+          {nodes.length >= 2 && (
+            <Minimap
+              nodes={nodes}
+              nodeConfigs={nodeConfigs}
+              pan={pan}
+              zoom={zoom}
+              canvasRef={canvasRef}
+              onNavigate={setPan}
+            />
           )}
 
           {logs.length > 0 && (

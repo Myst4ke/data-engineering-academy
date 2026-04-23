@@ -42,6 +42,13 @@ const MODULES = [
 // Module en préparation — teaser distinct en bas de page
 const UPCOMING_MODULES = [
   {
+    id: 'data-modeling-dojo',
+    name: 'Data Modeling Dojo',
+    subtitle: 'Modélisation dimensionnelle',
+    icon: '📐',
+    description: 'Modèles en étoile, faits & dimensions, grain, SCD — concevez les schémas des datamarts.',
+  },
+  {
     id: 'git-dojo',
     name: 'Git Dojo',
     subtitle: 'Gestion de versions',

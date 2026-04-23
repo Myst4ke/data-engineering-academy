@@ -1,5 +1,5 @@
 /**
- * BI Dojo exercises — 20 exercises across 4 tiers
+ * BI Dojo exercises : 20 exercises across 4 tiers
  * Each provides custom tables and validates the dashboard structure.
  */
 
@@ -182,7 +182,7 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-08', title: 'Donut CA clients', difficulty: 2,
-    description: 'Pour la presentation investisseurs, on veut un donut chart montrant la répartition du CA par client. La table "ca_par_client" a ete générée par le pipeline d\'agrégation (exercice Pipeline #22 — Gold CA par client).\n\nMethodologie : Creez un Camembert en mode Donut avec les noms clients en labels et la somme des montants en valeur.',
+    description: 'Pour la presentation investisseurs, on veut un donut chart montrant la répartition du CA par client. La table "ca_par_client" a ete générée par le pipeline d\'agrégation (exercice Pipeline #22 : Gold CA par client).\n\nMethodologie : Creez un Camembert en mode Donut avec les noms clients en labels et la somme des montants en valeur.',
     hint: 'Camembert → Labels: nom, Valeur: sum_montant, cochez "Mode Donut".',
     hintWidgets: ['pie'],
     tables: [mkPipeTable('ca_par_client', CA_PAR_CLIENT)],
@@ -287,7 +287,7 @@ export const BI_EXERCISES = [
   },
   {
     id: 'bi-16', title: 'Top ventes Pipeline', difficulty: 3,
-    description: 'L\'equipe commerciale a généré un classement des 3 meilleures ventes via le Pipeline Dojo (exercice Pipeline #26 — Podium des ventes). Vous devez maintenant presenter ces resultats dans un dashboard avec un KPI du montant total, un graphique en barres du podium, et un tableau detaille.\n\nMethodologie : Utilisez la table Pipeline "top_ventes" pour vos 3 widgets.',
+    description: 'L\'equipe commerciale a généré un classement des 3 meilleures ventes via le Pipeline Dojo (exercice Pipeline #26 : Podium des ventes). Vous devez maintenant presenter ces resultats dans un dashboard avec un KPI du montant total, un graphique en barres du podium, et un tableau detaille.\n\nMethodologie : Utilisez la table Pipeline "top_ventes" pour vos 3 widgets.',
     hint: 'KPI (sum montant) + Barres (X: id, Y: montant) + Table.',
     hintWidgets: ['kpi', 'bar', 'table'],
     tables: [mkPipeTable('top_ventes', TOP_VENTES)],
@@ -373,7 +373,7 @@ export const BI_EXERCISES = [
       const titled = widgets.filter(w => w.config?.title?.trim()).length;
       if (titled >= 3) { score++; msg.push('titres'); }
       const stars = score >= 9 ? 3 : score >= 6 ? 2 : score >= 3 ? 1 : 0;
-      return { ok: score >= 3, msg: `Score: ${score}/12 — ${msg.join(', ')}`, stars };
+      return { ok: score >= 3, msg: `Score: ${score}/12 : ${msg.join(', ')}`, stars };
     },
   },
 ];

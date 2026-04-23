@@ -37,7 +37,7 @@ export default function WindowConfig({ columns, initialParams, onConfirm, onCanc
             <label className="block text-xs font-semibold text-slate-600 mb-1">Fonction</label>
             <select value={func} onChange={e => setFunc(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-indigo-400 focus:outline-none">
-              {WINDOW_FUNCS.map(f => <option key={f.id} value={f.id}>{f.label} — {f.desc}</option>)}
+              {WINDOW_FUNCS.map(f => <option key={f.id} value={f.id}>{f.label} : {f.desc}</option>)}
             </select>
           </div>
 
@@ -45,7 +45,7 @@ export default function WindowConfig({ columns, initialParams, onConfirm, onCanc
             <label className="block text-xs font-semibold text-slate-600 mb-1">Partitionner par (optionnel)</label>
             <select value={partitionBy} onChange={e => setPartitionBy(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-indigo-400 focus:outline-none">
-              <option value="">— Pas de partition —</option>
+              <option value="">Pas de partition</option>
               {columns.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>

@@ -1,5 +1,5 @@
 /**
- * DojoEmoji — pack d'emojis SVG custom (design file `Emoji Pack`).
+ * DojoEmoji : pack d'emojis SVG custom (design file `Emoji Pack`).
  * Style : outline minimaliste type Phosphor/Iconoir + accent coloré rempli.
  * - viewBox 80×80, glyphes optiquement centrés ~48×48 (padding 16)
  * - ink #2B2D42, stroke 2.2, linecap/linejoin round
@@ -763,7 +763,7 @@ export const EMOJI_COMPONENTS = {
   link:      { C: LinkIco,   label: 'Link',      fr: 'Lien',              use: 'Relation / FK',             replaces: '🔗',  tile: 'sky'   },
   brain:     { C: Brain,     label: 'Apprendre', fr: 'Savoir',            use: 'Niveau / connaissance',     replaces: '🧠',  tile: 'rose'  },
 
-  // v2 — Pipeline
+  // v2 : Pipeline
   api:       { C: Api,       label: 'API',       fr: 'API REST',          use: 'Source externe',            replaces: '🌐',  tile: 'sky'   },
   concat:    { C: Concat,    label: 'Concat',    fr: 'Concaténer',        use: 'Empiler deux tables',       replaces: '⬇️',  tile: 'sky'   },
   trash:     { C: Trash,     label: 'Trash',     fr: 'Supprimer',         use: 'Supprimer colonne',         replaces: '🗑️',  tile: 'rose'  },
@@ -779,12 +779,12 @@ export const EMOJI_COMPONENTS = {
   gear:      { C: Gear,      label: 'Gear',      fr: 'Transformer',       use: 'Catégorie transformations', replaces: '⚙️',  tile: 'sun'   },
   fileBox:   { C: FileBox,   label: 'Box',       fr: 'Archive',           use: 'Stockage / Medallion',      replaces: '🗃️',  tile: 'sun'   },
 
-  // v2 — Lakehouse tiers
+  // v2 : Lakehouse tiers
   bronze:    { C: Bronze,    label: 'Bronze',    fr: 'Bronze',            use: 'Tier Bronze',               replaces: '🥉',  tile: 'coral' },
   silver:    { C: Silver,    label: 'Silver',    fr: 'Argent',            use: 'Tier Silver',               replaces: '🥈',  tile: 'sky'   },
   gold:      { C: Gold,      label: 'Gold',      fr: 'Or',                use: 'Tier Gold',                 replaces: '🥇',  tile: 'sun'   },
 
-  // v2 — BI widgets
+  // v2 : BI widgets
   kpi:       { C: Kpi,       label: 'KPI',       fr: 'KPI',               use: 'Indicateur chiffré',        replaces: '🔢',  tile: 'mint'  },
   scatter:   { C: Scatter,   label: 'Scatter',   fr: 'Nuage',             use: 'Nuage de points',           replaces: '⚬',   tile: 'rose'  },
   treemap:   { C: Treemap,   label: 'Treemap',   fr: 'Arborescence',      use: 'Répartition proportionnelle', replaces: '🟩', tile: 'mint' },
@@ -792,22 +792,22 @@ export const EMOJI_COMPONENTS = {
   slicer:    { C: Slicer,    label: 'Slicer',    fr: 'Slicer',            use: 'Filtre interactif',         replaces: '🔘',  tile: 'sky'   },
   separator: { C: Separator, label: 'Sep.',      fr: 'Séparateur',        use: 'Divider layout',            replaces: '➖',  tile: 'coral' },
 
-  // v2 — Statuses
+  // v2 : Statuses
   diamond:   { C: Diamond,   label: 'Diamond',   fr: 'Diamant',           use: 'Tier Expert',               replaces: '💎',  tile: 'sky'   },
   starEmpty: { C: StarEmpty, label: 'Empty',     fr: 'Étoile vide',       use: 'Étoile non-gagnée',         replaces: '☆',   tile: 'sun'   },
   info:      { C: Info,      label: 'Info',      fr: 'Info',              use: 'Log INFO',                  replaces: 'ℹ️',  tile: 'sky'   },
   warn:      { C: Warn,      label: 'Attention', fr: 'Attention',         use: 'Log WARN',                  replaces: '⚠️',  tile: 'sun'   },
   errorIco:  { C: ErrorIco,  label: 'Error',     fr: 'Erreur',            use: 'Log ERROR',                 replaces: '❌',  tile: 'rose'  },
 
-  // v2 — Dojo Intro
+  // v2 : Dojo Intro
   office:    { C: Office,    label: 'Office',    fr: 'Immeuble',          use: 'Dans le monde réel',        replaces: '🏢',  tile: 'sky'   },
   card:      { C: PlayingCard, label: 'Card',    fr: 'Carte',             use: 'Comment ça marche',         replaces: '🃏',  tile: 'coral' },
 
-  // v2 — Pipeline categories
+  // v2 : Pipeline categories
   inbox:     { C: Inbox,     label: 'Inbox',     fr: 'Entrée',            use: 'Catégorie Sources',         replaces: '📥',  tile: 'sky'   },
   outbox:    { C: Outbox,    label: 'Outbox',    fr: 'Sortie',            use: 'Catégorie Destinations',    replaces: '📤',  tile: 'coral' },
 
-  // v2 — Database icons (BI Dojo + Table Explorer)
+  // v2 : Database icons (BI Dojo + Table Explorer)
   cart:      { C: Cart,      label: 'Cart',      fr: 'Panier',            use: 'Base E-Commerce',           replaces: '🛒',  tile: 'coral' },
   users:     { C: Users,     label: 'Users',     fr: 'Personnes',         use: 'Base RH',                   replaces: '👥',  tile: 'sky'   },
 };

@@ -172,7 +172,7 @@ export default function Card({
               <DojoEmojiAuto native={cardInfo.icon} size={effectiveSize === 'small' ? 32 : effectiveSize === 'medium' ? 38 : 48} />
             </div>
 
-            {/* Name — min-height réservé pour 2 lignes : position du paramLabel cohérente entre cartes à nom court/long */}
+            {/* Name : min-height réservé pour 2 lignes : position du paramLabel cohérente entre cartes à nom court/long */}
             <div
               className={`text-center font-bold ${s.name} mt-1 drop-shadow-md leading-tight min-h-[2.4em] flex items-center justify-center`}
             >

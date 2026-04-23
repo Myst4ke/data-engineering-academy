@@ -40,7 +40,7 @@ export default function IfConfig({ columns, rowCount, initialParams, onConfirm, 
             <label className="block text-xs font-semibold text-slate-600 mb-1">Condition</label>
             <select value={condition} onChange={e => setCondition(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:border-indigo-400 focus:outline-none">
-              {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label} — {c.desc}</option>)}
+              {CONDITIONS.map(c => <option key={c.id} value={c.id}>{c.label} : {c.desc}</option>)}
             </select>
           </div>
 

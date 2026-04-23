@@ -23,7 +23,7 @@ export default function LakehousePicker({ lakehouseName, tables, alreadyExposedI
 
         <div className="p-4 max-h-[400px] overflow-y-auto">
           {tables.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">Aucune table — connectez des données en entrée</p>
+            <p className="text-sm text-slate-400 text-center py-4">Aucune table : connectez des données en entrée</p>
           ) : (
             <div className="space-y-1">
               {tables.map(t => {

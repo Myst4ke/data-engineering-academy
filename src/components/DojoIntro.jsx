@@ -39,7 +39,7 @@ export default function DojoIntro({ dojoId, title, icon, accent = 'coral', secti
         style={{ border: `2px solid ${a.border}`, boxShadow: '0 12px 0 rgba(43,45,66,0.08)' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Header — carte d'accueil à l'esprit hub */}
+        {/* Header : carte d'accueil à l'esprit hub */}
         <div className="relative px-6 pt-6 pb-5">
           <button
             onClick={onClose}
@@ -233,7 +233,7 @@ export const BI_DOJO_INTRO = {
     {
       icon: '🔧',
       title: 'Lien avec le Pipeline',
-      content: 'Certains exercices utilisent des tables pré-agrégées issues du Pipeline Dojo (marquées 🔧). Dans la réalité, les dashboards BI consomment des données transformées par les pipelines ETL — vous vivez ici la chaîne complète du data engineer au data analyst.',
+      content: 'Certains exercices utilisent des tables pré-agrégées issues du Pipeline Dojo (marquées 🔧). Dans la réalité, les dashboards BI consomment des données transformées par les pipelines ETL : vous vivez ici la chaîne complète du data engineer au data analyst.',
     },
     {
       icon: '📈',

@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
-   DESIGN SYSTEM — Edtech chaleureux + Fraunces éditorial
+   DESIGN SYSTEM : Edtech chaleureux + Fraunces éditorial
    ═══════════════════════════════════════════════════════════ */
 
 :root {
@@ -18,7 +18,7 @@
   --ink-muted:  #9CA3AF;
   --border:     #EDE3D2;
 
-  /* Accents edtech par dojo — chaque module a son identité */
+  /* Accents edtech par dojo : chaque module a son identité */
   --coral:   #FF8066;
   --coral-l: #FFE5DC;
   --coral-d: #E85D41;
@@ -34,17 +34,17 @@
   --rose:    #F472B6;
   --rose-l:  #FCE7F3;
 
-  /* Tier colors (Débutant → Expert) — couleurs seules, pas de vocabulaire rareté */
-  --t1:      #9CA3AF;   /* Débutant — gris doux */
+  /* Tier colors (Débutant → Expert) : couleurs seules, pas de vocabulaire rareté */
+  --t1:      #9CA3AF;   /* Débutant : gris doux */
   --t1-l:    #F3F4F6;
   --t1-ink:  #4B5563;
-  --t2:      #60A5FA;   /* Intermédiaire — bleu ciel */
+  --t2:      #60A5FA;   /* Intermédiaire : bleu ciel */
   --t2-l:    #EFF6FF;
   --t2-ink:  #2563EB;
-  --t3:      #C084FC;   /* Difficile — violet */
+  --t3:      #C084FC;   /* Difficile : violet */
   --t3-l:    #F5F3FF;
   --t3-ink:  #9333EA;
-  --t4:      #F59E0B;   /* Expert — or chaud */
+  --t4:      #F59E0B;   /* Expert : or chaud */
   --t4-l:    #FEF3C7;
   --t4-ink:  #B45309;
 
@@ -103,12 +103,12 @@ body {
   color: var(--ink);
 }
 
-/* Scrollables — body handles scrolling, children just grow */
+/* Scrollables : body handles scrolling, children just grow */
 .game-view { min-height: 100vh; }
 .home-view { min-height: 100vh; }
 
 /* ═══════════════════════════════════════════════════════════
-   TYPOGRAPHIE — Fraunces pour display/titres, Inter pour body
+   TYPOGRAPHIE : Fraunces pour display/titres, Inter pour body
    ═══════════════════════════════════════════════════════════ */
 
 .font-display {
@@ -202,7 +202,7 @@ body {
   animation: modalFadeIn var(--motion-base) ease-out;
 }
 
-/* Panel skeumorphique — surface principale (replace l'ancien game-panel) */
+/* Panel skeumorphique : surface principale (replace l'ancien game-panel) */
 .game-panel {
   background: var(--bg-panel);
   border: 2px solid var(--border);
@@ -249,7 +249,7 @@ body {
    TIERS (exercices niveaux 1 à 4)
    ═══════════════════════════════════════════════════════════ */
 
-/* Exercise card — base
+/* Exercise card : base
    NB: pas d'overflow:hidden sur la carte elle-même pour ne pas couper les badges
    qui débordent (-top-2 -right-2). Le foil effect est clippé via clip-path. */
 .ex-card {
@@ -299,7 +299,7 @@ body {
 .tier-t4 .ex-card.done { --done-bg-1: #FEF3C7; --done-bg-2: #FDE68A; --done-border: #F59E0B; --done-check: #92400E; }
 
 /* ═══════════════════════════════════════════════════════════
-   ACCESSIBILITÉ — focus visible + prefers-reduced-motion
+   ACCESSIBILITÉ : focus visible + prefers-reduced-motion
    ═══════════════════════════════════════════════════════════ */
 
 button:focus-visible,

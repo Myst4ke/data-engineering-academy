@@ -21,7 +21,7 @@ export default function DataPreview({ data, title, onClose }) {
 
         <div className="flex-1 overflow-auto p-2">
           {data.length === 0 ? (
-            <p className="text-slate-400 text-sm text-center py-8">Aucune donnée — connectez une source en amont</p>
+            <p className="text-slate-400 text-sm text-center py-8">Aucune donnée : connectez une source en amont</p>
           ) : (
             <table className="text-xs border-collapse w-full">
               <thead className="sticky top-0">

@@ -80,7 +80,7 @@ export default function ForEachConfig({ initialSteps, sampleColumns, sampleData,
           <div className="flex items-center gap-2">
             <span className="text-2xl">🔁</span>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">ForEach — Pipeline de transformations</h3>
+              <h3 className="text-lg font-bold text-slate-800">ForEach : Pipeline de transformations</h3>
               <p className="text-xs text-slate-500">Ces transformations s'appliqueront à chaque table en entrée</p>
             </div>
           </div>

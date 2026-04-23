@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Trophy } from 'lucide-react';
 
-// Palette dojo — cohérente avec l'identité edtech
+// Palette dojo : cohérente avec l'identité edtech
 const CONFETTI_COLORS = ['#FF8066', '#5ED6B4', '#6BA4FF', '#FFC857', '#F472B6'];
 
 function StarDisplay({ rating, maxStars = 3 }) {
@@ -92,7 +92,7 @@ export default function SuccessModal({ isOpen, onClose, onNextExercise, exercise
 
           {optimalSteps > 0 && (
             <p className="text-sm text-[#9CA3AF] mb-4 font-medium">
-              {cardCount} carte{cardCount > 1 ? 's' : ''} utilisée{cardCount > 1 ? 's' : ''} — optimal : {optimalSteps}
+              {cardCount} carte{cardCount > 1 ? 's' : ''} utilisée{cardCount > 1 ? 's' : ''} : optimal : {optimalSteps}
             </p>
           )}
 

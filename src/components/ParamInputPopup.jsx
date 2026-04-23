@@ -283,7 +283,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
               onChange={(e) => handleColumnChange(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-[#FF8066] focus:outline-none transition-colors"
             >
-              <option value="">— Sélectionner —</option>
+              <option value="">Sélectionner...</option>
               {columns.map((col) => (
                 <option key={col} value={col}>{col}</option>
               ))}
@@ -303,7 +303,7 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
               disabled={!column}
               className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 bg-white text-slate-700 focus:border-[#FF8066] focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-500"
             >
-              <option value="">— Sélectionner une valeur —</option>
+              <option value="">Sélectionner une valeur...</option>
               {columnValues.map((val) => (
                 <option key={val} value={val}>{val}</option>
               ))}

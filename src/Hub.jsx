@@ -5,7 +5,7 @@ import PipelineDojo from './pipeline/PipelineDojo';
 import BiDojoWrapper from './bi/BiDojoWrapper';
 import { DojoEmojiAuto } from './components/DojoEmoji';
 
-// Les 3 modules actifs — chacun avec sa couleur d'accent edtech
+// Les 3 modules actifs : chacun avec sa couleur d'accent edtech
 const MODULES = [
   {
     id: 'data-dojo',
@@ -39,14 +39,14 @@ const MODULES = [
   },
 ];
 
-// Module en préparation — teaser distinct en bas de page
+// Module en préparation : teaser distinct en bas de page
 const UPCOMING_MODULES = [
   {
     id: 'data-modeling-dojo',
     name: 'Data Modeling Dojo',
     subtitle: 'Modélisation dimensionnelle',
     icon: '📐',
-    description: 'Modèles en étoile, faits & dimensions, grain, SCD — concevez les schémas des datamarts.',
+    description: 'Modèles en étoile, faits & dimensions, grain, SCD : concevez les schémas des datamarts.',
   },
   {
     id: 'git-dojo',
@@ -79,7 +79,7 @@ function readProgress(moduleId) {
   return 0;
 }
 
-// Palette d'accent — chaque module a sa couleur
+// Palette d'accent : chaque module a sa couleur
 const ACCENT_CLASSES = {
   coral: {
     border: 'border-[#FF8066]',
@@ -134,7 +134,7 @@ export default function Hub() {
 
   return (
     <div className="home-view flex flex-col items-center p-6 relative overflow-x-clip">
-      {/* Decorative blobs — repeated pattern down the page */}
+      {/* Decorative blobs: repeated pattern down the page */}
       <div className="hero-blobs" aria-hidden="true">
         <div className="blob" style={{ top: 20, left: '8%', width: 260, height: 260, background: '#FF8066' }} />
         <div className="blob" style={{ top: 50, right: '10%', width: 220, height: 220, background: '#5ED6B4' }} />
@@ -165,7 +165,7 @@ export default function Hub() {
           )}
         </header>
 
-        {/* MODULES ACTIFS (3 cartes — vitrine pleine) */}
+        {/* MODULES ACTIFS (3 cartes : vitrine pleine) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16">
           {MODULES.map((mod, idx) => {
             const completed = moduleProgress[mod.id] || 0;
@@ -218,7 +218,7 @@ export default function Hub() {
           })}
         </div>
 
-        {/* FEUILLE DE ROUTE — modules à venir (teaser) */}
+        {/* FEUILLE DE ROUTE : modules à venir (teaser) */}
         {UPCOMING_MODULES.length > 0 && (
           <section className="border-t-2 border-dashed border-[#EDE3D2] pt-8">
             <div className="flex items-center gap-2 mb-4">
@@ -226,7 +226,7 @@ export default function Hub() {
               <h2 className="font-display text-xl text-[#2B2D42]">
                 Feuille de route
               </h2>
-              <span className="text-xs text-[#9CA3AF] font-medium ml-1">— modules en préparation</span>
+              <span className="text-xs text-[#9CA3AF] font-medium ml-1">modules en préparation</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {UPCOMING_MODULES.map((mod) => (

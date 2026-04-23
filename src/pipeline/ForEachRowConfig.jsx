@@ -40,7 +40,7 @@ export default function ForEachRowConfig({ columns, sampleData, initialParams, o
           <div className="flex items-center gap-2">
             <span className="text-2xl">📝</span>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">ForEachRow — Colonnes calculées</h3>
+              <h3 className="text-lg font-bold text-slate-800">ForEachRow : Colonnes calculées</h3>
               <p className="text-xs text-slate-500">Pour chaque ligne, créez de nouvelles colonnes à partir de formules</p>
             </div>
           </div>

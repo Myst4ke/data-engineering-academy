@@ -126,7 +126,7 @@ function SortableCard({ card, index, onRemove, onEditCard, isHovered, intermedia
 
   return (
     <div className="flex items-center shrink-0 relative" ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {/* Hover preview tooltip — rendered via portal to avoid clipping */}
+      {/* Hover preview tooltip : rendered via portal to avoid clipping */}
       {isHovered && intermediateTable && createPortal(
         <div style={getTooltipStyle()}>
           <MiniTable data={intermediateTable} />

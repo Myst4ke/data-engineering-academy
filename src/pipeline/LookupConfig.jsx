@@ -17,8 +17,8 @@ export default function LookupConfig({ mainColumns, refColumns, initialParams, o
         </div>
 
         <div className="mb-4 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 space-y-1">
-          <p><strong>Entrée 1</strong> (haut) : Table principale — {mainColumns.length} colonnes</p>
-          <p><strong>Entrée 2</strong> (bas) : Table de référence — {refColumns.length} colonnes</p>
+          <p><strong>Entrée 1</strong> (haut) : Table principale : {mainColumns.length} colonnes</p>
+          <p><strong>Entrée 2</strong> (bas) : Table de référence : {refColumns.length} colonnes</p>
           <p className="text-indigo-500 font-medium mt-2">→ Sortie "Match" : lignes trouvées dans la référence</p>
           <p className="text-amber-500 font-medium">→ Sortie "No Match" : lignes absentes de la référence</p>
         </div>

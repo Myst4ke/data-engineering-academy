@@ -1,5 +1,5 @@
 /**
- * Pipeline Dojo exercises — 32 exercises across 4 difficulty tiers
+ * Pipeline Dojo exercises : 32 exercises across 4 difficulty tiers
  * Each exercise provides custom source data (sometimes with intentional errors)
  * and a validation function that checks the pipeline output.
  */
@@ -346,7 +346,7 @@ export const EXERCISES = [
   },
   {
     id: 'pipe-11', title: 'Evaluations partielles', difficulty: 2,
-    description: 'Les evaluations annuelles ont ete saisies mais certains managers n\'ont pas rempli le champ commentaire. Le RH souhaite que chaque evaluation ait un commentaire — les vides doivent indiquer "Non evalue" plutot que d\'etre supprimes.\n\nMethodologie : Comblez les trous sans perdre aucune ligne.',
+    description: 'Les evaluations annuelles ont ete saisies mais certains managers n\'ont pas rempli le champ commentaire. Le RH souhaite que chaque evaluation ait un commentaire : les vides doivent indiquer "Non evalue" plutot que d\'etre supprimes.\n\nMethodologie : Comblez les trous sans perdre aucune ligne.',
     hint: 'Source → Remplir Vides (commentaire → "Non evalue") → Export.',
     hintNodes: ['csv_source', 'fill_na', 'csv_export'],
     sources: { 'csv_source': [{ name: 'evaluations', data: EVALUATIONS_WITH_EMPTY }] },
@@ -741,7 +741,7 @@ export const EXERCISES = [
       score += Math.min(2, advTypes.size);
       if (advTypes.size > 0) msg.push(`${advTypes.size} transforms avancees`);
       const stars = score >= 10 ? 3 : score >= 7 ? 2 : score >= 4 ? 1 : 0;
-      return { ok: score >= 4, msg: `Score: ${score}/13 — ${msg.join(', ')}`, stars };
+      return { ok: score >= 4, msg: `Score: ${score}/13 : ${msg.join(', ')}`, stars };
     },
   },
 ];

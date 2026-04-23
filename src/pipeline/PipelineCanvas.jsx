@@ -182,7 +182,7 @@ function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, is
         <rect x={node.x - 4} y={node.y - 4} width={LAKE_W + 8} height={height + 8} rx={14}
           fill="none" stroke="#6366F1" strokeWidth={2.5} pointerEvents="none" />
       )}
-      {/* Container body via foreignObject — styled like global site */}
+      {/* Container body via foreignObject : styled like global site */}
       <foreignObject x={node.x} y={node.y} width={LAKE_W} height={height}>
         <div
           onMouseDown={(e) => { e.stopPropagation(); onMouseDown(e, node.id); }}
@@ -334,7 +334,7 @@ function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate, topOffs
       onMouseLeave={() => setIsDragging(false)}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
       onWheel={(e) => e.stopPropagation()}
-      title="Minimap — clic ou glisser pour naviguer"
+      title="Minimap : clic ou glisser pour naviguer"
       aria-label="Minimap du canvas"
     >
       <svg width={MM_W} height={MM_H} style={{ display: 'block', pointerEvents: 'none' }}>
@@ -1538,7 +1538,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
                 return fn ? <ConnectionLine from={getEffectiveOutputPortPos(fn)} to={mousePos} isTemp /> : null;
               })()}
 
-              {/* Nodes — render in two passes: non-dragged first, dragged last (z-order) */}
+              {/* Nodes : render in two passes: non-dragged first, dragged last (z-order) */}
               {[false, true].map(pass => nodes.map(node => {
                 const typeDef = NODE_TYPES[node.type];
                 if (!typeDef) return null;
@@ -1546,7 +1546,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
                 if (pass === false && isDragged) return null; // skip dragged on first pass
                 if (pass === true && !isDragged) return null; // skip non-dragged on second pass
 
-                // Skip lakehouse children — rendered inside their parent container
+                // Skip lakehouse children : rendered inside their parent container
                 if (nodeConfigs[node.id]?.parentId) return null;
 
                 // Lakehouse container rendering
@@ -1659,13 +1659,13 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
 
           {connectingFrom && (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg" style={{ zIndex: 3 }}>
-              Relâchez sur un noeud ou un port — Echap pour annuler
+              Relâchez sur un noeud ou un port : Echap pour annuler
             </div>
           )}
 
           {totalSelected > 1 && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-indigo-50 text-indigo-600 text-xs font-medium px-3 py-1.5 rounded-full shadow border border-indigo-200" style={{ zIndex: 3 }}>
-              {totalSelected} éléments sélectionnés — Suppr pour les retirer
+              {totalSelected} éléments sélectionnés : Suppr pour les retirer
             </div>
           )}
         </div>
@@ -1695,7 +1695,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       {/* Data Preview popup */}
       {previewNodeId && (
         <DataPreview data={nodeOutputs[previewNodeId] || []}
-          title={(() => { const n = nodes.find(nd => nd.id === previewNodeId); const t = n ? NODE_TYPES[n.type] : null; const cfg = nodeConfigs[previewNodeId]; return `${t?.icon || ''} ${t?.name || ''} ${cfg?.tableName ? '— ' + cfg.tableName : ''}`; })()}
+          title={(() => { const n = nodes.find(nd => nd.id === previewNodeId); const t = n ? NODE_TYPES[n.type] : null; const cfg = nodeConfigs[previewNodeId]; return `${t?.icon || ''} ${t?.name || ''} ${cfg?.tableName ? ': ' + cfg.tableName : ''}`; })()}
           onClose={() => setPreviewNodeId(null)} />
       )}
 

@@ -68,7 +68,12 @@ function pointInRect(r, px, py) {
 }
 
 function ConnectionLine({ from, to, isTemp, isSelected, onClick }) {
-  const d = bezierPath(from, to);
+  // Temp line follows the cursor as a straight segment to avoid loopy Béziers
+  // when the cursor sits to the left of the source port (which would otherwise
+  // curve off the canvas and clip back at the top like a floating bar).
+  const d = isTemp
+    ? `M ${from.x} ${from.y} L ${to.x} ${to.y}`
+    : bezierPath(from, to);
   return (
     <g>
       {!isTemp && <path d={d} fill="none" stroke="transparent" strokeWidth={14} className="cursor-pointer" onClick={onClick} />}

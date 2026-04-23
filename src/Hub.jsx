@@ -154,7 +154,7 @@ export default function Hub() {
             <span className="font-display-italic text-[#FF8066]">à votre rythme.</span>
           </h1>
           <p className="text-base sm:text-lg text-[#5A6072] font-medium max-w-xl mx-auto leading-relaxed">
-            Des exercices courts, une progression claire, un parcours qui s'accumule — de la transformation à la BI.
+            Des exercices courts, une progression claire, un parcours qui s'accumule, de la transformation à la BI.
           </p>
 
           {totalCompleted > 0 && (

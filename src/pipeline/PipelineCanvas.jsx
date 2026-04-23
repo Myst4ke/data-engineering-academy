@@ -652,8 +652,8 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     }
 
     if (dragging && dragStart) {
-      const dx = e.clientX - dragStart.x;
-      const dy = e.clientY - dragStart.y;
+      const dx = (e.clientX - dragStart.x) / zoom;
+      const dy = (e.clientY - dragStart.y) / zoom;
 
       // Collect lakehouse children that should move with their parent
       const extraIds = new Set();
@@ -1610,16 +1610,6 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
               ))}
             </div>
           )}
-
-          <div className="absolute bottom-16 right-4 flex flex-col gap-1" style={{ zIndex: 3 }}>
-            <button onClick={() => { const nz = Math.min(2, zoom + 0.15); const rect = canvasRef.current?.getBoundingClientRect(); const cx = (rect?.width || 0) / 2; const cy = (rect?.height || 0) / 2; const s = nz / zoom; setPan(p => ({ x: cx - s * (cx - p.x), y: cy - s * (cy - p.y) })); setZoom(nz); }}
-              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center" title="Zoom in">+</button>
-            <span className="text-[9px] text-slate-400 text-center font-medium">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => { const nz = Math.max(0.2, zoom - 0.15); const rect = canvasRef.current?.getBoundingClientRect(); const cx = (rect?.width || 0) / 2; const cy = (rect?.height || 0) / 2; const s = nz / zoom; setPan(p => ({ x: cx - s * (cx - p.x), y: cy - s * (cy - p.y) })); setZoom(nz); }}
-              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center" title="Zoom out">−</button>
-            <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-              className="w-9 h-9 bg-white border border-slate-200 shadow rounded-lg text-[10px] font-bold text-slate-500 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center" title="Reset zoom">1:1</button>
-          </div>
 
           {nodes.length >= 2 && (
             <button onClick={handleAutoLayout}

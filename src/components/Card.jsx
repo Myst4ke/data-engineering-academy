@@ -124,7 +124,7 @@ export default function Card({
           `}
           style={{
             border: `${s.border} solid ${colors.border}`,
-            boxShadow: disabled ? 'none' : `
+            boxShadow: (disabled || isInPipeline) ? 'none' : `
               0 6px 20px rgba(0, 0, 0, 0.15),
               0 0 25px ${colors.glow}
             `,

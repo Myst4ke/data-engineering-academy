@@ -611,6 +611,9 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     };
   };
 
+  const selectionAdditiveRef = useRef(false);
+  const selectionBaseRef = useRef({ nodes: new Set(), conns: new Set() });
+
   const handleCanvasMouseDown = (e) => {
     if (e.button === 2 || e.button === 1) {
       e.preventDefault();
@@ -623,7 +626,14 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       const coords = getCanvasCoords(e);
       setIsSelecting(true);
       setSelectionRect({ startX: coords.x, startY: coords.y, currentX: coords.x, currentY: coords.y });
-      clearSelection();
+      const additive = e.ctrlKey || e.metaKey || e.shiftKey;
+      selectionAdditiveRef.current = additive;
+      if (additive) {
+        selectionBaseRef.current = { nodes: new Set(selectedNodes), conns: new Set(selectedConns) };
+      } else {
+        selectionBaseRef.current = { nodes: new Set(), conns: new Set() };
+        clearSelection();
+      }
     }
     if (e.button === 0 && connectingFrom) {
       setConnectingFrom(null);
@@ -651,8 +661,12 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         setDragging(pd.nodeId);
         setDragStart({ x: pd.startX, y: pd.startY, nodeX: pd.nodeX, nodeY: pd.nodeY, origPositions: pd.origPositions });
         if (!selectedNodes.has(pd.nodeId)) {
-          setSelectedNodes(new Set([pd.nodeId]));
-          setSelectedConns(new Set());
+          if (pd.additive) {
+            setSelectedNodes(prev => new Set([...prev, pd.nodeId]));
+          } else {
+            setSelectedNodes(new Set([pd.nodeId]));
+            setSelectedConns(new Set());
+          }
         }
       }
       return;
@@ -722,8 +736,16 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
 
     if (pendingDragRef.current && !pendingDragRef.current.activated) {
       const nodeId = pendingDragRef.current.nodeId;
-      setSelectedNodes(new Set([nodeId]));
-      setSelectedConns(new Set());
+      if (pendingDragRef.current.additive) {
+        setSelectedNodes(prev => {
+          const next = new Set(prev);
+          if (next.has(nodeId)) next.delete(nodeId); else next.add(nodeId);
+          return next;
+        });
+      } else {
+        setSelectedNodes(new Set([nodeId]));
+        setSelectedConns(new Set());
+      }
     }
     pendingDragRef.current = null;
 
@@ -752,9 +774,16 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
             if (pointInRect(r, mid.x, mid.y)) selConns.add(i);
           }
         });
-        setSelectedNodes(selNodes);
-        setSelectedConns(selConns);
+        if (selectionAdditiveRef.current) {
+          const base = selectionBaseRef.current;
+          setSelectedNodes(new Set([...base.nodes, ...selNodes]));
+          setSelectedConns(new Set([...base.conns, ...selConns]));
+        } else {
+          setSelectedNodes(selNodes);
+          setSelectedConns(selConns);
+        }
       }
+      selectionAdditiveRef.current = false;
       setSelectionRect(null);
       setIsSelecting(false);
     }
@@ -783,6 +812,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       nodeY: node.y,
       origPositions,
       activated: false,
+      additive: e.ctrlKey || e.metaKey || e.shiftKey,
     };
   };
 
@@ -1404,7 +1434,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500">{nodes.length} nœud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
-          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Suppr : supprimer · Ctrl+A : tout sélectionner · Ctrl+C / Ctrl+V : copier / coller · Ctrl+D : dupliquer">
+          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Ctrl+clic : sélection multiple · Suppr : supprimer · Ctrl+A : tout sélectionner · Ctrl+C / Ctrl+V : copier / coller · Ctrl+D : dupliquer">
             Clic droit = configurer
           </span>
           {totalSelected > 0 && (

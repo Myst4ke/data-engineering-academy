@@ -916,6 +916,8 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     pendingDragRef.current = null;
     setDragging(null);
     setDragStart(null);
+    setIsSelecting(false);
+    setSelectionRect(null);
   };
 
   // ── Confirm table rename → create child table inside lakehouse ──
@@ -1489,7 +1491,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       <div className="flex-1 flex overflow-hidden">
         <NodePalette onAddNode={handleAddNode} />
 
-        <div ref={canvasRef} data-tutorial="canvas" className="flex-1 relative overflow-hidden" style={{ cursor: cursorStyle }}
+        <div ref={canvasRef} data-tutorial="canvas" className="flex-1 relative overflow-hidden" style={{ cursor: cursorStyle, userSelect: 'none', WebkitUserSelect: 'none' }}
           onMouseDown={handleCanvasMouseDown} onMouseMove={handleCanvasMouseMove} onMouseUp={handleCanvasMouseUp} onMouseLeave={handleCanvasMouseUp}
           onContextMenu={(e) => e.preventDefault()}
           onWheel={(e) => {
@@ -1690,11 +1692,6 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
             </button>
           )}
 
-          {connectingFrom && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg" style={{ zIndex: 3 }}>
-              Relâchez sur un noeud ou un port : Echap pour annuler
-            </div>
-          )}
 
           {totalSelected > 1 && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-indigo-50 text-indigo-600 text-xs font-medium px-3 py-1.5 rounded-full shadow border border-indigo-200" style={{ zIndex: 3 }}>

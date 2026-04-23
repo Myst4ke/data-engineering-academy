@@ -134,7 +134,11 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
           onClick={(e) => { e.stopPropagation(); onPreview(node.id); }}
           onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}>
           <circle cx={node.x + NODE_W - 10} cy={node.y + NODE_H + 2} r={10} fill="white" stroke="#CBD5E1" strokeWidth={1.5} />
-          <text x={node.x + NODE_W - 10} y={node.y + NODE_H + 6} textAnchor="middle" fontSize="10" style={{ pointerEvents: 'none' }}>🔍</text>
+          <foreignObject x={node.x + NODE_W - 18} y={node.y + NODE_H - 6} width={16} height={16} style={{ pointerEvents: 'none' }}>
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <DojoEmojiAuto native="🔎" size={14} />
+            </div>
+          </foreignObject>
         </g>
       )}
 

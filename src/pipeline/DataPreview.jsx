@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 export default function DataPreview({ data, title, onClose }) {
   if (!data) return null;
@@ -9,7 +10,7 @@ export default function DataPreview({ data, title, onClose }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🔍</span>
+            <DojoEmojiAuto native="🔎" size={20} />
             <h3 className="text-sm font-bold text-slate-700">{title}</h3>
             <span className="text-xs text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded font-medium">
               {data.length} ligne{data.length !== 1 ? 's' : ''} · {cols.length} colonne{cols.length !== 1 ? 's' : ''}

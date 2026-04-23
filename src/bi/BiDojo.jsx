@@ -656,13 +656,19 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
           <div className="w-48 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
             <div className="p-3 border-b border-slate-200">
               <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Source</p>
-              <select value={selectedTableId} onChange={e => { setSelectedTableId(e.target.value); setCrossFilters([]); }}
-                className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:border-indigo-400 focus:outline-none">
-                {allTables.map(t => <option key={t.id} value={t.id}>{t.dbIcon} {t.tableName} ({t.rowCount})</option>)}
-              </select>
+              <div className="relative flex items-center w-full px-2 py-1.5 rounded-lg border border-slate-200 focus-within:border-indigo-400">
+                <span className="shrink-0 inline-flex mr-1.5">
+                  <DojoEmojiAuto native={allTables.find(t => t.id === selectedTableId)?.dbIcon} size={18} />
+                </span>
+                <select value={selectedTableId} onChange={e => { setSelectedTableId(e.target.value); setCrossFilters([]); }}
+                  className="flex-1 bg-transparent text-xs font-medium focus:outline-none appearance-none cursor-pointer">
+                  {allTables.map(t => <option key={t.id} value={t.id}>{t.tableName} ({t.rowCount})</option>)}
+                </select>
+              </div>
               <button onClick={() => fileInputRef.current?.click()}
-                className="w-full mt-1.5 py-1 text-[10px] text-indigo-500 font-medium rounded-lg border border-dashed border-indigo-300 hover:bg-indigo-50 transition-colors">
-                📄 Importer CSV
+                className="w-full mt-1.5 py-1 text-[10px] text-indigo-500 font-medium rounded-lg border border-dashed border-indigo-300 hover:bg-indigo-50 transition-colors inline-flex items-center justify-center gap-1">
+                <DojoEmojiAuto native="📄" size={14} />
+                <span>Importer CSV</span>
               </button>
               <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
             </div>
@@ -709,7 +715,9 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
               {widgets.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center max-w-xs">
-                    <p className="text-5xl mb-3" aria-hidden="true">📊</p>
+                    <div className="flex justify-center mb-3" aria-hidden="true">
+                      <DojoEmojiAuto native="📊" size={56} />
+                    </div>
                     <p className="text-slate-700 text-sm font-semibold mb-1">Votre dashboard est vide.</p>
                     <p className="text-slate-500 text-xs">Ajoutez un widget depuis la barre latérale, ou choisissez un template ci-contre pour démarrer.</p>
                   </div>

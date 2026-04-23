@@ -675,6 +675,29 @@ function Office() {
   );
 }
 
+function Cart() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 20 L22 20 L28 50 L60 50" {...S} />
+      <rect x="26" y="26" width="36" height="20" rx="2.4" {...SFill(DD.coral)} />
+      <path d="M30 32 L58 32 M30 39 L58 39" stroke={PAPER} strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="32" cy="62" r="4.4" {...SFill(DD.coralD)} />
+      <circle cx="54" cy="62" r="4.4" {...SFill(DD.coralD)} />
+    </svg>
+  );
+}
+
+function Users() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="28" cy="30" r="9" {...SFill(DD.sky)} />
+      <path d="M12 60 Q12 46 28 46 Q44 46 44 60 Z" {...SFill(DD.sky)} />
+      <circle cx="52" cy="30" r="9" {...SFill(DD.mint)} />
+      <path d="M36 60 Q36 46 52 46 Q68 46 68 60 Z" {...SFill(DD.mint)} />
+    </svg>
+  );
+}
+
 function Inbox() {
   return (
     <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
@@ -783,6 +806,10 @@ export const EMOJI_COMPONENTS = {
   // v2 — Pipeline categories
   inbox:     { C: Inbox,     label: 'Inbox',     fr: 'Entrée',            use: 'Catégorie Sources',         replaces: '📥',  tile: 'sky'   },
   outbox:    { C: Outbox,    label: 'Outbox',    fr: 'Sortie',            use: 'Catégorie Destinations',    replaces: '📤',  tile: 'coral' },
+
+  // v2 — Database icons (BI Dojo + Table Explorer)
+  cart:      { C: Cart,      label: 'Cart',      fr: 'Panier',            use: 'Base E-Commerce',           replaces: '🛒',  tile: 'coral' },
+  users:     { C: Users,     label: 'Users',     fr: 'Personnes',         use: 'Base RH',                   replaces: '👥',  tile: 'sky'   },
 };
 
 // Normalisation FE0F pour que '↕' (sans sélecteur) matche '↕️' (avec sélecteur)

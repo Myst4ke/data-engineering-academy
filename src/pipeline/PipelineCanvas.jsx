@@ -584,6 +584,13 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       const tag = e.target?.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable) return;
       const mod = e.ctrlKey || e.metaKey;
+      if (mod && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        const topLevel = nodes.filter(n => !nodeConfigs[n.id]?.parentId).map(n => n.id);
+        setSelectedNodes(new Set(topLevel));
+        setSelectedConns(new Set(connections.map((_, i) => i)));
+        return;
+      }
       if (mod && (e.key === 'c' || e.key === 'C')) { e.preventDefault(); handleCopy(); return; }
       if (mod && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); handlePaste(); return; }
       if (mod && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); handleCopy(); handlePaste(); return; }
@@ -592,7 +599,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [handleDelete, handleCopy, handlePaste]);
+  }, [handleDelete, handleCopy, handlePaste, nodes, nodeConfigs, connections]);
 
   const getNormalizedRect = () => {
     if (!selectionRect) return null;
@@ -1397,7 +1404,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500">{nodes.length} nœud{nodes.length !== 1 ? 's' : ''} · {connections.length} lien{connections.length !== 1 ? 's' : ''}</span>
-          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Suppr : supprimer · Ctrl+C / Ctrl+V : copier / coller la sélection · Ctrl+D : dupliquer">
+          <span className="hidden lg:inline text-xs text-slate-400" title="Clic droit : configurer · Molette : zoom · Clic droit + glisser : pan · Suppr : supprimer · Ctrl+A : tout sélectionner · Ctrl+C / Ctrl+V : copier / coller · Ctrl+D : dupliquer">
             Clic droit = configurer
           </span>
           {totalSelected > 0 && (

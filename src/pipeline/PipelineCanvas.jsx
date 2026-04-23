@@ -275,7 +275,7 @@ function NodePalette({ onAddNode }) {
   );
 }
 
-function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate }) {
+function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate, topOffset = 16 }) {
   const [isDragging, setIsDragging] = useState(false);
 
   const topLevel = nodes.filter(n => !nodeConfigs[n.id]?.parentId);
@@ -326,8 +326,8 @@ function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate }) {
 
   return (
     <div
-      className="absolute top-4 right-4 bg-white/95 border border-slate-200 rounded-lg shadow-md overflow-hidden"
-      style={{ width: MM_W, height: MM_H, zIndex: 20, cursor: isDragging ? 'grabbing' : 'pointer' }}
+      className="absolute right-4 bg-white/95 border border-slate-200 rounded-lg shadow-md overflow-hidden"
+      style={{ top: topOffset, width: MM_W, height: MM_H, zIndex: 20, cursor: isDragging ? 'grabbing' : 'pointer' }}
       onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); setIsDragging(true); centerOn(e, e.currentTarget); }}
       onMouseMove={(e) => { if (isDragging) centerOn(e, e.currentTarget); }}
       onMouseUp={() => setIsDragging(false)}
@@ -1592,6 +1592,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
               zoom={zoom}
               canvasRef={canvasRef}
               onNavigate={setPan}
+              topOffset={exercise ? 48 : 16}
             />
           )}
 

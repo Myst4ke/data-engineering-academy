@@ -103,9 +103,9 @@ body {
   color: var(--ink);
 }
 
-/* Scrollables */
-.game-view { min-height: 100vh; overflow-y: auto; }
-.home-view { min-height: 100vh; overflow-y: auto; }
+/* Scrollables — body handles scrolling, children just grow */
+.game-view { min-height: 100vh; }
+.home-view { min-height: 100vh; }
 
 /* ═══════════════════════════════════════════════════════════
    TYPOGRAPHIE — Fraunces pour display/titres, Inter pour body

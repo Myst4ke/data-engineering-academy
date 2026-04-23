@@ -126,7 +126,7 @@ export default function Hub() {
   if (activeModule === 'bi-dojo')       return <BiDojoWrapper onBackToHub={() => setActiveModule(null)} />;
 
   return (
-    <div className="home-view flex flex-col items-center p-6 relative overflow-x-hidden">
+    <div className="home-view flex flex-col items-center p-6 relative overflow-x-clip">
       {/* Decorative blobs — repeated pattern down the page */}
       <div className="hero-blobs" aria-hidden="true">
         <div className="blob" style={{ top: 20, left: '8%', width: 260, height: 260, background: '#FF8066' }} />

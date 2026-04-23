@@ -113,7 +113,7 @@ export const CARD_DEFINITIONS = {
   join: {
     name: 'Joindre',
     shortName: 'join',
-    icon: '🔗',
+    icon: '🔀',
     description: 'Fusionne deux tables sur une colonne commune.',
     detailedExplanation: `Cette carte combine deux tables en utilisant une colonne commune.
 

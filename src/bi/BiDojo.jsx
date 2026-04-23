@@ -727,9 +727,10 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
           </div>
 
           {/* Page tabs */}
-          <div className="flex-none flex items-center gap-1 px-3 py-1 bg-white border-t border-slate-200" onClick={e => e.stopPropagation()}>
+          <div className="flex-none flex items-center gap-2 px-3 py-1 bg-white border-t border-slate-200" onClick={e => e.stopPropagation()}>
+            <div className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto">
             {pages.map(p => (
-              <div key={p.id} className={`flex items-center gap-1 px-3 py-1 rounded-t-lg text-xs font-medium cursor-pointer border-b-2 transition-colors ${
+              <div key={p.id} className={`shrink-0 flex items-center gap-1 px-3 py-1 rounded-t-lg text-xs font-medium cursor-pointer border-b-2 transition-colors ${
                 p.id === activePageId ? 'border-indigo-400 text-indigo-600 bg-indigo-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
               }`}>
                 {renamingPageId === p.id ? (
@@ -754,10 +755,11 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
               </div>
             ))}
             {!presentationMode && (
-              <button onClick={addPage} className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-indigo-500 hover:bg-slate-50 text-sm font-bold" title="Nouvelle page" aria-label="Ajouter une page">+</button>
+              <button onClick={addPage} className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-indigo-500 hover:bg-slate-50 text-sm font-bold" title="Nouvelle page" aria-label="Ajouter une page">+</button>
             )}
+            </div>
             {!presentationMode && (
-              <span className="ml-2 text-[11px] text-slate-400 hidden md:inline" title="Double-cliquez sur une page pour la renommer">Double-clic : renommer</span>
+              <span className="shrink-0 text-[11px] text-slate-400 hidden md:inline" title="Double-cliquez sur une page pour la renommer">Double-clic : renommer</span>
             )}
           </div>
         </div>

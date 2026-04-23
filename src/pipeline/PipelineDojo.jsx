@@ -99,8 +99,8 @@ function ExercisePopup({ exercise, onClose }) {
               {exercise.hintNodes && (
                 <div className="flex flex-wrap gap-1 mt-2" aria-label="Nœuds suggérés">
                   {exercise.hintNodes.map((nt, i) => {
-                    const def = { csv_source: '📄', db_source: '🗄️', api_source: '🌐', filter: '🔍', sort: '↕️', join: '🔗', concat: '⬇️', aggregate: '📊', select_cols: '✅', delete_col: '🗑️', rename_col: '✏️', deduplicate: '🔄', clean_na: '🧹', fill_na: '🔧', mapping: '🗺️', window_func: '📐', sample: '🎲', foreach: '🔁', foreach_row: '📝', if_condition: '⚡', lookup: '🔎', log: '📋', lakehouse_bronze: '🥉', lakehouse_silver: '🥈', lakehouse_gold: '🥇', warehouse: '🏭', dashboard: '📈', csv_export: '💾' };
-                    return <span key={i} title={nt} aria-label={nt}><DojoEmojiAuto native={def[nt] || '?'} size={18} /></span>;
+                    const d = NODE_TYPES[nt];
+                    return <span key={i} title={d?.name || nt} aria-label={d?.name || nt}><DojoEmojiAuto native={d?.icon || '?'} size={18} /></span>;
                   })}
                 </div>
               )}

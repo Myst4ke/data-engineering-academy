@@ -3,6 +3,7 @@ import { Flame, ArrowRight, Sprout } from 'lucide-react';
 import App from './App';
 import PipelineDojo from './pipeline/PipelineDojo';
 import BiDojoWrapper from './bi/BiDojoWrapper';
+import DataModelingDojo from './datamodel/DataModelingDojo';
 import { DojoEmojiAuto } from './components/DojoEmoji';
 
 // Les 3 modules actifs : chacun avec sa couleur d'accent edtech
@@ -37,17 +38,20 @@ const MODULES = [
     accent: 'mint',
     totalExercises: 20,
   },
-];
-
-// Module en préparation : teaser distinct en bas de page
-const UPCOMING_MODULES = [
   {
     id: 'data-modeling-dojo',
     name: 'Data Modeling Dojo',
     subtitle: 'Modélisation dimensionnelle',
+    kata: 'Kata IV',
     icon: '📐',
-    description: 'Modèles en étoile, faits & dimensions, grain, SCD : concevez les schémas des datamarts.',
+    description: 'Concevez des schémas clairs : entités, clés, relations, faits et dimensions.',
+    accent: 'violet',
+    totalExercises: 6,
   },
+];
+
+// Module en préparation : teaser distinct en bas de page
+const UPCOMING_MODULES = [
   {
     id: 'git-dojo',
     name: 'Git Dojo',
@@ -74,6 +78,12 @@ function readProgress(moduleId) {
       if (!raw) return 0;
       const obj = JSON.parse(raw) || {};
       return Object.keys(obj).filter(k => obj[k]).length;
+    }
+    if (moduleId === 'data-modeling-dojo') {
+      const raw = localStorage.getItem('dataModelingDojo_progress');
+      if (!raw) return 0;
+      const obj = JSON.parse(raw) || {};
+      return Object.keys(obj).filter(k => (obj[k]?.stars || 0) > 0).length;
     }
   } catch { /* corrupted localStorage */ }
   return 0;
@@ -105,6 +115,14 @@ const ACCENT_CLASSES = {
     cta: 'bg-[#5ED6B4]',
     subtitle: 'text-[#0F9B7A]',
   },
+  violet: {
+    border: 'border-[#C084FC]',
+    isoBg: 'bg-[#F5F3FF]',
+    tagBg: 'bg-[#F5F3FF] text-[#9333EA]',
+    xpFill: 'bg-[#C084FC]',
+    cta: 'bg-[#C084FC]',
+    subtitle: 'text-[#9333EA]',
+  },
 };
 
 export default function Hub() {
@@ -128,9 +146,10 @@ export default function Hub() {
   );
   const totalPossible = useMemo(() => MODULES.reduce((s, m) => s + m.totalExercises, 0), []);
 
-  if (activeModule === 'data-dojo')     return <App onBackToHub={() => setActiveModule(null)} />;
-  if (activeModule === 'pipeline-dojo') return <PipelineDojo onBackToHub={() => setActiveModule(null)} />;
-  if (activeModule === 'bi-dojo')       return <BiDojoWrapper onBackToHub={() => setActiveModule(null)} />;
+  if (activeModule === 'data-dojo')          return <App onBackToHub={() => setActiveModule(null)} />;
+  if (activeModule === 'pipeline-dojo')      return <PipelineDojo onBackToHub={() => setActiveModule(null)} />;
+  if (activeModule === 'bi-dojo')            return <BiDojoWrapper onBackToHub={() => setActiveModule(null)} />;
+  if (activeModule === 'data-modeling-dojo') return <DataModelingDojo onBackToHub={() => setActiveModule(null)} />;
 
   return (
     <div className="home-view flex flex-col items-center p-6 relative overflow-x-clip">
@@ -166,7 +185,7 @@ export default function Hub() {
         </header>
 
         {/* MODULES ACTIFS (3 cartes : vitrine pleine) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {MODULES.map((mod, idx) => {
             const completed = moduleProgress[mod.id] || 0;
             const pct = (completed / mod.totalExercises) * 100;

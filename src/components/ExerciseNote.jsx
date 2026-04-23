@@ -38,7 +38,7 @@ export default function ExerciseNote({
 
   return (
     <div
-      className="absolute bg-[#FFF9C4] border border-[#FDD835] rounded-xl shadow-lg overflow-hidden"
+      className="absolute bg-[#FFFBEB] border border-[#FDE68A] rounded-xl shadow-lg overflow-hidden"
       style={{ top: topOffset, left: leftOffset, width, zIndex: 15 }}
       onMouseDown={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.stopPropagation()}
@@ -46,7 +46,7 @@ export default function ExerciseNote({
     >
       <button
         onClick={() => setCollapsed((c) => !c)}
-        className="w-full flex items-center gap-2 px-3 py-2 border-b border-[#FDD835]/40 bg-[#FFF59D] hover:bg-[#FFEE58] transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 border-b border-[#FDE68A]/60 bg-[#FEF3C7] hover:bg-[#FEF9C3] transition-colors focus:outline-none focus-visible:outline-none focus-visible:shadow-none"
         aria-expanded={!collapsed}
       >
         {collapsed
@@ -62,8 +62,8 @@ export default function ExerciseNote({
           value={text}
           onChange={handleChange}
           placeholder="Écris ici ton plan, tes rappels, un brouillon de schéma..."
-          className="w-full px-3 py-2 text-[11.5px] text-amber-900 bg-transparent outline-none resize-none placeholder:text-amber-700/40 leading-snug"
-          style={{ height: 200, fontFamily: "'Inter', sans-serif" }}
+          className="w-full px-3 py-2 text-[11.5px] text-amber-900 bg-transparent outline-none resize-none placeholder:text-amber-700/40 leading-snug focus:outline-none focus-visible:outline-none focus-visible:shadow-none"
+          style={{ height: 200, fontFamily: "'Inter', sans-serif", boxShadow: 'none' }}
         />
       )}
     </div>

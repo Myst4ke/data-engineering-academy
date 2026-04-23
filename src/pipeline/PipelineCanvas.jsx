@@ -307,14 +307,24 @@ function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate, topOffs
   const nodesMaxX = Math.max(...topLevel.map(n => n.x + widthOf(n)));
   const nodesMaxY = Math.max(...topLevel.map(n => n.y + heightOf(n)));
 
-  const bbMinX = Math.min(nodesMinX, viewMinX);
-  const bbMinY = Math.min(nodesMinY, viewMinY);
-  const bbMaxX = Math.max(nodesMaxX, viewMinX + viewW);
-  const bbMaxY = Math.max(nodesMaxY, viewMinY + viewH);
+  // Bbox is driven by nodes only: the viewport marker may extend beyond and get
+  // clipped by `overflow-hidden` on the outer container. Otherwise the marker
+  // would fill the minimap when all nodes fit on screen.
+  const bbMinX = nodesMinX;
+  const bbMinY = nodesMinY;
+  const bbMaxX = nodesMaxX;
+  const bbMaxY = nodesMaxY;
 
   const contentW = (bbMaxX - bbMinX) + PAD * 2;
   const contentH = (bbMaxY - bbMinY) + PAD * 2;
   const scale = Math.min(MM_W / contentW, MM_H / contentH);
+
+  // Only show the viewport marker when it's usefully smaller than the node bbox
+  // (i.e. when zoomed in). If the viewport already contains everything, hide it.
+  const viewContainsAll = (
+    viewMinX <= nodesMinX && viewMinY <= nodesMinY &&
+    viewMinX + viewW >= nodesMaxX && viewMinY + viewH >= nodesMaxY
+  );
 
   const proj = (x, y) => ({ x: (x - bbMinX + PAD) * scale, y: (y - bbMinY + PAD) * scale });
 
@@ -347,15 +357,17 @@ function Minimap({ nodes, nodeConfigs, pan, zoom, canvasRef, onNavigate, topOffs
           const h = Math.max(2, heightOf(n) * scale);
           return <rect key={n.id} x={p.x} y={p.y} width={w} height={h} fill={NODE_TYPES[n.type]?.color || '#94A3B8'} opacity={0.85} rx={1} />;
         })}
-        <rect
-          x={proj(viewMinX, viewMinY).x}
-          y={proj(viewMinX, viewMinY).y}
-          width={Math.max(1, viewW * scale)}
-          height={Math.max(1, viewH * scale)}
-          fill="rgba(99,102,241,0.12)"
-          stroke="#6366F1"
-          strokeWidth={1.5}
-        />
+        {!viewContainsAll && (
+          <rect
+            x={proj(viewMinX, viewMinY).x}
+            y={proj(viewMinX, viewMinY).y}
+            width={Math.max(1, viewW * scale)}
+            height={Math.max(1, viewH * scale)}
+            fill="rgba(99,102,241,0.12)"
+            stroke="#6366F1"
+            strokeWidth={1.5}
+          />
+        )}
       </svg>
     </div>
   );

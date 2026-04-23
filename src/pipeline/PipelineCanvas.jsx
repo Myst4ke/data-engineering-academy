@@ -81,14 +81,16 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
   const bgColor = isTable ? '#F0FDF4' : 'white';
   return (
     <g>
+      {isSelected && (
+        <rect x={node.x - 4} y={node.y - 4} width={NODE_W + 8} height={NODE_H + 8} rx={14}
+          fill="none" stroke="#6366F1" strokeWidth={2.5} pointerEvents="none" />
+      )}
       <foreignObject x={node.x} y={node.y} width={NODE_W} height={NODE_H}>
         <div
           onMouseDown={(e) => { e.stopPropagation(); onMouseDown(e, node.id); }}
           onMouseUp={(e) => { e.stopPropagation(); onNodeMouseUp(node.id); }}
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu(e, node.id); }}
-          className={`w-full h-full rounded-xl border-2 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none ${
-            isSelected ? 'shadow-lg ring-2 ring-indigo-400' : 'shadow-md hover:shadow-lg'
-          }`}
+          className="w-full h-full rounded-xl border-2 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
           style={{ background: bgColor, borderColor: typeDef.color, borderLeftWidth: '4px', overflow: 'visible' }}
         >
           {!isTable && <span className="leading-none inline-flex"><DojoEmojiAuto native={typeDef.icon} size={22} /></span>}
@@ -176,15 +178,17 @@ function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, is
 
   return (
     <g>
+      {isSelected && (
+        <rect x={node.x - 4} y={node.y - 4} width={LAKE_W + 8} height={height + 8} rx={14}
+          fill="none" stroke="#6366F1" strokeWidth={2.5} pointerEvents="none" />
+      )}
       {/* Container body via foreignObject — styled like global site */}
       <foreignObject x={node.x} y={node.y} width={LAKE_W} height={height}>
         <div
           onMouseDown={(e) => { e.stopPropagation(); onMouseDown(e, node.id); }}
           onMouseUp={(e) => { e.stopPropagation(); onNodeMouseUp(node.id); }}
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onContextMenu?.(e, node.id); }}
-          className={`w-full h-full rounded-xl border-2 flex flex-col cursor-grab active:cursor-grabbing select-none overflow-hidden ${
-            isSelected ? 'shadow-lg ring-2 ring-indigo-400' : 'shadow-md hover:shadow-lg'
-          }`}
+          className="w-full h-full rounded-xl border-2 flex flex-col cursor-grab active:cursor-grabbing select-none overflow-hidden"
           style={{ background: 'white', borderColor: typeDef.color, borderLeftWidth: '4px' }}
         >
           {/* Header */}

@@ -40,3 +40,11 @@ tmp-analysis/
 
 # Claude local settings
 .claude/settings.local.json
+CLAUDE.md
+
+# Graphify knowledge graph (generated, regenerable via `graphify update .`)
+graphify-out/
+src/graphify-out/
+
+# Internal planning docs
+documentation/*_PLAN.md

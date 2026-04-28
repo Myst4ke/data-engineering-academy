@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { recommendChart } from './charts';
 import { DojoEmojiAuto } from '../components/DojoEmoji';
+import TableDropdown from './TableDropdown';
 
 const CHART_TYPES = [
   { id: 'bar', label: 'Barres', icon: '📊' },
@@ -59,15 +60,15 @@ export default function ChartConfig({ columns: defaultColumns, data: defaultData
           {allTables && allTables.length > 1 && (
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">Source de données</label>
-              <div className="relative flex items-center w-full px-3 py-2 rounded-lg border border-slate-200 focus-within:border-indigo-400">
-                <span className="shrink-0 inline-flex mr-2">
-                  <DojoEmojiAuto native={allTables.find(t => t.id === tableId)?.dbIcon} size={18} />
-                </span>
-                <select value={tableId} onChange={e => { setTableId(e.target.value); const t = allTables.find(tt => tt.id === e.target.value); if (t?.columns?.[0]) { setXCol(t.columns[0]); setYCol(t.columns[1] || t.columns[0]); } }}
-                  className="flex-1 bg-transparent text-sm focus:outline-none appearance-none cursor-pointer">
-                  {allTables.map(t => <option key={t.id} value={t.id}>{t.tableName} ({t.rowCount})</option>)}
-                </select>
-              </div>
+              <TableDropdown
+                tables={allTables}
+                value={tableId}
+                onChange={(id) => {
+                  setTableId(id);
+                  const t = allTables.find(tt => tt.id === id);
+                  if (t?.columns?.[0]) { setXCol(t.columns[0]); setYCol(t.columns[1] || t.columns[0]); }
+                }}
+              />
             </div>
           )}
           <div>

@@ -3,6 +3,7 @@ import { Copy, Settings, X, Undo2, Redo2, Save, FolderOpen, Monitor, Trash2, Pla
 import { getAllTables } from '../pipeline/sampleData';
 import { BarChart, LineChart, PieChart, KpiCard, ScatterPlot, Gauge, Treemap, MapChart, FunnelChart, DataTable, TextWidget, Slicer, recommendChart } from './charts';
 import ChartConfig from './ChartConfig';
+import TableDropdown from './TableDropdown';
 import BackButton from '../components/BackButton';
 import { DojoEmojiAuto } from '../components/DojoEmoji';
 
@@ -656,15 +657,11 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
           <div className="w-48 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
             <div className="p-3 border-b border-slate-200">
               <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Source</p>
-              <div className="relative flex items-center w-full px-2 py-1.5 rounded-lg border border-slate-200 focus-within:border-indigo-400">
-                <span className="shrink-0 inline-flex mr-1.5">
-                  <DojoEmojiAuto native={allTables.find(t => t.id === selectedTableId)?.dbIcon} size={18} />
-                </span>
-                <select value={selectedTableId} onChange={e => { setSelectedTableId(e.target.value); setCrossFilters([]); }}
-                  className="flex-1 bg-transparent text-xs font-medium focus:outline-none appearance-none cursor-pointer">
-                  {allTables.map(t => <option key={t.id} value={t.id}>{t.tableName} ({t.rowCount})</option>)}
-                </select>
-              </div>
+              <TableDropdown
+                tables={allTables}
+                value={selectedTableId}
+                onChange={(id) => { setSelectedTableId(id); setCrossFilters([]); }}
+              />
               <button onClick={() => fileInputRef.current?.click()}
                 className="w-full mt-1.5 py-1 text-[10px] text-indigo-500 font-medium rounded-lg border border-dashed border-indigo-300 hover:bg-indigo-50 transition-colors inline-flex items-center justify-center gap-1">
                 <DojoEmojiAuto native="📄" size={14} />

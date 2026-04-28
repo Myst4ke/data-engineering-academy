@@ -5,7 +5,10 @@ import { colorForBranch } from './gitTypes';
  */
 export default function BranchLabel({ name, x, y, isHead, onClick, isDetached }) {
   const palette = colorForBranch(name);
-  const w = 12 + name.length * 6;
+  // Display the last segment after `/` to avoid overflow when names contain
+  // a prefix (eg. `team-a/feature-a` → `feature-a`). Full name in tooltip.
+  const display = name.includes('/') ? name.split('/').slice(-1)[0] : name;
+  const w = 12 + display.length * 6;
   const h = 20;
   const labelX = x + 26; // to the right of the commit
   return (
@@ -13,6 +16,7 @@ export default function BranchLabel({ name, x, y, isHead, onClick, isDetached })
       onClick={(e) => { e.stopPropagation(); onClick?.(name); }}
       className="cursor-pointer"
     >
+      <title>{name}</title>
       {isHead && (
         <rect
           x={labelX - 3} y={y - h / 2 - 3}
@@ -37,7 +41,7 @@ export default function BranchLabel({ name, x, y, isHead, onClick, isDetached })
         fill={palette.color === '#FFC857' ? '#1E293B' : '#FFFFFF'}
         pointerEvents="none"
       >
-        {name}
+        {display}
       </text>
     </g>
   );

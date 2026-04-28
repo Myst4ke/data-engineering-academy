@@ -35,6 +35,14 @@ export function validateGit(state, exercise) {
     }
   }
 
+  if (target.hasBranches) {
+    for (const b of target.hasBranches) {
+      if (!state.branches[b]) {
+        warnings.push({ level: 'error', message: `La branche ${b} n'existe pas encore.` });
+      }
+    }
+  }
+
   if (target.indexEmpty && Object.keys(state.index).length > 0) {
     warnings.push({ level: 'warn', message: `La zone stagée n'est pas vide (${Object.keys(state.index).join(', ')}).` });
   }
@@ -56,9 +64,15 @@ export function validateGit(state, exercise) {
   }
 
   if (target.mustNotCommitFile) {
-    const committed = commits.some(c => c.tree && target.mustNotCommitFile in c.tree);
-    if (committed) {
-      warnings.push({ level: 'error', message: `${target.mustNotCommitFile} ne doit pas apparaître dans l'historique.` });
+    const f = target.mustNotCommitFile;
+    const wtValue = state.workingTree[f];
+    // Pre-existing commits may already contain the file with its original value.
+    // The constraint is that the file's CURRENT (modified) content must not have been committed.
+    if (wtValue !== undefined) {
+      const committedAtCurrent = commits.some(c => c.tree && c.tree[f] === wtValue);
+      if (committedAtCurrent) {
+        warnings.push({ level: 'error', message: `${f} ne doit pas avoir été commité dans son état actuel (modifié).` });
+      }
     }
   }
 
@@ -125,6 +139,61 @@ export function validateGit(state, exercise) {
     const tip = state.commits[headSha];
     if (tip && tip.parents.length >= 2) {
       warnings.push({ level: 'warn', message: `Un commit de merge a été créé : pour un fast-forward, pas de commit de merge attendu.` });
+    }
+  }
+
+  if (target.hasMergeCommit) {
+    const merges = commits.filter(c => c.parents.length >= 2);
+    if (merges.length === 0) {
+      warnings.push({ level: 'error', message: `Un commit de merge est attendu (commit avec deux parents).` });
+    }
+  }
+
+  if (target.headHasFiles) {
+    const headSha = state.head.type === 'branch' ? state.branches[state.head.ref] : state.head.ref;
+    const headTree = headSha ? (state.commits[headSha]?.tree || {}) : {};
+    const missing = target.headHasFiles.filter(f => !(f in headTree));
+    if (missing.length > 0) {
+      warnings.push({ level: 'error', message: `Le commit courant doit contenir : ${missing.join(', ')}.` });
+    }
+  }
+
+  if (target.lastCommitMessage) {
+    const headSha = state.head.type === 'branch' ? state.branches[state.head.ref] : state.head.ref;
+    const head = headSha ? state.commits[headSha] : null;
+    if (!head || !head.message.includes(target.lastCommitMessage)) {
+      warnings.push({ level: 'error', message: `Le dernier commit doit contenir le message « ${target.lastCommitMessage} ».` });
+    }
+  }
+
+  if (target.headFileEquals) {
+    const headSha = state.head.type === 'branch' ? state.branches[state.head.ref] : state.head.ref;
+    const headTree = headSha ? (state.commits[headSha]?.tree || {}) : {};
+    for (const [f, expected] of Object.entries(target.headFileEquals)) {
+      if (headTree[f] !== expected) {
+        warnings.push({ level: 'error', message: `${f} doit avoir le contenu attendu (cherry-pick / revert mal appliqué ?).` });
+      }
+    }
+  }
+
+  if (target.headLacksFiles) {
+    const headSha = state.head.type === 'branch' ? state.branches[state.head.ref] : state.head.ref;
+    const headTree = headSha ? (state.commits[headSha]?.tree || {}) : {};
+    const present = target.headLacksFiles.filter(f => f in headTree);
+    if (present.length > 0) {
+      warnings.push({ level: 'error', message: `Le commit courant ne doit pas contenir : ${present.join(', ')}.` });
+    }
+  }
+
+  if (target.branchAtRootCommit) {
+    const sha = state.branches[target.branchAtRootCommit];
+    if (!sha) {
+      warnings.push({ level: 'error', message: `Branche ${target.branchAtRootCommit} introuvable.` });
+    } else {
+      const c = state.commits[sha];
+      if (!c || c.parents.length !== 0) {
+        warnings.push({ level: 'error', message: `${target.branchAtRootCommit} doit pointer sur le tout premier commit (sans parent).` });
+      }
     }
   }
 

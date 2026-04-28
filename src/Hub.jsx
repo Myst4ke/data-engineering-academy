@@ -45,8 +45,8 @@ const MODULES = [
     kata: 'Kata IV',
     icon: '🌿',
     description: 'Branches, commits, merges et workflows collaboratifs.',
-    accent: 'forest',
-    totalExercises: 8,
+    accent: 'violet',
+    totalExercises: 31,
   },
 ];
 
@@ -122,6 +122,14 @@ const ACCENT_CLASSES = {
     xpFill: 'bg-[#059669]',
     cta: 'bg-[#059669]',
     subtitle: 'text-[#047857]',
+  },
+  violet: {
+    border: 'border-[#8B5CF6]',
+    isoBg: 'bg-[#EDE9FE]',
+    tagBg: 'bg-[#EDE9FE] text-[#6D28D9]',
+    xpFill: 'bg-[#8B5CF6]',
+    cta: 'bg-[#8B5CF6]',
+    subtitle: 'text-[#6D28D9]',
   },
 };
 

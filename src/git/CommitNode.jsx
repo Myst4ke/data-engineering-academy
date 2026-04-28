@@ -27,7 +27,7 @@ export default function CommitNode({ commit, x, y, branchName, isHead, isSelecte
         fill={palette.color}
         pointerEvents="none"
       >
-        {commit.sha.slice(0, 4)}
+        {commit.sha.slice(-4)}
       </text>
       <title>{`${commit.sha} · ${commit.message}`}</title>
     </g>

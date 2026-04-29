@@ -35,8 +35,11 @@ electron-release/
 release/
 Data-Dojo-Build/
 
-# Local analysis scripts and screenshots
+# Local analysis scripts, screenshots, subagent / playwright artifacts
 tmp-analysis/
+tmp-*/
+tmp_*
+test-screenshots/
 
 # Claude local settings
 .claude/settings.local.json

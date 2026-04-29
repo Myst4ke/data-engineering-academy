@@ -3,10 +3,11 @@ import { Flame, ArrowRight, Sprout } from 'lucide-react';
 import App from './App';
 import PipelineDojo from './pipeline/PipelineDojo';
 import BiDojoWrapper from './bi/BiDojoWrapper';
+import GitDojo from './git/GitDojo';
 import DataModelingDojo from './datamodel/DataModelingDojo';
 import { DojoEmojiAuto } from './components/DojoEmoji';
 
-// Les 3 modules actifs : chacun avec sa couleur d'accent edtech
+// Modules actifs : chacun avec sa couleur d'accent edtech
 const MODULES = [
   {
     id: 'data-dojo',
@@ -39,27 +40,29 @@ const MODULES = [
     totalExercises: 20,
   },
   {
+    id: 'git-dojo',
+    name: 'Git Dojo',
+    subtitle: 'Gestion de versions',
+    kata: 'Kata IV',
+    icon: '🌿',
+    description: 'Branches, commits, merges et workflows collaboratifs.',
+    accent: 'violet',
+    totalExercises: 31,
+  },
+  {
     id: 'data-modeling-dojo',
     name: 'Data Modeling Dojo',
     subtitle: 'Modélisation dimensionnelle',
-    kata: 'Kata IV',
+    kata: 'Kata V',
     icon: '📐',
     description: 'Concevez des schémas clairs : entités, clés, relations, faits et dimensions.',
-    accent: 'violet',
+    accent: 'lavender',
     totalExercises: 6,
   },
 ];
 
-// Module en préparation : teaser distinct en bas de page
-const UPCOMING_MODULES = [
-  {
-    id: 'git-dojo',
-    name: 'Git Dojo',
-    subtitle: 'Gestion de versions',
-    icon: '🌿',
-    description: 'Branches, commits, merges et workflows collaboratifs.',
-  },
-];
+// Module en préparation : aucun pour l'instant (Git et Data Modeling sont actifs)
+const UPCOMING_MODULES = [];
 
 function readProgress(moduleId) {
   try {
@@ -78,6 +81,12 @@ function readProgress(moduleId) {
       if (!raw) return 0;
       const obj = JSON.parse(raw) || {};
       return Object.keys(obj).filter(k => obj[k]).length;
+    }
+    if (moduleId === 'git-dojo') {
+      const raw = localStorage.getItem('gitDojo_progress');
+      if (!raw) return 0;
+      const obj = JSON.parse(raw) || {};
+      return Object.keys(obj).filter(k => (obj[k]?.stars || 0) > 0).length;
     }
     if (moduleId === 'data-modeling-dojo') {
       const raw = localStorage.getItem('dataModelingDojo_progress');
@@ -115,7 +124,25 @@ const ACCENT_CLASSES = {
     cta: 'bg-[#5ED6B4]',
     subtitle: 'text-[#0F9B7A]',
   },
+  forest: {
+    border: 'border-[#059669]',
+    isoBg: 'bg-[#D1FAE5]',
+    tagBg: 'bg-[#D1FAE5] text-[#047857]',
+    xpFill: 'bg-[#059669]',
+    cta: 'bg-[#059669]',
+    subtitle: 'text-[#047857]',
+  },
+  // violet : nuance vive (Git Dojo)
   violet: {
+    border: 'border-[#8B5CF6]',
+    isoBg: 'bg-[#EDE9FE]',
+    tagBg: 'bg-[#EDE9FE] text-[#6D28D9]',
+    xpFill: 'bg-[#8B5CF6]',
+    cta: 'bg-[#8B5CF6]',
+    subtitle: 'text-[#6D28D9]',
+  },
+  // lavender : nuance pastel (Data Modeling Dojo)
+  lavender: {
     border: 'border-[#C084FC]',
     isoBg: 'bg-[#F5F3FF]',
     tagBg: 'bg-[#F5F3FF] text-[#9333EA]',
@@ -149,6 +176,7 @@ export default function Hub() {
   if (activeModule === 'data-dojo')          return <App onBackToHub={() => setActiveModule(null)} />;
   if (activeModule === 'pipeline-dojo')      return <PipelineDojo onBackToHub={() => setActiveModule(null)} />;
   if (activeModule === 'bi-dojo')            return <BiDojoWrapper onBackToHub={() => setActiveModule(null)} />;
+  if (activeModule === 'git-dojo')           return <GitDojo onBackToHub={() => setActiveModule(null)} />;
   if (activeModule === 'data-modeling-dojo') return <DataModelingDojo onBackToHub={() => setActiveModule(null)} />;
 
   return (
@@ -184,8 +212,8 @@ export default function Hub() {
           )}
         </header>
 
-        {/* MODULES ACTIFS (3 cartes : vitrine pleine) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+        {/* MODULES ACTIFS (5 cartes) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-16">
           {MODULES.map((mod, idx) => {
             const completed = moduleProgress[mod.id] || 0;
             const pct = (completed / mod.totalExercises) * 100;

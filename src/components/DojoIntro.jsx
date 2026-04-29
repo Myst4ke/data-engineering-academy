@@ -5,15 +5,19 @@ import { DojoEmojiAuto } from './DojoEmoji';
 
 // Palette alignée sur celle du Hub (Hub.jsx ACCENT_CLASSES)
 const ACCENTS = {
-  coral: { main: '#FF8066', dark: '#E85D41', isoBg: '#FFE5DC', border: '#FF8066', tagText: '#E85D41' },
-  sky:   { main: '#6BA4FF', dark: '#3B7ADB', isoBg: '#DCE8FF', border: '#6BA4FF', tagText: '#3B7ADB' },
-  mint:  { main: '#5ED6B4', dark: '#0F9B7A', isoBg: '#D4F4E9', border: '#5ED6B4', tagText: '#0F9B7A' },
+  coral:  { main: '#FF8066', dark: '#E85D41', isoBg: '#FFE5DC', border: '#FF8066', tagText: '#E85D41' },
+  sky:    { main: '#6BA4FF', dark: '#3B7ADB', isoBg: '#DCE8FF', border: '#6BA4FF', tagText: '#3B7ADB' },
+  mint:   { main: '#5ED6B4', dark: '#0F9B7A', isoBg: '#D4F4E9', border: '#5ED6B4', tagText: '#0F9B7A' },
+  forest: { main: '#059669', dark: '#047857', isoBg: '#D1FAE5', border: '#059669', tagText: '#047857' },
+  violet: { main: '#8B5CF6', dark: '#6D28D9', isoBg: '#EDE9FE', border: '#8B5CF6', tagText: '#6D28D9' },
 };
 
 const KATA_BY_DOJO = {
-  'data-dojo':     'Kata I',
-  'pipeline-dojo': 'Kata II',
-  'bi-dojo':       'Kata III',
+  'data-dojo':         'Kata I',
+  'pipeline-dojo':     'Kata II',
+  'bi-dojo':           'Kata III',
+  'git-dojo':          'Kata IV',
+  'data-modeling-dojo': 'Kata V',
 };
 
 export default function DojoIntro({ dojoId, title, icon, accent = 'coral', sections, onClose }) {
@@ -210,6 +214,45 @@ export const PIPELINE_DOJO_INTRO = {
       icon: '⭐',
       title: 'Progression',
       content: '32 exercices avec des scénarios métier réalistes (e-commerce, RH). Chaque exercice décrit un besoin concret et vous guide vers la solution. Un mode Bac à sable est disponible pour expérimenter librement.',
+    },
+  ],
+};
+
+export const GIT_DOJO_INTRO = {
+  dojoId: 'git-dojo',
+  title: 'Git Dojo',
+  icon: '🌿',
+  accent: 'violet',
+  sections: [
+    {
+      icon: '📝',
+      title: "C'est quoi Git ?",
+      content: "Git, c'est le carnet de bord de ton projet. À chaque étape, tu prends une photo de tes fichiers (un commit). Plus tard, tu peux relire l'historique, ou même revenir à n'importe quelle photo si quelque chose casse. C'est une machine à remonter le temps pour ton code.",
+    },
+    {
+      icon: '🏢',
+      title: 'À quoi ça sert dans la vraie vie ?',
+      content: "Tous les projets tech utilisent Git : sites web, applis, dashboards data, notebooks. Sans Git, impossible de travailler à plusieurs sans s'écraser, pas de retour en arrière en cas de bug, pas de trace de qui a changé quoi. C'est aussi ce qui fait tourner GitHub et GitLab.",
+    },
+    {
+      icon: '💾',
+      title: 'Trois étapes pour sauvegarder',
+      content: "1. Tu modifies un fichier sur ton ordinateur. 2. Tu choisis lesquels mettre dans la prochaine photo (la zone de staging). 3. Tu prends la photo avec un petit message qui décrit ton changement (le commit). La photo est rangée dans l'album : l'historique du projet.",
+    },
+    {
+      icon: '🌿',
+      title: 'Les branches : essayer sans risque',
+      content: "Une branche, c'est une copie parallèle de ton projet. Tu peux tester une nouvelle idée sur une branche 'essai' sans toucher la version principale 'main'. Si ça marche, tu fusionnes les deux (merge). Si ça rate, tu jettes la branche. Personne n'a vu. Pour passer d'une branche à l'autre, clique simplement sur son nom dans le graphe.",
+    },
+    {
+      icon: '🃏',
+      title: 'Comment jouer ici',
+      content: "À droite, ton explorateur de fichiers. Glisse les fichiers rouges (modifiés) vers la Staging Zone, puis clique 'Commiter' dans la palette à gauche. Le graphe au centre dessine l'historique en temps réel. Double-clique un fichier pour le modifier. Pour switcher de branche, clique son nom dans le graphe ; pour en créer une nouvelle, utilise 'Nouvelle branche' dans la palette.",
+    },
+    {
+      icon: '⭐',
+      title: 'Progression',
+      content: "31 exercices répartis en 4 niveaux : Snapshots (commits de base, création de fichiers), Branches (travailler en parallèle, multi-commits), Réécriture (amend, revert, rebase), Collaboration (gitflow, hotfix, cherry-pick, conflits, multi-équipes). Un mode Bac à sable est disponible pour tester librement. Le premier exercice est un tutoriel guidé.",
     },
   ],
 };

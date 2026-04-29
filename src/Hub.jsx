@@ -3,6 +3,7 @@ import { Flame, ArrowRight, Sprout } from 'lucide-react';
 import App from './App';
 import PipelineDojo from './pipeline/PipelineDojo';
 import BiDojoWrapper from './bi/BiDojoWrapper';
+import GitDojo from './git/GitDojo';
 import { DojoEmojiAuto } from './components/DojoEmoji';
 
 // Les 3 modules actifs : chacun avec sa couleur d'accent edtech
@@ -37,6 +38,16 @@ const MODULES = [
     accent: 'mint',
     totalExercises: 20,
   },
+  {
+    id: 'git-dojo',
+    name: 'Git Dojo',
+    subtitle: 'Gestion de versions',
+    kata: 'Kata IV',
+    icon: '🌿',
+    description: 'Branches, commits, merges et workflows collaboratifs.',
+    accent: 'violet',
+    totalExercises: 31,
+  },
 ];
 
 // Module en préparation : teaser distinct en bas de page
@@ -47,13 +58,6 @@ const UPCOMING_MODULES = [
     subtitle: 'Modélisation dimensionnelle',
     icon: '📐',
     description: 'Modèles en étoile, faits & dimensions, grain, SCD : concevez les schémas des datamarts.',
-  },
-  {
-    id: 'git-dojo',
-    name: 'Git Dojo',
-    subtitle: 'Gestion de versions',
-    icon: '🌿',
-    description: 'Branches, commits, merges et workflows collaboratifs.',
   },
 ];
 
@@ -74,6 +78,12 @@ function readProgress(moduleId) {
       if (!raw) return 0;
       const obj = JSON.parse(raw) || {};
       return Object.keys(obj).filter(k => obj[k]).length;
+    }
+    if (moduleId === 'git-dojo') {
+      const raw = localStorage.getItem('gitDojo_progress');
+      if (!raw) return 0;
+      const obj = JSON.parse(raw) || {};
+      return Object.keys(obj).filter(k => (obj[k]?.stars || 0) > 0).length;
     }
   } catch { /* corrupted localStorage */ }
   return 0;
@@ -105,6 +115,22 @@ const ACCENT_CLASSES = {
     cta: 'bg-[#5ED6B4]',
     subtitle: 'text-[#0F9B7A]',
   },
+  forest: {
+    border: 'border-[#059669]',
+    isoBg: 'bg-[#D1FAE5]',
+    tagBg: 'bg-[#D1FAE5] text-[#047857]',
+    xpFill: 'bg-[#059669]',
+    cta: 'bg-[#059669]',
+    subtitle: 'text-[#047857]',
+  },
+  violet: {
+    border: 'border-[#8B5CF6]',
+    isoBg: 'bg-[#EDE9FE]',
+    tagBg: 'bg-[#EDE9FE] text-[#6D28D9]',
+    xpFill: 'bg-[#8B5CF6]',
+    cta: 'bg-[#8B5CF6]',
+    subtitle: 'text-[#6D28D9]',
+  },
 };
 
 export default function Hub() {
@@ -131,6 +157,7 @@ export default function Hub() {
   if (activeModule === 'data-dojo')     return <App onBackToHub={() => setActiveModule(null)} />;
   if (activeModule === 'pipeline-dojo') return <PipelineDojo onBackToHub={() => setActiveModule(null)} />;
   if (activeModule === 'bi-dojo')       return <BiDojoWrapper onBackToHub={() => setActiveModule(null)} />;
+  if (activeModule === 'git-dojo')      return <GitDojo onBackToHub={() => setActiveModule(null)} />;
 
   return (
     <div className="home-view flex flex-col items-center p-6 relative overflow-x-clip">
@@ -166,7 +193,7 @@ export default function Hub() {
         </header>
 
         {/* MODULES ACTIFS (3 cartes : vitrine pleine) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {MODULES.map((mod, idx) => {
             const completed = moduleProgress[mod.id] || 0;
             const pct = (completed / mod.totalExercises) * 100;

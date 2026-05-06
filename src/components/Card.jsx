@@ -26,6 +26,7 @@ export default function Card({
   disabled = false,
   size = 'normal',
   small = false,
+  noShadow = false,
 }) {
   const [showInfo, setShowInfo] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -75,6 +76,7 @@ export default function Card({
       iconBtn: 'w-3 h-3',
       border: '2px',
       padding: 'p-1',
+      paramOuter: '-mx-1 -mb-1',
       showTechName: false,
     },
     medium: {
@@ -86,6 +88,7 @@ export default function Card({
       iconBtn: 'w-3.5 h-3.5',
       border: '2px',
       padding: 'p-1.5',
+      paramOuter: '-mx-1.5 -mb-1.5',
       showTechName: false,
     },
     normal: {
@@ -97,6 +100,7 @@ export default function Card({
       iconBtn: 'w-4 h-4',
       border: '3px',
       padding: 'p-2',
+      paramOuter: '-mx-2 -mb-2',
       showTechName: true,
     },
   };
@@ -124,7 +128,7 @@ export default function Card({
           `}
           style={{
             border: `${s.border} solid ${colors.border}`,
-            boxShadow: (disabled || isInPipeline) ? 'none' : `
+            boxShadow: (disabled || isInPipeline || noShadow) ? 'none' : `
               0 6px 20px rgba(0, 0, 0, 0.15),
               0 0 25px ${colors.glow}
             `,
@@ -186,11 +190,12 @@ export default function Card({
               </div>
             )}
 
-            {/* Parameters - only show in pipeline */}
+            {/* Parameters - only show in pipeline. Full-width footer strip so the
+                card's rounded-xl + overflow-hidden cleanly handles the bottom curve. */}
             {cardInfo.paramLabel && isInPipeline && (
-              <div className="mt-auto mx-0.5 mb-0.5">
+              <div className={`mt-auto ${s.paramOuter}`}>
                 <div
-                  className="bg-white/30 rounded-md px-1.5 py-1 text-[10px] text-center truncate font-medium"
+                  className="bg-white/30 px-1.5 py-1 text-[10px] text-center truncate font-medium"
                   title={cardInfo.paramLabel}
                 >
                   {cardInfo.paramLabel}

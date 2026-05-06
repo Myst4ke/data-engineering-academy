@@ -9,13 +9,14 @@ import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
 import { DojoEmojiAuto } from '../components/DojoEmoji';
 import { NODE_TYPES } from './nodeTypes';
 
-// ── Tutorial (5 steps, spotlight) ──
+// ── Tutorial (6 steps, spotlight). Teaches the notebook-based workflow. ──
 const TUTORIAL_STEPS = [
-  { target: '[data-tutorial="palette"]', title: 'Les activités', text: 'Cliquez sur une activité pour l\'ajouter au canvas. Sources, transformations, stockage, destinations…' },
-  { target: '[data-tutorial="canvas"]', title: 'Le canvas', text: 'C\'est votre espace de travail. Glissez les nœuds pour les organiser. Clic droit/molette pour naviguer.' },
-  { target: null, title: 'Les sources', text: 'Ajoutez une Source CSV puis faites un clic droit dessus pour choisir quelles tables charger.' },
-  { target: null, title: 'Les connexions', text: 'Glissez depuis un port de sortie (cercle droit) vers un port d\'entrée (cercle gauche) pour connecter deux nœuds.' },
-  { target: null, title: 'Valider !', text: 'Quand votre pipeline est prêt, cliquez sur « Valider » pour vérifier votre solution. Bonne chance !' },
+  { target: '[data-tutorial="palette"]', title: 'La palette', text: "Toutes les activités sont ici : Sources (CSV, SQL, API), Notebooks (chaînes de transformations prêtes), Stockage, Destinations." },
+  { target: '[data-tutorial="palette"]', title: 'Les notebooks', text: "Un notebook regroupe plusieurs transformations en une seule unité réutilisable. Plus besoin de placer dédoublonner + nettoyer + renommer un par un : un notebook fait tout." },
+  { target: '[data-tutorial="canvas"]', title: 'Le canvas', text: "C'est votre espace de travail. Cliquez sur une activité dans la palette pour l'ajouter ici. Glissez les nœuds, molette pour zoomer, clic droit pour configurer." },
+  { target: null, title: 'La source', text: "Ajoutez d'abord une Source CSV, puis faites un clic droit dessus pour choisir la table à charger (clients, commandes, etc.)." },
+  { target: null, title: 'Connecter source → notebook → destination', text: "Glissez depuis un port de sortie (cercle droit) vers un port d'entrée (cercle gauche). L'enchaînement classique : Source → Notebook → Export/Dashboard." },
+  { target: null, title: 'Valider !', text: "Quand votre pipeline est prêt, cliquez sur « Valider » en haut à droite pour vérifier votre solution." },
 ];
 
 function Tutorial({ onComplete }) {
@@ -86,6 +87,22 @@ function ExercisePopup({ exercise, onClose }) {
               <p className="text-xs text-slate-500 font-medium">{TIERS[exercise.difficulty - 1]?.name}</p>
             </div>
           </div>
+          {exercise.notebookGuidance && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-3 text-xs text-indigo-700 flex items-start gap-2">
+              <span className="shrink-0 inline-flex mt-0.5"><DojoEmojiAuto native="📓" size={18} /></span>
+              <span>
+                {exercise.notebookGuidance === 'use-prefab' && (
+                  <>Branche un <b>notebook préfait</b> proposé dans la palette : il encapsule la transformation pour toi.</>
+                )}
+                {exercise.notebookGuidance === 'create-then-save' && (
+                  <>Cet exercice te demande de <b>créer ton propre notebook</b> avec ces étapes. Sauve-le : tu le réutiliseras dans les exos suivants.</>
+                )}
+                {exercise.notebookGuidance === 'reuse-from' && (
+                  <><b>Réutilise</b> le notebook que tu as créé en <b>{exercise.reuseExerciseId || 'l\'exo précédent'}</b> (ou un notebook système équivalent).</>
+                )}
+              </span>
+            </div>
+          )}
           <div className="text-sm text-slate-600 leading-relaxed mb-4 space-y-2">
             {exercise.description.split('\n').filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}
           </div>

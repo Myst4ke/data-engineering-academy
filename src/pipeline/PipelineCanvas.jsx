@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Trash2 } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { DojoEmojiAuto } from '../components/DojoEmoji';
 import { NODE_TYPES, CATEGORIES } from './nodeTypes';
@@ -17,6 +17,8 @@ import IfConfig from './IfConfig';
 import WindowConfig from './WindowConfig';
 import SampleConfig from './SampleConfig';
 import LogConfig from './LogConfig';
+import NotebookConfig from './NotebookConfig';
+import { getNotebook, updateUserNotebook, runNotebook, listNotebooks, createUserNotebook, deleteUserNotebook } from './notebooks';
 
 function mapNodeTypeToTransform(nodeType) {
   const map = {
@@ -248,28 +250,215 @@ function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, is
   );
 }
 
-function NodePalette({ onAddNode }) {
+function NodePalette({ onAddNode, exerciseNotebooks = [], availableNotebookIds = null }) {
+  const [allNotebooksTick, setAllNotebooksTick] = useState(0);
+  const [showAllModal, setShowAllModal] = useState(false);
+
+  // Recompute notebook list whenever someone signals a change.
+  useEffect(() => {
+    const handler = () => setAllNotebooksTick(t => t + 1);
+    window.addEventListener('pipeline:notebook-changed', handler);
+    return () => window.removeEventListener('pipeline:notebook-changed', handler);
+  }, []);
+
+  // Explorer library (used by the "Voir tous" modal) : system notebooks
+  // restricted to the exercise whitelist, plus every user/exercise notebook
+  // (so the learner can reuse a notebook they saved in a previous exo).
+  const explorerNotebooks = useMemo(() => {
+    const list = listNotebooks({ exerciseNotebooks });
+    if (!availableNotebookIds) return list; // sandbox : everything
+    return list.filter(nb =>
+      nb.source === 'user' ||
+      nb.source === 'exercise' ||
+      availableNotebookIds.includes(nb.id)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allNotebooksTick, exerciseNotebooks, availableNotebookIds]);
+
+  // Main palette : only PRE-MADE (system) notebooks the exercise whitelisted.
+  // User notebooks live in the explorer (modal) to keep the palette focused.
+  const paletteNotebooks = useMemo(
+    () => explorerNotebooks.filter(nb => nb.source === 'system'),
+    [explorerNotebooks]
+  );
+  const explorerExtras = explorerNotebooks.length - paletteNotebooks.length;
+
+  const triggerAdd = (notebookId) => {
+    window.dispatchEvent(new CustomEvent('pipeline:add-notebook', { detail: { notebookId } }));
+  };
+
+  const handleCreateNew = () => {
+    // Don't persist a stub : open the draft editor. PipelineCanvas will
+    // create the user notebook only if the learner saves it.
+    window.dispatchEvent(new CustomEvent('pipeline:create-notebook-draft'));
+  };
+
   return (
-    <div data-tutorial="palette" className="w-48 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
-      <div className="p-3 border-b border-slate-200 shrink-0">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Activités</h3>
+    <>
+      <div data-tutorial="palette" className="w-48 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
+        <div className="p-3 border-b border-slate-200 shrink-0">
+          <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Activités</h3>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {CATEGORIES.map(cat => (
+            <div key={cat.id} className="p-2">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1 px-1 sticky top-0 bg-white flex items-center gap-1.5">
+                <DojoEmojiAuto native={cat.icon} size={14} />
+                <span>{cat.name}</span>
+              </p>
+              {cat.id === 'notebook' ? (
+                <>
+                  <button onClick={handleCreateNew}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 mb-1 group font-bold text-indigo-700">
+                    <span className="text-base">+</span>
+                    <span>Nouveau notebook</span>
+                  </button>
+                  <button onClick={() => setShowAllModal(true)}
+                    className="w-full flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-left text-[11px] bg-slate-50 hover:bg-slate-100 mb-1 text-slate-600"
+                    title="Tous les notebooks accessibles, y compris ceux que tu as créés">
+                    Explorateur ({explorerNotebooks.length}{explorerExtras > 0 ? ` · ${explorerExtras} perso` : ''})
+                  </button>
+                  {paletteNotebooks.map(nb => (
+                    <button key={nb.id} onClick={() => triggerAdd(nb.id)}
+                      title={nb.description || nb.name}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-slate-50 transition-colors mb-0.5 group">
+                      <span className="shrink-0 inline-flex"><DojoEmojiAuto native="📓" size={18} /></span>
+                      <span className="font-medium text-slate-700 group-hover:text-indigo-600 truncate">{nb.name}</span>
+                    </button>
+                  ))}
+                </>
+              ) : (
+                Object.entries(NODE_TYPES).filter(([, d]) => d.category === cat.id).map(([typeId, def]) => (
+                  <button key={typeId} onClick={() => onAddNode(typeId)}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-slate-50 transition-colors mb-0.5 group">
+                    <span className="shrink-0 inline-flex"><DojoEmojiAuto native={def.icon} size={18} /></span>
+                    <span className="font-medium text-slate-700 group-hover:text-indigo-600 truncate">{def.name}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {CATEGORIES.map(cat => (
-          <div key={cat.id} className="p-2">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1 px-1 sticky top-0 bg-white flex items-center gap-1.5">
-              <DojoEmojiAuto native={cat.icon} size={14} />
-              <span>{cat.name}</span>
-            </p>
-            {Object.entries(NODE_TYPES).filter(([, d]) => d.category === cat.id).map(([typeId, def]) => (
-              <button key={typeId} onClick={() => onAddNode(typeId)}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs hover:bg-slate-50 transition-colors mb-0.5 group">
-                <span className="shrink-0 inline-flex"><DojoEmojiAuto native={def.icon} size={18} /></span>
-                <span className="font-medium text-slate-700 group-hover:text-indigo-600 truncate">{def.name}</span>
-              </button>
-            ))}
+      {showAllModal && (
+        <AllNotebooksModal
+          notebooks={explorerNotebooks}
+          onPick={(id) => { triggerAdd(id); setShowAllModal(false); }}
+          onClose={() => setShowAllModal(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function AllNotebooksModal({ notebooks, onPick, onClose }) {
+  const [filter, setFilter] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  const handleDeleteClick = (id, e) => {
+    e.stopPropagation();
+    setConfirmDeleteId(id);
+  };
+  const cancelDelete = (e) => {
+    e?.stopPropagation();
+    setConfirmDeleteId(null);
+  };
+  const confirmDelete = (id, e) => {
+    e.stopPropagation();
+    deleteUserNotebook(id);
+    setConfirmDeleteId(null);
+    window.dispatchEvent(new CustomEvent('pipeline:notebook-changed'));
+  };
+  const filtered = filter
+    ? notebooks.filter(n => n.name.toLowerCase().includes(filter.toLowerCase()) || (n.description || '').toLowerCase().includes(filter.toLowerCase()))
+    : notebooks;
+  const grouped = {
+    system: filtered.filter(n => n.source === 'system'),
+    exercise: filtered.filter(n => n.source === 'exercise'),
+    user: filtered.filter(n => n.source === 'user'),
+  };
+  return (
+    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex"><DojoEmojiAuto native="📓" size={24} /></span>
+            <h3 className="text-base font-bold text-slate-800">Tous les notebooks ({notebooks.length})</h3>
           </div>
-        ))}
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-lg font-bold">×</button>
+        </div>
+        <div className="px-4 pt-3 pb-2">
+          <input
+            type="text" autoFocus value={filter} onChange={e => setFilter(e.target.value)}
+            placeholder="Filtrer par nom ou description…"
+            className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-indigo-400"
+          />
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 pb-4 text-xs">
+          {[['Système', grouped.system], ['Fournis par l\'exercice', grouped.exercise], ['Mes notebooks', grouped.user]].map(([label, items]) => (
+            items.length === 0 ? null : (
+              <div key={label} className="mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">{label}</p>
+                <ul className="space-y-1">
+                  {items.map(nb => {
+                    const isUser = nb.source === 'user';
+                    const pendingDelete = confirmDeleteId === nb.id;
+                    return (
+                      <li key={nb.id}>
+                        <div className={`relative flex items-stretch rounded-lg border transition-colors ${pendingDelete ? 'border-red-300 bg-red-50' : 'border-slate-200 hover:border-indigo-300 hover:bg-indigo-50'}`}>
+                          <button
+                            onClick={() => onPick(nb.id)}
+                            className="flex-1 text-left px-3 py-2 rounded-l-lg min-w-0"
+                            disabled={pendingDelete}
+                          >
+                            <div className="flex items-start gap-2">
+                              <span className="shrink-0 inline-flex"><DojoEmojiAuto native="📓" size={18} /></span>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-slate-800 text-[12px] truncate">{nb.name}</div>
+                                <div className="text-[11px] text-slate-500 line-clamp-2">{nb.description || '—'}</div>
+                                {nb.createdAtExerciseId && (
+                                  <div className="text-[10px] text-indigo-600 font-bold mt-0.5">créé en {nb.createdAtExerciseId}</div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                          {isUser && !pendingDelete && (
+                            <button
+                              onClick={(e) => handleDeleteClick(nb.id, e)}
+                              title="Supprimer ce notebook"
+                              aria-label={`Supprimer ${nb.name}`}
+                              className="shrink-0 px-2 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-r-lg border-l border-slate-100"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                            </button>
+                          )}
+                          {isUser && pendingDelete && (
+                            <div className="shrink-0 flex items-center gap-1 px-2 border-l border-red-200">
+                              <span className="text-[11px] text-red-600 font-semibold mr-1">Supprimer ?</span>
+                              <button
+                                onClick={(e) => confirmDelete(nb.id, e)}
+                                className="px-2 py-0.5 text-[11px] font-bold rounded bg-red-500 text-white hover:bg-red-600"
+                              >
+                                Oui
+                              </button>
+                              <button
+                                onClick={cancelDelete}
+                                className="px-2 py-0.5 text-[11px] font-medium rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                              >
+                                Non
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )
+          ))}
+          {filtered.length === 0 && <p className="text-center text-slate-400 italic py-6">Aucun notebook ne correspond.</p>}
+        </div>
       </div>
     </div>
   );
@@ -381,6 +570,9 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
   const [previewNodeId, setPreviewNodeId] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [configNodeId, setConfigNodeId] = useState(null);
+  const [notebookNodeId, setNotebookNodeId] = useState(null);
+  const [creatingDraftNotebook, setCreatingDraftNotebook] = useState(false);
+  const [notebookTick, setNotebookTick] = useState(0); // bump to invalidate nodeOutputs when a notebook's cards change
   const [mappingNodeId, setMappingNodeId] = useState(null);
   const [forEachNodeId, setForEachNodeId] = useState(null);
   const [lookupNodeId, setLookupNodeId] = useState(null);
@@ -459,13 +651,16 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, x: lhNode.x, y: childY } : n));
   }, [nodes, getLakehouseChildren]);
 
-  const handleAddNode = useCallback((typeId) => {
+  const handleAddNode = useCallback((typeId, presetConfig = null) => {
     const id = `node-${nextId.current++}`;
     const rect = canvasRef.current?.getBoundingClientRect();
     const cx = rect ? (rect.width / 2 - pan.x - NODE_W / 2) : 300;
     const cy = rect ? (rect.height / 2 - pan.y - NODE_H / 2) : 200;
     const offset = (nextId.current - 1) * 20;
     setNodes(prev => [...prev, { id, type: typeId, x: cx + offset, y: cy + offset }]);
+    if (presetConfig) {
+      setNodeConfigs(prev => ({ ...prev, [id]: presetConfig }));
+    }
     setSelectedNodes(new Set([id]));
     setSelectedConns(new Set());
     const typeDef = NODE_TYPES[typeId];
@@ -490,6 +685,25 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     }
     return false;
   }, [nodes, connections]);
+
+  // ── Notebook spawn from external library (custom event) ──
+  useEffect(() => {
+    const onAddNotebook = (e) => {
+      const notebookId = e.detail?.notebookId;
+      if (!notebookId) return;
+      handleAddNode('notebook', { notebookId });
+    };
+    const onNotebookChanged = () => setNotebookTick(t => t + 1);
+    const onCreateDraft = () => setCreatingDraftNotebook(true);
+    window.addEventListener('pipeline:add-notebook', onAddNotebook);
+    window.addEventListener('pipeline:notebook-changed', onNotebookChanged);
+    window.addEventListener('pipeline:create-notebook-draft', onCreateDraft);
+    return () => {
+      window.removeEventListener('pipeline:add-notebook', onAddNotebook);
+      window.removeEventListener('pipeline:notebook-changed', onNotebookChanged);
+      window.removeEventListener('pipeline:create-notebook-draft', onCreateDraft);
+    };
+  }, [handleAddNode]);
 
   // ── Delete ──
   const handleDelete = useCallback(() => {
@@ -974,6 +1188,17 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
           const incoming = connections.filter(c => c.to === nodeId);
           outputs[nodeId] = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         }
+      } else if (node.type === 'notebook') {
+        // Notebook : runs its card chain on the upstream table.
+        const incoming = connections.filter(c => c.to === nodeId);
+        const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
+        const notebook = config?.notebookId ? getNotebook(config.notebookId) : null;
+        if (notebook && Array.isArray(notebook.cards) && notebook.cards.length > 0) {
+          try { outputs[nodeId] = runNotebook(notebook, upstream); }
+          catch { outputs[nodeId] = upstream; }
+        } else {
+          outputs[nodeId] = upstream;
+        }
       } else if (node.type === 'if_condition') {
         const incoming = connections.filter(c => c.to === nodeId);
         const data = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
@@ -1182,7 +1407,8 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     });
 
     return outputs;
-  }, [nodes, connections, nodeConfigs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes, connections, nodeConfigs, notebookTick]);
 
   // Generate logs
   useEffect(() => {
@@ -1225,6 +1451,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     else if (node.type === 'sample') { setSampleNodeId(nodeId); }
     else if (node.type === 'log') { setLogNodeId(nodeId); }
     else if (node.type === 'mapping') { setMappingNodeId(nodeId); }
+    else if (node.type === 'notebook') { setNotebookNodeId(nodeId); }
     else if (typeDef?.category === 'transform') { setConfigNodeId(nodeId); }
     else if (typeDef?.category === 'destination') {
       // Show save-to-BI dialog for destination nodes
@@ -1461,7 +1688,12 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        <NodePalette onAddNode={handleAddNode} />
+        <NodePalette
+          onAddNode={handleAddNode}
+          exerciseNotebooks={exercise?.providedNotebooks || []}
+          currentExerciseId={exercise?.id || 'sandbox'}
+          availableNotebookIds={exercise?.availableNotebookIds || null}
+        />
 
         <div ref={canvasRef} data-tutorial="canvas" className="flex-1 relative overflow-hidden" style={{ cursor: cursorStyle }}
           onMouseDown={handleCanvasMouseDown} onMouseMove={handleCanvasMouseMove} onMouseUp={handleCanvasMouseUp} onMouseLeave={handleCanvasMouseUp}
@@ -1572,6 +1804,10 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
                 const output = nodeOutputs[node.id];
                 let label = null;
                 if (config?.tableName) { label = config.tableName; }
+                else if (node.type === 'notebook' && config?.notebookId) {
+                  const nb = getNotebook(config.notebookId);
+                  label = nb ? nb.name : '(notebook absent)';
+                }
                 else if (node.type === 'foreach' && config?.params?.steps?.length > 0) { label = '__foreach_emojis__'; }
                 else if (node.type === 'foreach_row' && config?.params?.computedCols?.length > 0) { label = config.params.computedCols.map(c => c.name).join(', '); }
                 else if (node.type === 'if_condition' && config?.params?.condition) {
@@ -1697,6 +1933,56 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         <DataPreview data={nodeOutputs[previewNodeId] || []}
           title={(() => { const n = nodes.find(nd => nd.id === previewNodeId); const t = n ? NODE_TYPES[n.type] : null; const cfg = nodeConfigs[previewNodeId]; return `${t?.icon || ''} ${t?.name || ''} ${cfg?.tableName ? ': ' + cfg.tableName : ''}`; })()}
           onClose={() => setPreviewNodeId(null)} />
+      )}
+
+      {/* Notebook configuration popup */}
+      {notebookNodeId && (() => {
+        const cfg = nodeConfigs[notebookNodeId] || {};
+        const notebook = cfg.notebookId ? getNotebook(cfg.notebookId) : null;
+        if (!notebook) return null;
+        const incoming = connections.filter(c => c.to === notebookNodeId);
+        const upstream = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : null;
+        const isUserNotebook = notebook.source === 'user';
+        return (
+          <NotebookConfig
+            notebook={notebook}
+            readOnly={!isUserNotebook}
+            inputTable={upstream}
+            onSave={(updated) => {
+              if (isUserNotebook) {
+                updateUserNotebook(notebook.id, updated);
+                setNotebookTick(t => t + 1);
+                window.dispatchEvent(new CustomEvent('pipeline:notebook-changed'));
+              }
+              setNotebookNodeId(null);
+            }}
+            onSaveAsNew={null}
+            onCancel={() => setNotebookNodeId(null)}
+          />
+        );
+      })()}
+
+      {/* Draft notebook editor : "+ Nouveau notebook" opens the modal in
+          create mode. Nothing is persisted unless the learner clicks "Sauver". */}
+      {creatingDraftNotebook && (
+        <NotebookConfig
+          notebook={{ id: null, name: '', description: '', cards: [], source: 'user' }}
+          readOnly={false}
+          inputTable={null}
+          onSave={(payload) => {
+            const created = createUserNotebook({
+              name: payload.name,
+              description: payload.description,
+              cards: payload.cards,
+              createdAtExerciseId: exercise?.id || null,
+            });
+            window.dispatchEvent(new CustomEvent('pipeline:notebook-changed'));
+            handleAddNode('notebook', { notebookId: created.id });
+            setCreatingDraftNotebook(false);
+          }}
+          onSaveAsNew={null}
+          onCancel={() => setCreatingDraftNotebook(false)}
+        />
       )}
 
       {/* Transform configuration popup */}

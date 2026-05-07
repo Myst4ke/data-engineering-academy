@@ -7,8 +7,8 @@ export const NODE_TYPES = {
   // Transformations (all Data Dojo cards + extras)
   filter: { name: 'Filtrer', icon: '🔍', category: 'transform', inputs: 1, outputs: 1, color: '#F59E0B' },
   sort: { name: 'Trier', icon: '↕️', category: 'transform', inputs: 1, outputs: 1, color: '#06B6D4' },
-  join: { name: 'Joindre', icon: '🔀', category: 'transform', inputs: 2, outputs: 1, color: '#6366F1' },
-  concat: { name: 'Concaténer', icon: '⬇️', category: 'transform', inputs: 2, outputs: 1, color: '#84CC16' },
+  join: { name: 'Joindre', icon: '🔀', category: 'logic', inputs: 2, outputs: 1, color: '#6366F1' },
+  concat: { name: 'Concaténer', icon: '⬇️', category: 'logic', inputs: 2, outputs: 1, color: '#84CC16' },
   aggregate: { name: 'Agréger', icon: '📊', category: 'transform', inputs: 1, outputs: 1, color: '#EC4899' },
   select_cols: { name: 'Sélectionner', icon: '✅', category: 'transform', inputs: 1, outputs: 1, color: '#14B8A6' },
   delete_col: { name: 'Suppr. Colonne', icon: '🗑️', category: 'transform', inputs: 1, outputs: 1, color: '#DC2626' },
@@ -19,6 +19,11 @@ export const NODE_TYPES = {
   mapping: { name: 'Mapping', icon: '🗺️', category: 'transform', inputs: 1, outputs: 1, color: '#0D9488' },
   window_func: { name: 'Fenêtre', icon: '📐', category: 'transform', inputs: 1, outputs: 1, color: '#7E22CE' },
   sample: { name: 'Échantillonner', icon: '🎲', category: 'transform', inputs: 1, outputs: 1, color: '#EA580C' },
+
+  // Notebook : encapsulates a chain of Data Dojo cards as a reusable unit.
+  // The `notebookId` config field references a notebook from notebooks.js
+  // (system / exercise / user). Inputs/outputs are tables, like a transform.
+  notebook: { name: 'Notebook', icon: '📓', category: 'notebook', inputs: 1, outputs: 1, color: '#6366F1' },
 
   // Table output (auto-created when selecting tables from a source or lakehouse)
   table_output: { name: 'Table', icon: '📋', category: 'table', inputs: 1, outputs: 1, color: '#22C55E' },
@@ -45,7 +50,7 @@ export const NODE_TYPES = {
 
 export const CATEGORIES = [
   { id: 'source', name: 'Sources', icon: '📥' },
-  { id: 'transform', name: 'Transformations', icon: '⚙️' },
+  { id: 'notebook', name: 'Notebooks', icon: '📓' },
   { id: 'logic', name: 'Boucles & Conditions', icon: '🔄' },
   { id: 'storage', name: 'Stockage', icon: '🗃️' },
   { id: 'monitoring', name: 'Monitoring', icon: '📊' },

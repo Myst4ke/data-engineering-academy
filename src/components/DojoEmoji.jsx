@@ -718,6 +718,31 @@ function Outbox() {
   );
 }
 
+// 📓 NOTEBOOK : carnet à spirale + cellule de code (Jupyter / data notebook)
+function Notebook() {
+  return (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      {/* dos / reliure */}
+      <rect x="16" y="14" width="8" height="52" rx="2" {...SFill(DD.coralD)} />
+      {/* page principale */}
+      <path d="M24 14 L62 14 Q64 14 64 16 L64 64 Q64 66 62 66 L24 66 Z" {...SFill(PAPER)} />
+      {/* perforations de la spirale */}
+      <circle cx="20" cy="22" r="1.6" fill={PAPER} stroke={INK} strokeWidth="1" />
+      <circle cx="20" cy="32" r="1.6" fill={PAPER} stroke={INK} strokeWidth="1" />
+      <circle cx="20" cy="42" r="1.6" fill={PAPER} stroke={INK} strokeWidth="1" />
+      <circle cx="20" cy="52" r="1.6" fill={PAPER} stroke={INK} strokeWidth="1" />
+      <circle cx="20" cy="62" r="1.6" fill={PAPER} stroke={INK} strokeWidth="1" />
+      {/* cellule de code (rectangle accent) */}
+      <rect x="30" y="22" width="28" height="14" rx="2" fill={DD.skyL} stroke={INK} strokeWidth="1.6" />
+      {/* prompt > */}
+      <path d="M33 27 L36 29 L33 31" stroke={DD.skyD} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M39 30 L52 30" stroke={DD.skyD} strokeWidth="1.8" strokeLinecap="round" />
+      {/* lignes de sortie */}
+      <path d="M30 44 L58 44 M30 51 L52 51 M30 58 L46 58" stroke={INK} strokeWidth="1.8" strokeLinecap="round" opacity="0.35" />
+    </svg>
+  );
+}
+
 function PlayingCard() {
   return (
     <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
@@ -778,6 +803,7 @@ export const EMOJI_COMPONENTS = {
   warehouse: { C: Warehouse, label: 'DWH',       fr: 'Entrepôt',          use: 'Data Warehouse',            replaces: '🏭',  tile: 'sky'   },
   gear:      { C: Gear,      label: 'Gear',      fr: 'Transformer',       use: 'Catégorie transformations', replaces: '⚙️',  tile: 'sun'   },
   fileBox:   { C: FileBox,   label: 'Box',       fr: 'Archive',           use: 'Stockage / Medallion',      replaces: '🗃️',  tile: 'sun'   },
+  notebook:  { C: Notebook,  label: 'Notebook',  fr: 'Notebook',          use: 'Pipeline Dojo · notebook',  replaces: '📓',  tile: 'coral' },
 
   // v2 : Lakehouse tiers
   bronze:    { C: Bronze,    label: 'Bronze',    fr: 'Bronze',            use: 'Tier Bronze',               replaces: '🥉',  tile: 'coral' },

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 const FUNCTIONS = [
   { id: 'concat', label: 'CONCAT(col1, col2)', desc: 'Concatène deux colonnes', args: ['col1', 'col2', 'sep'] },
@@ -38,7 +39,7 @@ export default function ForEachRowConfig({ columns, sampleData, initialParams, o
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">📝</span>
+            <span className="inline-flex"><DojoEmojiAuto native="📝" size={28} /></span>
             <div>
               <h3 className="text-lg font-bold text-slate-800">ForEachRow : Colonnes calculées</h3>
               <p className="text-xs text-slate-500">Pour chaque ligne, créez de nouvelles colonnes à partir de formules</p>

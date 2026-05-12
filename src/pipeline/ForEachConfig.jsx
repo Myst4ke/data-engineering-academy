@@ -78,7 +78,7 @@ export default function ForEachConfig({ initialSteps, sampleColumns, sampleData,
         {/* Header */}
         <div className="p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🔁</span>
+            <span className="inline-flex"><DojoEmojiAuto native="🔁" size={28} /></span>
             <div>
               <h3 className="text-lg font-bold text-slate-800">ForEach : Pipeline de transformations</h3>
               <p className="text-xs text-slate-500">Ces transformations s'appliqueront à chaque table en entrée</p>

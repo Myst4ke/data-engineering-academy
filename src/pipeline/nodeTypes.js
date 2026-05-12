@@ -16,7 +16,7 @@ export const NODE_TYPES = {
   deduplicate: { name: 'Dédoublonner', icon: '🔄', category: 'transform', inputs: 1, outputs: 1, color: '#A855F7' },
   clean_na: { name: 'Suppr. Vides', icon: '🧹', category: 'transform', inputs: 1, outputs: 1, color: '#EF4444' },
   fill_na: { name: 'Remplir Vides', icon: '🔧', category: 'transform', inputs: 1, outputs: 1, color: '#64748B' },
-  mapping: { name: 'Mapping', icon: '🗺️', category: 'transform', inputs: 1, outputs: 1, color: '#0D9488' },
+  mapping: { name: 'Mapping', icon: '🗺️', category: 'logic', inputs: 1, outputs: 1, color: '#0D9488' },
   window_func: { name: 'Fenêtre', icon: '📐', category: 'transform', inputs: 1, outputs: 1, color: '#7E22CE' },
   sample: { name: 'Échantillonner', icon: '🎲', category: 'transform', inputs: 1, outputs: 1, color: '#EA580C' },
 

@@ -145,6 +145,7 @@ function SortableCard({ card, index, onRemove, onEditCard, isHovered, intermedia
             isInPipeline={true}
             onRemove={onRemove}
             onEdit={onEditCard}
+            onInfoOpen={onLeaveCard}
             size="small"
           />
         </div>
@@ -154,6 +155,7 @@ function SortableCard({ card, index, onRemove, onEditCard, isHovered, intermedia
             isInPipeline={true}
             onRemove={onRemove}
             onEdit={onEditCard}
+            onInfoOpen={onLeaveCard}
             size="medium"
           />
         </div>

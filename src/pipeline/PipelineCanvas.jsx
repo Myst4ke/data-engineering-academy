@@ -96,20 +96,39 @@ function PipelineNode({ node, typeDef, isSelected, onMouseDown, onNodeMouseUp, o
           style={{ background: bgColor, borderColor: typeDef.color, borderLeftWidth: '4px', overflow: 'visible' }}
         >
           {!isTable && <span className="leading-none inline-flex"><DojoEmojiAuto native={typeDef.icon} size={22} /></span>}
-          {isTable && <span className="text-[10px] font-bold text-emerald-700">📋 {label || 'Table'}</span>}
+          {isTable && (
+            <span className="text-[10px] font-bold text-emerald-700 inline-flex items-center gap-1">
+              <DojoEmojiAuto native="📋" size={14} />
+              {label || 'Table'}
+            </span>
+          )}
           {!isTable && <span className="text-[10px] font-bold text-slate-700 mt-0.5">{typeDef.name}</span>}
           {!isTable && label === '__foreach_emojis__' && (() => {
             const steps = node._foreachSteps || [];
-            return steps.length > 0 ? (
-              <div className="flex items-center gap-0.5 mt-0.5">
-                {steps.map((s, i) => (
-                  <span key={i} className="flex items-center gap-0.5">
-                    {i > 0 && <span className="text-[8px] text-slate-300">→</span>}
-                    <DojoEmojiAuto native={NODE_TYPES[s.nodeType]?.icon} size={16} />
-                  </span>
-                ))}
+            if (steps.length === 0) return null;
+            const VISIBLE = 5;
+            const head = steps.slice(0, VISIBLE);
+            const extra = steps.length - head.length;
+            return (
+              <div className="flex items-center gap-1 mt-1 max-w-full">
+                {head.map((s, i) => {
+                  const stepDef = NODE_TYPES[s.nodeType];
+                  return (
+                    <div
+                      key={i}
+                      title={stepDef?.name || s.nodeType}
+                      className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 border border-white/40 shadow-sm"
+                      style={{ background: stepDef?.color || '#94a3b8' }}
+                    >
+                      <DojoEmojiAuto native={stepDef?.icon || '?'} size={12} />
+                    </div>
+                  );
+                })}
+                {extra > 0 && (
+                  <span className="text-[9px] text-slate-600 font-bold ml-0.5">+{extra}</span>
+                )}
               </div>
-            ) : null;
+            );
           })()}
           {!isTable && label && label !== '__foreach_emojis__' && <span className="text-[10px] text-indigo-500 font-medium">{label}</span>}
           {!isTable && !label && isSource && <span className="text-[10px] text-amber-600 font-medium">À configurer</span>}
@@ -250,7 +269,7 @@ function LakehouseNode({ node, typeDef, childNodes, nodeConfigs, nodeOutputs, is
   );
 }
 
-function NodePalette({ onAddNode, exerciseNotebooks = [], availableNotebookIds = null }) {
+function NodePalette({ onAddNode, exerciseNotebooks = [], currentExerciseId, availableNotebookIds = null }) {
   const [allNotebooksTick, setAllNotebooksTick] = useState(0);
   const [showAllModal, setShowAllModal] = useState(false);
 
@@ -275,10 +294,11 @@ function NodePalette({ onAddNode, exerciseNotebooks = [], availableNotebookIds =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allNotebooksTick, exerciseNotebooks, availableNotebookIds]);
 
-  // Main palette : only PRE-MADE (system) notebooks the exercise whitelisted.
-  // User notebooks live in the explorer (modal) to keep the palette focused.
+  // Main palette : only PRE-MADE (system) notebooks the exercise whitelisted,
+  // capped to 5 entries. Anything beyond lives in the explorer modal.
+  const MAIN_LIMIT = 5;
   const paletteNotebooks = useMemo(
-    () => explorerNotebooks.filter(nb => nb.source === 'system'),
+    () => explorerNotebooks.filter(nb => nb.source === 'system').slice(0, MAIN_LIMIT),
     [explorerNotebooks]
   );
   const explorerExtras = explorerNotebooks.length - paletteNotebooks.length;
@@ -288,9 +308,17 @@ function NodePalette({ onAddNode, exerciseNotebooks = [], availableNotebookIds =
   };
 
   const handleCreateNew = () => {
-    // Don't persist a stub : open the draft editor. PipelineCanvas will
-    // create the user notebook only if the learner saves it.
-    window.dispatchEvent(new CustomEvent('pipeline:create-notebook-draft'));
+    // Persist immediately + drop the notebook node on the canvas. The config
+    // modal does NOT auto-open : the learner first connects an upstream table,
+    // then clicks the notebook node to open the editor with usable columns.
+    const created = createUserNotebook({
+      name: 'Nouveau notebook',
+      description: '',
+      cards: [],
+      createdAtExerciseId: currentExerciseId || null,
+    });
+    window.dispatchEvent(new CustomEvent('pipeline:notebook-changed'));
+    triggerAdd(created.id);
   };
 
   return (
@@ -571,7 +599,6 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
   const [contextMenu, setContextMenu] = useState(null);
   const [configNodeId, setConfigNodeId] = useState(null);
   const [notebookNodeId, setNotebookNodeId] = useState(null);
-  const [creatingDraftNotebook, setCreatingDraftNotebook] = useState(false);
   const [notebookTick, setNotebookTick] = useState(0); // bump to invalidate nodeOutputs when a notebook's cards change
   const [mappingNodeId, setMappingNodeId] = useState(null);
   const [forEachNodeId, setForEachNodeId] = useState(null);
@@ -694,14 +721,11 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       handleAddNode('notebook', { notebookId });
     };
     const onNotebookChanged = () => setNotebookTick(t => t + 1);
-    const onCreateDraft = () => setCreatingDraftNotebook(true);
     window.addEventListener('pipeline:add-notebook', onAddNotebook);
     window.addEventListener('pipeline:notebook-changed', onNotebookChanged);
-    window.addEventListener('pipeline:create-notebook-draft', onCreateDraft);
     return () => {
       window.removeEventListener('pipeline:add-notebook', onAddNotebook);
       window.removeEventListener('pipeline:notebook-changed', onNotebookChanged);
-      window.removeEventListener('pipeline:create-notebook-draft', onCreateDraft);
     };
   }, [handleAddNode]);
 
@@ -1225,16 +1249,19 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         const mainData = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
         const refData = incoming.length > 1 ? (outputs[incoming[1].from] || []) : [];
         const col = config?.params?.column;
+        // Always write match/nomatch outputs so downstream table_output children
+        // never read a stale value when the config is incomplete or inputs change.
+        let match = [], noMatch = mainData;
         if (col && refData.length > 0) {
+          // Use the column on the ref side ; if the same name doesn't exist on
+          // the main side, fall back to undefined → those rows go to noMatch.
           const refValues = new Set(refData.map(r => String(r[col] ?? '').trim()));
-          const match = mainData.filter(r => refValues.has(String(r[col] ?? '').trim()));
-          const noMatch = mainData.filter(r => !refValues.has(String(r[col] ?? '').trim()));
-          outputs[nodeId] = [...match, ...noMatch];
-          outputs[`${nodeId}_match`] = match;
-          outputs[`${nodeId}_nomatch`] = noMatch;
-        } else {
-          outputs[nodeId] = mainData;
+          match = mainData.filter(r => refValues.has(String(r[col] ?? '').trim()));
+          noMatch = mainData.filter(r => !refValues.has(String(r[col] ?? '').trim()));
         }
+        outputs[nodeId] = [...match, ...noMatch];
+        outputs[`${nodeId}_match`] = match;
+        outputs[`${nodeId}_nomatch`] = noMatch;
       } else if (node.type === 'aggregate') {
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
@@ -1961,29 +1988,6 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
           />
         );
       })()}
-
-      {/* Draft notebook editor : "+ Nouveau notebook" opens the modal in
-          create mode. Nothing is persisted unless the learner clicks "Sauver". */}
-      {creatingDraftNotebook && (
-        <NotebookConfig
-          notebook={{ id: null, name: '', description: '', cards: [], source: 'user' }}
-          readOnly={false}
-          inputTable={null}
-          onSave={(payload) => {
-            const created = createUserNotebook({
-              name: payload.name,
-              description: payload.description,
-              cards: payload.cards,
-              createdAtExerciseId: exercise?.id || null,
-            });
-            window.dispatchEvent(new CustomEvent('pipeline:notebook-changed'));
-            handleAddNode('notebook', { notebookId: created.id });
-            setCreatingDraftNotebook(false);
-          }}
-          onSaveAsNew={null}
-          onCancel={() => setCreatingDraftNotebook(false)}
-        />
-      )}
 
       {/* Transform configuration popup */}
       {configNodeId && (() => {

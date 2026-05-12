@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Star, Lightbulb, FileText } from 'lucide-react';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 import BackButton from '../components/BackButton';
 import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
 import DojoIntro, { useDojoIntro, GIT_DOJO_INTRO } from '../components/DojoIntro';
@@ -366,7 +367,7 @@ export default function GitDojo({ onBackToHub }) {
               <ul className="space-y-1.5 mb-4 max-h-60 overflow-y-auto">
                 {validationResult.warnings.map((w, i) => (
                   <li key={i} className={`text-xs flex gap-1.5 ${w.level === 'error' ? 'text-red-700' : 'text-amber-700'}`}>
-                    <span>{w.level === 'error' ? '❌' : '⚠️'}</span>
+                    <span className="inline-flex shrink-0"><DojoEmojiAuto native={w.level === 'error' ? '❌' : '⚠️'} size={14} /></span>
                     <span className="flex-1">{w.message}</span>
                   </li>
                 ))}

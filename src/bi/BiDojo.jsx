@@ -17,9 +17,25 @@ function aggregateData(data, xCol, yCol, aggFunc) {
   });
 }
 
+// Returns the CONTENT-BOX size (excludes padding) of the observed element. Using
+// getBoundingClientRect would include the parent chart container's `p-0.5`, so
+// charts would be 4px larger than the visible area and the right/bottom would
+// get clipped by `overflow:hidden`, producing asymmetric "padding".
 function useSize(ref) {
   const [size, setSize] = useState({ width: 0, height: 0 });
-  useEffect(() => { if (!ref.current) return; const m = () => { const r = ref.current.getBoundingClientRect(); setSize({ width: Math.floor(r.width), height: Math.floor(r.height) }); }; m(); const o = new ResizeObserver(m); o.observe(ref.current); return () => o.disconnect(); }, []);
+  useEffect(() => {
+    if (!ref.current) return;
+    const setFromContentBox = (w, h) => setSize({ width: Math.floor(w), height: Math.floor(h) });
+    // Approximate initial value (1 frame max) before the observer fires with contentRect.
+    const r0 = ref.current.getBoundingClientRect();
+    setFromContentBox(r0.width, r0.height);
+    const o = new ResizeObserver((entries) => {
+      const cr = entries[0]?.contentRect;
+      if (cr) setFromContentBox(cr.width, cr.height);
+    });
+    o.observe(ref.current);
+    return () => o.disconnect();
+  }, []);
   return size;
 }
 
@@ -611,20 +627,6 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
       {/* Exercise info bar (inside layout, not overlaid) */}
       {exerciseBar}
 
-      {/* Cross-filter banner */}
-      {crossFilters.length > 0 && (
-        <div className="flex-none flex items-center gap-2 px-4 py-1.5 bg-indigo-50 border-b border-indigo-200">
-          <span className="text-xs text-indigo-500 font-medium">Filtres :</span>
-          {crossFilters.map((f, i) => (
-            <button key={i} onClick={() => setCrossFilters(prev => prev.filter((_, j) => j !== i))}
-              className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium hover:bg-indigo-200">
-              {f.col} = {f.val} ✕
-            </button>
-          ))}
-          <button onClick={() => setCrossFilters([])} className="text-[10px] text-indigo-400 hover:text-indigo-600 ml-2">Tout effacer</button>
-        </div>
-      )}
-
       {/* Multi-select toolbar */}
       {selectedIds.length >= 2 && !presentationMode && (
         <div className="flex-none flex items-center gap-2 px-4 py-1.5 bg-amber-50 border-b border-amber-200" onClick={e => e.stopPropagation()}>
@@ -723,8 +725,22 @@ export default function BiDojo({ onBackToHub, exercise, onExerciseValidate, exer
             </div>
           </div>
 
+          {/* Cross-filter banner : above the page tabs, only in the grid column */}
+          {crossFilters.length > 0 && (
+            <div className="flex-none flex items-center gap-2 px-4 py-2 bg-indigo-50 border-t border-indigo-200">
+              <span className="text-xs text-indigo-500 font-medium">Filtres :</span>
+              {crossFilters.map((f, i) => (
+                <button key={i} onClick={() => setCrossFilters(prev => prev.filter((_, j) => j !== i))}
+                  className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium hover:bg-indigo-200">
+                  {f.col} = {f.val} ✕
+                </button>
+              ))}
+              <button onClick={() => setCrossFilters([])} className="text-[10px] text-indigo-400 hover:text-indigo-600 ml-2">Tout effacer</button>
+            </div>
+          )}
+
           {/* Page tabs */}
-          <div className="flex-none flex items-center gap-2 px-3 py-1 bg-white border-t border-slate-200" onClick={e => e.stopPropagation()}>
+          <div className="flex-none flex items-center gap-2 px-3 py-1.5 bg-white border-t border-slate-200" onClick={e => e.stopPropagation()}>
             <div className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto">
             {pages.map(p => (
               <div key={p.id} className={`shrink-0 flex items-center gap-1 px-3 py-1 rounded-t-lg text-xs font-medium cursor-pointer border-b-2 transition-colors ${

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trophy } from 'lucide-react';
+import { DojoEmoji } from './DojoEmoji';
 
 // Palette dojo : cohérente avec l'identité edtech
 const CONFETTI_COLORS = ['#FF8066', '#5ED6B4', '#6BA4FF', '#FFC857', '#F472B6'];
@@ -11,11 +12,11 @@ function StarDisplay({ rating, maxStars = 3 }) {
         <span
           key={i}
           aria-hidden="true"
-          className={`text-3xl transition-all duration-300 ${
+          className={`inline-flex transition-all duration-300 ${
             i < rating ? 'scale-110' : 'opacity-30 grayscale'
           }`}
         >
-          {i < rating ? '⭐' : '☆'}
+          <DojoEmoji name={i < rating ? 'star' : 'starEmpty'} size={32} />
         </span>
       ))}
     </div>

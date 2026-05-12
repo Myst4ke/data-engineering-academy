@@ -241,27 +241,45 @@ export function Treemap({ data, labelCol, valueCol, width = 300, height = 200, o
   const items = data.map((r, i) => ({ label: String(r[labelCol]), value: Math.abs(parseFloat(r[valueCol]) || 0), i })).filter(x => x.value > 0).sort((a, b) => b.value - a.value);
   const total = items.reduce((s, x) => s + x.value, 0) || 1;
 
+  // Inner padding so the treemap doesn't kiss the widget's rounded edges.
+  const PAD = 10;
+  const innerW = Math.max(0, width - PAD * 2);
+  const innerH = Math.max(0, height - PAD * 2);
+
+  // Slice-and-dice layout : at each step, slice off the longer remaining edge.
+  // Direction is locked BEFORE shrinking so the position update can't disagree
+  // with the slice axis (the source of "rects falling outside the canvas").
   const rects = [];
-  let x = 0, y = 0, remW = width, remH = height, remTotal = total;
+  let x = 0, y = 0, remW = innerW, remH = innerH, remTotal = total;
   items.forEach((item, idx) => {
-    const pct = item.value / remTotal;
+    const isLast = idx === items.length - 1;
+    const pct = remTotal > 0 ? item.value / remTotal : 0;
+    const horizontal = remW >= remH;
     let rw, rh;
-    if (remW >= remH) { rw = remW * pct; rh = remH; if (idx < items.length - 1) remW -= rw; else rw = remW; }
-    else { rh = remH * pct; rw = remW; if (idx < items.length - 1) remH -= rh; else rh = remH; }
+    if (horizontal) {
+      rw = isLast ? remW : remW * pct;
+      rh = remH;
+    } else {
+      rh = isLast ? remH : remH * pct;
+      rw = remW;
+    }
     rects.push({ ...item, x, y, w: rw, h: rh });
-    if (remW >= remH) x += rw; else y += rh;
+    if (horizontal) { x += rw; remW -= rw; }
+    else { y += rh; remH -= rh; }
     remTotal -= item.value;
   });
 
   return (
     <div ref={ref} className="relative" style={{ width, height }}>
       <svg width={width} height={height}>
-        {rects.map((r, i) => (<g key={i} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onClick={() => onRectClick?.(labelCol, r.label)} className="cursor-pointer">
-          <rect x={r.x + 1} y={r.y + 1} width={Math.max(0, r.w - 2)} height={Math.max(0, r.h - 2)} fill={COLORS[i % COLORS.length]} rx={3} opacity={hover === null || hover === i ? 0.85 : 0.4} />
-          {r.w > 40 && r.h > 20 && <text x={r.x + r.w / 2} y={r.y + r.h / 2} textAnchor="middle" dominantBaseline="middle" fontSize={Math.min(11, r.w / 6)} fill="white" fontWeight="bold" className="select-none pointer-events-none">{r.label.slice(0, 12)}</text>}
-        </g>))}
+        <g transform={`translate(${PAD},${PAD})`}>
+          {rects.map((r, i) => (<g key={i} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onClick={() => onRectClick?.(labelCol, r.label)} className="cursor-pointer">
+            <rect x={r.x + 1} y={r.y + 1} width={Math.max(0, r.w - 2)} height={Math.max(0, r.h - 2)} fill={COLORS[i % COLORS.length]} rx={3} opacity={hover === null || hover === i ? 0.85 : 0.4} />
+            {r.w > 40 && r.h > 20 && <text x={r.x + r.w / 2} y={r.y + r.h / 2} textAnchor="middle" dominantBaseline="middle" fontSize={Math.min(11, r.w / 6)} fill="white" fontWeight="bold" className="select-none pointer-events-none">{r.label.slice(0, 12)}</text>}
+          </g>))}
+        </g>
       </svg>
-      {hover !== null && <Tooltip containerRef={ref} x={rects[hover].x + rects[hover].w / 2} y={rects[hover].y + rects[hover].h / 2}><strong>{rects[hover].label}</strong>: {rects[hover].value} ({Math.round(rects[hover].value / total * 100)}%)</Tooltip>}
+      {hover !== null && <Tooltip containerRef={ref} x={PAD + rects[hover].x + rects[hover].w / 2} y={PAD + rects[hover].y + rects[hover].h / 2}><strong>{rects[hover].label}</strong>: {rects[hover].value} ({Math.round(rects[hover].value / total * 100)}%)</Tooltip>}
     </div>
   );
 }

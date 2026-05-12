@@ -16,6 +16,7 @@ import SandboxImport from './components/SandboxImport';
 import Tutorial from './components/Tutorial';
 import DojoIntro, { useDojoIntro, DATA_DOJO_INTRO } from './components/DojoIntro';
 import BackButton from './components/BackButton';
+import { DojoEmojiAuto } from './components/DojoEmoji';
 import { loadExercise, getExerciseList } from './utils/csvParser';
 import { getAllCards, getCardDisplayInfo } from './utils/cardDefinitions';
 import { applyPipeline, tablesEqual } from './transformations';
@@ -643,7 +644,7 @@ function App({ onBackToHub }) {
               aria-label="Voir ma solution précédente"
             >
               <span className="hidden sm:inline">Solution</span>
-              <span className="sm:hidden" aria-hidden="true">📋</span>
+              <span className="sm:hidden inline-flex" aria-hidden="true"><DojoEmojiAuto native="📋" size={18} /></span>
             </button>
           )}
           {view === 'game' && <div data-tutorial="hint-btn"><HintPopup hint={exerciseData?.config?.hint} /></div>}

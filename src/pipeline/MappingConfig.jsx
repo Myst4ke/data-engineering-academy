@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 const DATA_TYPES = [
   { id: 'string', label: 'Texte', icon: 'Aa' },
@@ -64,7 +65,7 @@ export default function MappingConfig({ columns, tableData, initialParams, onCon
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🗺️</span>
+            <span className="inline-flex"><DojoEmojiAuto native="🗺️" size={28} /></span>
             <div>
               <h3 className="text-lg font-bold text-slate-800">Mapping des colonnes</h3>
               <p className="text-xs text-slate-500">Renommez et typez les colonnes de sortie</p>

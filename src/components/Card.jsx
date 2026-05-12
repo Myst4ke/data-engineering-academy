@@ -27,6 +27,7 @@ export default function Card({
   size = 'normal',
   small = false,
   noShadow = false,
+  onInfoOpen = null,
 }) {
   const [showInfo, setShowInfo] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -58,6 +59,10 @@ export default function Card({
 
   const handleInfoClick = (e) => {
     e.stopPropagation();
+    // Notify parent so a hover-driven sibling (e.g. the pipeline preview
+    // tooltip) can clear its state. The cursor doesn't move when "?" is
+    // clicked, so onMouseLeave never fires on its own.
+    if (onInfoOpen) onInfoOpen();
     setShowInfo(true);
   };
 

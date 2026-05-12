@@ -6,6 +6,7 @@ import { BI_TIERS, getBiExercisesByTier, getBiProgress, saveBiProgress, isBiTier
 import DojoIntro, { useDojoIntro, BI_DOJO_INTRO } from '../components/DojoIntro';
 import BackButton from '../components/BackButton';
 import ExerciseHoverTooltip from '../components/ExerciseHoverTooltip';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 // ── Exercise popup ──
 function ExercisePopup({ exercise, onClose }) {
@@ -47,7 +48,8 @@ function ExercisePopup({ exercise, onClose }) {
                   {exercise.hintWidgets.map((w, i) => (
                     <span key={i} className="inline-flex items-center gap-1 bg-white border border-amber-200 rounded-lg px-2 py-0.5 text-xs font-medium text-amber-700">
                       {i > 0 && <span className="text-amber-300 -ml-1 mr-0.5" aria-hidden="true">+</span>}
-                      {widgetIcons[w] || '?'} {w}
+                      {widgetIcons[w] && <DojoEmojiAuto native={widgetIcons[w]} size={14} />}
+                      {w}
                     </span>
                   ))}
                 </div>
@@ -336,7 +338,8 @@ export default function BiDojoWrapper({ onBackToHub }) {
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {currentExercise.hintWidgets.map((w, i) => (
                     <span key={i} className="inline-flex items-center gap-1 bg-white border border-amber-200 rounded-lg px-2 py-0.5 text-xs font-medium text-amber-700">
-                      {widgetIcons[w] || '?'} {w}
+                      {widgetIcons[w] && <DojoEmojiAuto native={widgetIcons[w]} size={14} />}
+                      {w}
                     </span>
                   ))}
                 </div>

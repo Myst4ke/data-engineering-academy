@@ -275,7 +275,7 @@ export const BI_DOJO_INTRO = {
     {
       icon: '🔧',
       title: 'Lien avec le Pipeline',
-      content: 'Certains exercices utilisent des tables pré-agrégées issues du Pipeline Dojo (marquées 🔧). Dans la réalité, les dashboards BI consomment des données transformées par les pipelines ETL : vous vivez ici la chaîne complète du data engineer au data analyst.',
+      content: 'Certains exercices utilisent des tables pré-agrégées issues du Pipeline Dojo (marquées par l\'icône Pipeline). Dans la réalité, les dashboards BI consomment des données transformées par les pipelines ETL : vous vivez ici la chaîne complète du data engineer au data analyst.',
     },
     {
       icon: '📈',

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { DojoEmojiAuto } from '../components/DojoEmoji';
 
 const CONDITIONS = [
   { id: 'table_empty', label: 'Table vide', desc: 'Vrai si 0 lignes', needsCol: false },
@@ -23,7 +24,7 @@ export default function IfConfig({ columns, rowCount, initialParams, onConfirm, 
     <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">⚡</span>
+          <span className="inline-flex"><DojoEmojiAuto native="⚡" size={28} /></span>
           <div>
             <h3 className="text-lg font-bold text-slate-800">Si / Sinon</h3>
             <p className="text-xs text-slate-500">Teste une condition sur la table ({rowCount} lignes)</p>

@@ -333,8 +333,8 @@ export const BI_EXERCISES = [
   {
     id: 'bi-19', title: 'E-Commerce 360', difficulty: 4,
     description: 'Construisez le dashboard ultime e-commerce en croisant 3 tables issues du Pipeline : "ventes_par_catégorie" (#27), "ca_par_client" (#22) et "ca_mensuel". Le dashboard doit comporter 2 pages minimum, 7 widgets, et exploiter au moins 2 des 3 tables.\n\nMethodologie : Page 1 = vue globale (KPIs + camembert + ligne). Page 2 = detail clients + catégories.',
-    hint: 'Page 1: KPI + Camembert + Ligne. Page 2: Barres + Treemap + Table. Slicer en bonus.',
-    hintWidgets: ['kpi', 'pie', 'line', 'bar', 'treemap', 'table'],
+    hint: 'Page 1: KPI + Camembert + Ligne + Slicer. Page 2: Barres + Treemap + Table.',
+    hintWidgets: ['kpi', 'pie', 'line', 'slicer', 'bar', 'treemap', 'table'],
     tables: [mkPipeTable('ventes_par_catégorie', VENTES_PAR_CATEGORIE), mkPipeTable('ca_par_client', CA_PAR_CLIENT), mkPipeTable('ca_mensuel', COMMANDES_PAR_MOIS)],
     validate: (widgets, pages) => {
       if (widgets.length < 7) return { ok: false, msg: `Minimum 7 widgets. (${widgets.length})` };

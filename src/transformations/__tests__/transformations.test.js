@@ -35,6 +35,16 @@ describe('sort', () => {
     const result = sort(table, { column: 'n', order: 'asc' });
     expect(result.map(r => r.n)).toEqual(['Alice', 'Bob', 'Charlie']);
   });
+  it('sorts ISO dates chronologically, not as truncated numbers', () => {
+    const table = [{ d: '2024-01-15' }, { d: '2024-01-05' }, { d: '2024-01-10' }];
+    const result = sort(table, { column: 'd', order: 'asc' });
+    expect(result.map(r => r.d)).toEqual(['2024-01-05', '2024-01-10', '2024-01-15']);
+  });
+  it('does not treat partially numeric strings as numbers', () => {
+    const table = [{ v: '10 rue B' }, { v: '10 rue A' }];
+    const result = sort(table, { column: 'v', order: 'asc' });
+    expect(result.map(r => r.v)).toEqual(['10 rue A', '10 rue B']);
+  });
 });
 
 describe('deleteColumn', () => {

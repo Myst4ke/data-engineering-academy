@@ -24,7 +24,18 @@ export function dropDuplicates(table, params) {
 
 /**
  * sort - Sort by a column (ascending or descending)
+ *
+ * Only values that are entirely numeric are compared as numbers. parseFloat()
+ * must not be used here : it would read "2024-01-05" as 2024, making every ISO
+ * date compare equal and turning a date sort into a silent no-op.
  */
+function toNumber(value) {
+  const str = String(value ?? '').trim();
+  if (str === '') return null;
+  const num = Number(str);
+  return Number.isNaN(num) ? null : num;
+}
+
 export function sort(table, params) {
   const { column, order = 'asc' } = params;
   return [...table].sort((a, b) => {
@@ -32,10 +43,10 @@ export function sort(table, params) {
     const valB = b[column];
 
     // Handle numeric comparison
-    const numA = parseFloat(valA);
-    const numB = parseFloat(valB);
+    const numA = toNumber(valA);
+    const numB = toNumber(valB);
 
-    if (!isNaN(numA) && !isNaN(numB)) {
+    if (numA !== null && numB !== null) {
       return order === 'asc' ? numA - numB : numB - numA;
     }
 

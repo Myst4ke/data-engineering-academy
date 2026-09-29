@@ -15,6 +15,8 @@
  *   - `reuseExerciseId`   : id of the exercise whose user-notebook can be reused.
  */
 
+import { getNotebook } from './notebooks';
+
 // ── Helper: deep-equal for table validation ──
 function tablesMatch(actual, expected) {
   if (!actual || !expected) return false;
@@ -49,6 +51,45 @@ function tablesMatchUnordered(actual, expected) {
 function hasNodeTypes(nodes, nodeConfigs, requiredTypes) {
   const types = nodes.map(n => n.type);
   return requiredTypes.every(t => types.includes(t));
+}
+
+// Count a transformation wherever it lives : atomic node on the canvas, card
+// inside a notebook, or step inside a ForEach. `nodeType` is the canvas node
+// type, `cardType` the matching Data Dojo card type used by notebooks.
+function countTransform(nodes, nodeConfigs, nodeType, cardType) {
+  return nodes.reduce((total, node) => {
+    if (node.type === nodeType) return total + 1;
+    if (node.type === 'notebook') {
+      const nb = getNotebook(nodeConfigs?.[node.id]?.notebookId);
+      return total + (nb?.cards?.filter(c => c.type === cardType).length || 0);
+    }
+    if (node.type === 'foreach') {
+      return total + (nodeConfigs?.[node.id]?.params?.steps?.filter(s => s.nodeType === nodeType).length || 0);
+    }
+    return total;
+  }, 0);
+}
+
+// Does `nodeId` have an ancestor whose type is one of `types` ?
+function hasUpstreamType(nodeId, nodes, conns, types, seen = new Set()) {
+  if (seen.has(nodeId)) return false;
+  seen.add(nodeId);
+  return (conns || []).filter(c => c.to === nodeId).some(c => {
+    const src = nodes.find(n => n.id === c.from);
+    if (src && types.includes(src.type)) return true;
+    return hasUpstreamType(c.from, nodes, conns, types, seen);
+  });
+}
+
+// Is at least one table of the lakehouse produced by a node of `types` ?
+// Stronger than "the layer exists" : it checks the layer is actually fed by
+// the expected step rather than by raw data dumped straight into it.
+function lakehouseFedBy(nodes, conns, nodeConfigs, lakehouseType, types) {
+  const lh = nodes.find(n => n.type === lakehouseType);
+  if (!lh) return false;
+  return nodes
+    .filter(n => nodeConfigs?.[n.id]?.parentId === lh.id)
+    .some(child => hasUpstreamType(child.id, nodes, conns, types));
 }
 
 // Check lakehouse has N children
@@ -452,6 +493,11 @@ export const EXERCISES = [
       if (!hasBronze || !hasSilver) return { ok: false, msg: 'Utilisez un Lakehouse Bronze ET Silver.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1))
         return { ok: false, msg: 'Le Silver doit contenir au moins 1 table nettoyee.' };
+      // COMMANDES_DIRTY : 9 lignes, dont 2 doublons et 2 lignes incompletes.
+      const silver = nodes.find(n => n.type === 'lakehouse_silver');
+      const silverData = outputs[silver.id] || [];
+      if (silverData.length !== 5)
+        return { ok: false, msg: `Le Silver doit contenir 5 lignes propres (sans doublon ni cellule vide). Recu: ${silverData.length}.` };
       return { ok: true, msg: 'Bronze → Silver réussi !' };
     },
   },
@@ -482,11 +528,11 @@ export const EXERCISES = [
       { id: 'CMD003', montant: '320', statut: 'En cours' }, { id: 'CMD004', montant: '85', statut: 'Livree' },
       { id: 'CMD005', montant: '210', statut: 'Annulee' }, { id: 'CMD006', montant: '95', statut: 'Livree' },
     ] }] },
-    validate: (outputs, nodes) => {
+    validate: (outputs, nodes, conns, cfgs) => {
       const hasIf = nodes.some(n => n.type === 'if_condition');
       if (!hasIf) return { ok: false, msg: 'Utilisez un noeud Si/Sinon.' };
-      const filters = nodes.filter(n => n.type === 'filter');
-      if (filters.length < 2) return { ok: false, msg: `Utilisez au moins 2 filtres. (${filters.length} actuellement)` };
+      const filters = countTransform(nodes, cfgs, 'filter', 'filter');
+      if (filters < 2) return { ok: false, msg: `Utilisez au moins 2 filtres. (${filters} actuellement)` };
       const exports = nodes.filter(n => ['csv_export', 'warehouse', 'dashboard'].includes(n.type));
       if (exports.length < 2) return { ok: false, msg: 'Ajoutez 2 destinations.' };
       return { ok: true, msg: 'Aiguillage logistique operationnel !' };
@@ -507,9 +553,14 @@ export const EXERCISES = [
       if (!lk) return { ok: false, msg: 'Utilisez un noeud Lookup (Existe).' };
       const match = outputs[`${lk.id}_match`] || [];
       const noMatch = outputs[`${lk.id}_nomatch`] || [];
-      if (match.length > 0 && noMatch.length > 0) return { ok: true, msg: `Audit termine ! Couverts: ${match.length}, Orphelins: ${noMatch.length}` };
-      if (match.length > 0 || noMatch.length > 0) return { ok: true, msg: `Lookup ok. Match: ${match.length}, No Match: ${noMatch.length}` };
-      return { ok: false, msg: 'Configurez le lookup sur la colonne catégorie.' };
+      // Entrees inversees : fournisseurs en principal donne 3 couverts / 1 orphelin.
+      if (match.length === 3 && noMatch.length === 1)
+        return { ok: false, msg: 'Entrees inversees : branchez produits sur la premiere entree et fournisseurs sur la seconde.' };
+      if (match.length !== 6 || noMatch.length !== 1)
+        return { ok: false, msg: `Configurez le lookup sur la colonne categorie. Attendu 6 produits couverts et 1 orphelin. Recu: ${match.length} / ${noMatch.length}.` };
+      if (String(noMatch[0].id ?? '') !== 'P99')
+        return { ok: false, msg: 'L\'orphelin attendu est le produit P99 (categorie Divers).' };
+      return { ok: true, msg: 'Audit termine ! 6 produits couverts, 1 orphelin (P99).' };
     },
   },
   {
@@ -582,6 +633,19 @@ export const EXERCISES = [
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Le Gold doit contenir au moins 1 table.' };
       const hasDash = nodes.some(n => n.type === 'dashboard');
       if (!hasDash) return { ok: false, msg: 'Ajoutez un Dashboard pour la visualisation.' };
+      const gold = nodes.find(n => n.type === 'lakehouse_gold');
+      const goldData = outputs[gold.id] || [];
+      if (goldData.length !== 3) return { ok: false, msg: `Le Gold doit contenir 3 lignes agregees, une par client. Recu: ${goldData.length}.` };
+      // client_id → [nb de commandes, CA]
+      const EXPECTED_CA = { '1': [2, 235], '2': [2, 405], '3': [1, 320] };
+      for (const row of goldData) {
+        const clientId = String(row.client_id ?? '').trim();
+        const expected = EXPECTED_CA[clientId];
+        if (!expected) return { ok: false, msg: 'Agregez par client_id : cette colonne doit rester dans le Gold.' };
+        const values = Object.values(row).map(v => parseFloat(v));
+        if (!expected.every(v => values.includes(v)))
+          return { ok: false, msg: `Client ${clientId} : attendu ${expected[0]} commandes et ${expected[1]} de CA. Ajoutez un count ET un sum(montant).` };
+      }
       return { ok: true, msg: 'Gold KPIs + Dashboard prets !' };
     },
   },
@@ -592,10 +656,10 @@ export const EXERCISES = [
     hint: 'Source → Log → Filtrer → Log → Export.',
     hintNodes: ['csv_source', 'log', 'filter', 'log', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut) }] },
-    validate: (outputs, nodes) => {
+    validate: (outputs, nodes, conns, cfgs) => {
       const logs = nodes.filter(n => n.type === 'log');
       if (logs.length < 2) return { ok: false, msg: `Utilisez au moins 2 noeuds Journal. (${logs.length} actuellement)` };
-      if (!nodes.some(n => n.type === 'filter')) return { ok: false, msg: 'Ajoutez un Filtrer.' };
+      if (countTransform(nodes, cfgs, 'filter', 'filter') < 1) return { ok: false, msg: 'Ajoutez un Filtrer (notebook ou ForEach accepte).' };
       return { ok: true, msg: 'Pipeline auditable !' };
     },
   },
@@ -675,6 +739,12 @@ export const EXERCISES = [
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 2)) return { ok: false, msg: 'Bronze: au moins 2 tables.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1)) return { ok: false, msg: 'Silver: au moins 1 table.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table.' };
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_silver', ['notebook', 'deduplicate', 'clean_na', 'fill_na']))
+        return { ok: false, msg: 'Le Silver doit recevoir des donnees nettoyees : passez par un notebook de nettoyage.' };
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_gold', ['aggregate']))
+        return { ok: false, msg: 'Le Gold doit contenir un agregat : branchez sa table sur un noeud Agreger.' };
+      const gold = nodes.find(n => n.type === 'lakehouse_gold');
+      if ((outputs[gold.id] || []).length === 0) return { ok: false, msg: 'La table Gold est vide : verifiez la configuration de l\'agregat.' };
       return { ok: true, msg: 'ETL E-Commerce complet !' };
     },
   },
@@ -712,10 +782,11 @@ export const EXERCISES = [
         { id: 'CMD006', client_id: '5', montant: '95', statut: 'Annulee' },
       ] }],
     },
-    validate: (outputs, nodes) => {
+    validate: (outputs, nodes, conns, cfgs) => {
       const has = t => nodes.some(n => n.type === t);
       if (!has('if_condition')) return { ok: false, msg: 'Utilisez Si/Sinon.' };
-      if (nodes.filter(n => n.type === 'filter').length < 2) return { ok: false, msg: 'Au moins 2 filtres necessaires.' };
+      const filters = countTransform(nodes, cfgs, 'filter', 'filter');
+      if (filters < 2) return { ok: false, msg: `Au moins 2 filtres necessaires. (${filters} actuellement)` };
       if (!has('log')) return { ok: false, msg: 'Ajoutez un Journal pour les annulees.' };
       const dests = nodes.filter(n => ['lakehouse_gold', 'lakehouse_silver', 'csv_export', 'warehouse', 'dashboard'].includes(n.type));
       if (dests.length < 2) return { ok: false, msg: 'Routez vers au moins 2 destinations.' };
@@ -787,9 +858,12 @@ export const EXERCISES = [
       const srcTypes = new Set(nodes.filter(n => ['csv_source', 'db_source', 'api_source'].includes(n.type)).map(n => n.type));
       score += Math.min(3, srcTypes.size);
       if (srcTypes.size >= 2) msg.push(`${srcTypes.size} sources`);
-      const cleanTypes = new Set(nodes.filter(n => ['clean_na', 'deduplicate', 'fill_na', 'filter'].includes(n.type)).map(n => n.type));
-      score += Math.min(2, cleanTypes.size);
-      if (cleanTypes.size > 0) msg.push(`${cleanTypes.size} nettoyage`);
+      // Le nettoyage se fait désormais dans les notebooks / ForEach : on compte
+      // les transformations quel que soit l'endroit où elles sont placées.
+      const cleanPairs = [['clean_na', 'delete_na'], ['deduplicate', 'drop_duplicates'], ['fill_na', 'fill_na'], ['filter', 'filter']];
+      const cleanCount = cleanPairs.filter(([nodeType, cardType]) => countTransform(nodes, cfgs, nodeType, cardType) > 0).length;
+      score += Math.min(2, cleanCount);
+      if (cleanCount > 0) msg.push(`${cleanCount} nettoyage`);
       ['lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold'].forEach(t => { if (nodes.some(n => n.type === t)) score++; });
       const lhCount = ['lakehouse_bronze', 'lakehouse_silver', 'lakehouse_gold'].filter(t => nodes.some(n => n.type === t)).length;
       if (lhCount > 0) msg.push(`${lhCount}/3 medallion`);

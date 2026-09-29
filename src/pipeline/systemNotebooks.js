@@ -126,19 +126,21 @@ export const SYSTEM_NOTEBOOKS = [
   {
     id: 'sys-silver-clean',
     name: 'Silver : nettoyage standard',
-    description: 'Suppr. doublons + suppr. vides + sélection des colonnes essentielles. Standard pour passer du Bronze au Silver.',
+    description: 'Suppr. doublons + suppr. lignes vides. Standard pour passer du Bronze au Silver, quelle que soit la table.',
     inputTable: 'bronze',
     outputTable: 'silver',
+    // Pas de carte `select` ici : elle imposerait des colonnes clients
+    // (id, nom, email, date_inscription) et viderait toute autre table.
+    // Pour un nettoyage spécifique aux clients, voir sys-clean-customers.
     cards: [
       { type: 'drop_duplicates', name: 'Supprimer doublons', params: {} },
       { type: 'delete_na', name: 'Suppr. lignes vides', params: {} },
-      { type: 'select', name: 'Sélectionner', params: { columns: ['id', 'nom', 'email', 'date_inscription'] } },
     ],
   },
   {
     id: 'sys-passthrough',
     name: 'Passthrough (vide)',
-    description: 'Ne fait rien — sert de placeholder pendant la conception du pipeline.',
+    description: 'Ne fait rien : sert de placeholder pendant la conception du pipeline.',
     inputTable: 'input',
     outputTable: 'output',
     cards: [],

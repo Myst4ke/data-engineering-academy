@@ -1479,7 +1479,10 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
     else if (node.type === 'log') { setLogNodeId(nodeId); }
     else if (node.type === 'mapping') { setMappingNodeId(nodeId); }
     else if (node.type === 'notebook') { setNotebookNodeId(nodeId); }
-    else if (typeDef?.category === 'transform') { setConfigNodeId(nodeId); }
+    // `join` is categorised as 'logic' but is configured with the generic
+    // transform popup (it only needs a join column).
+    else if (node.type === 'join') { setConfigNodeId(nodeId); }
+    else if (typeDef?.category === 'transform' || typeDef?.category === 'transform_card') { setConfigNodeId(nodeId); }
     else if (typeDef?.category === 'destination') {
       // Show save-to-BI dialog for destination nodes
       const destData = nodeOutputs[nodeId] || [];
@@ -1997,7 +2000,13 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
         const existingParams = nodeConfigs[configNodeId]?.params || null;
         const incoming = connections.filter(c => c.to === configNodeId);
         const upstreamData = incoming.length > 0 ? (nodeOutputs[incoming[0].from] || []) : [];
-        const columns = upstreamData.length > 0 ? Object.keys(upstreamData[0]) : [];
+        let columns = upstreamData.length > 0 ? Object.keys(upstreamData[0]) : [];
+        if (cfgNode?.type === 'join') {
+          // Only columns present in BOTH inputs can serve as a join key.
+          const rightData = incoming.length > 1 ? (nodeOutputs[incoming[1].from] || []) : [];
+          const rightCols = rightData.length > 0 ? Object.keys(rightData[0]) : [];
+          columns = columns.filter(c => rightCols.includes(c));
+        }
         if (!cfgType || !transformType) return null;
         return <ParamInputPopup cardType={transformType} cardName={cfgType.name} cardIcon={cfgType.icon} columns={columns} tableData={upstreamData} onConfirm={handleTransformConfig} onCancel={() => setConfigNodeId(null)} initialParams={existingParams} />;
       })()}

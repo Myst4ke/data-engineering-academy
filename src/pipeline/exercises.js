@@ -70,6 +70,28 @@ function countTransform(nodes, nodeConfigs, nodeType, cardType) {
   }, 0);
 }
 
+// Does `nodeId` have an ancestor whose type is one of `types` ?
+function hasUpstreamType(nodeId, nodes, conns, types, seen = new Set()) {
+  if (seen.has(nodeId)) return false;
+  seen.add(nodeId);
+  return (conns || []).filter(c => c.to === nodeId).some(c => {
+    const src = nodes.find(n => n.id === c.from);
+    if (src && types.includes(src.type)) return true;
+    return hasUpstreamType(c.from, nodes, conns, types, seen);
+  });
+}
+
+// Is at least one table of the lakehouse produced by a node of `types` ?
+// Stronger than "the layer exists" : it checks the layer is actually fed by
+// the expected step rather than by raw data dumped straight into it.
+function lakehouseFedBy(nodes, conns, nodeConfigs, lakehouseType, types) {
+  const lh = nodes.find(n => n.type === lakehouseType);
+  if (!lh) return false;
+  return nodes
+    .filter(n => nodeConfigs?.[n.id]?.parentId === lh.id)
+    .some(child => hasUpstreamType(child.id, nodes, conns, types));
+}
+
 // Check lakehouse has N children
 function lakehouseHasChildren(nodes, nodeConfigs, lakehouseType, minCount) {
   const lh = nodes.find(n => n.type === lakehouseType);
@@ -471,6 +493,11 @@ export const EXERCISES = [
       if (!hasBronze || !hasSilver) return { ok: false, msg: 'Utilisez un Lakehouse Bronze ET Silver.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1))
         return { ok: false, msg: 'Le Silver doit contenir au moins 1 table nettoyee.' };
+      // COMMANDES_DIRTY : 9 lignes, dont 2 doublons et 2 lignes incompletes.
+      const silver = nodes.find(n => n.type === 'lakehouse_silver');
+      const silverData = outputs[silver.id] || [];
+      if (silverData.length !== 5)
+        return { ok: false, msg: `Le Silver doit contenir 5 lignes propres (sans doublon ni cellule vide). Recu: ${silverData.length}.` };
       return { ok: true, msg: 'Bronze → Silver réussi !' };
     },
   },
@@ -526,9 +553,14 @@ export const EXERCISES = [
       if (!lk) return { ok: false, msg: 'Utilisez un noeud Lookup (Existe).' };
       const match = outputs[`${lk.id}_match`] || [];
       const noMatch = outputs[`${lk.id}_nomatch`] || [];
-      if (match.length > 0 && noMatch.length > 0) return { ok: true, msg: `Audit termine ! Couverts: ${match.length}, Orphelins: ${noMatch.length}` };
-      if (match.length > 0 || noMatch.length > 0) return { ok: true, msg: `Lookup ok. Match: ${match.length}, No Match: ${noMatch.length}` };
-      return { ok: false, msg: 'Configurez le lookup sur la colonne catégorie.' };
+      // Entrees inversees : fournisseurs en principal donne 3 couverts / 1 orphelin.
+      if (match.length === 3 && noMatch.length === 1)
+        return { ok: false, msg: 'Entrees inversees : branchez produits sur la premiere entree et fournisseurs sur la seconde.' };
+      if (match.length !== 6 || noMatch.length !== 1)
+        return { ok: false, msg: `Configurez le lookup sur la colonne categorie. Attendu 6 produits couverts et 1 orphelin. Recu: ${match.length} / ${noMatch.length}.` };
+      if (String(noMatch[0].id ?? '') !== 'P99')
+        return { ok: false, msg: 'L\'orphelin attendu est le produit P99 (categorie Divers).' };
+      return { ok: true, msg: 'Audit termine ! 6 produits couverts, 1 orphelin (P99).' };
     },
   },
   {
@@ -601,6 +633,19 @@ export const EXERCISES = [
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Le Gold doit contenir au moins 1 table.' };
       const hasDash = nodes.some(n => n.type === 'dashboard');
       if (!hasDash) return { ok: false, msg: 'Ajoutez un Dashboard pour la visualisation.' };
+      const gold = nodes.find(n => n.type === 'lakehouse_gold');
+      const goldData = outputs[gold.id] || [];
+      if (goldData.length !== 3) return { ok: false, msg: `Le Gold doit contenir 3 lignes agregees, une par client. Recu: ${goldData.length}.` };
+      // client_id → [nb de commandes, CA]
+      const EXPECTED_CA = { '1': [2, 235], '2': [2, 405], '3': [1, 320] };
+      for (const row of goldData) {
+        const clientId = String(row.client_id ?? '').trim();
+        const expected = EXPECTED_CA[clientId];
+        if (!expected) return { ok: false, msg: 'Agregez par client_id : cette colonne doit rester dans le Gold.' };
+        const values = Object.values(row).map(v => parseFloat(v));
+        if (!expected.every(v => values.includes(v)))
+          return { ok: false, msg: `Client ${clientId} : attendu ${expected[0]} commandes et ${expected[1]} de CA. Ajoutez un count ET un sum(montant).` };
+      }
       return { ok: true, msg: 'Gold KPIs + Dashboard prets !' };
     },
   },
@@ -694,6 +739,12 @@ export const EXERCISES = [
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 2)) return { ok: false, msg: 'Bronze: au moins 2 tables.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1)) return { ok: false, msg: 'Silver: au moins 1 table.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table.' };
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_silver', ['notebook', 'deduplicate', 'clean_na', 'fill_na']))
+        return { ok: false, msg: 'Le Silver doit recevoir des donnees nettoyees : passez par un notebook de nettoyage.' };
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_gold', ['aggregate']))
+        return { ok: false, msg: 'Le Gold doit contenir un agregat : branchez sa table sur un noeud Agreger.' };
+      const gold = nodes.find(n => n.type === 'lakehouse_gold');
+      if ((outputs[gold.id] || []).length === 0) return { ok: false, msg: 'La table Gold est vide : verifiez la configuration de l\'agregat.' };
       return { ok: true, msg: 'ETL E-Commerce complet !' };
     },
   },

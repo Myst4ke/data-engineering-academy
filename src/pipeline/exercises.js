@@ -70,26 +70,44 @@ function countTransform(nodes, nodeConfigs, nodeType, cardType) {
   }, 0);
 }
 
-// Does `nodeId` have an ancestor whose type is one of `types` ?
-function hasUpstreamType(nodeId, nodes, conns, types, seen = new Set()) {
+// Does `nodeId` have an ancestor satisfying `predicate(node)` ?
+function hasUpstream(nodeId, nodes, conns, predicate, seen = new Set()) {
   if (seen.has(nodeId)) return false;
   seen.add(nodeId);
   return (conns || []).filter(c => c.to === nodeId).some(c => {
     const src = nodes.find(n => n.id === c.from);
-    if (src && types.includes(src.type)) return true;
-    return hasUpstreamType(c.from, nodes, conns, types, seen);
+    if (src && predicate(src)) return true;
+    return hasUpstream(c.from, nodes, conns, predicate, seen);
   });
 }
 
-// Is at least one table of the lakehouse produced by a node of `types` ?
+// Is at least one table of the lakehouse produced by a node matching `predicate` ?
 // Stronger than "the layer exists" : it checks the layer is actually fed by
 // the expected step rather than by raw data dumped straight into it.
-function lakehouseFedBy(nodes, conns, nodeConfigs, lakehouseType, types) {
+function lakehouseFedBy(nodes, conns, nodeConfigs, lakehouseType, predicate) {
   const lh = nodes.find(n => n.type === lakehouseType);
   if (!lh) return false;
   return nodes
     .filter(n => nodeConfigs?.[n.id]?.parentId === lh.id)
-    .some(child => hasUpstreamType(child.id, nodes, conns, types));
+    .some(child => hasUpstream(child.id, nodes, conns, predicate));
+}
+
+const CLEAN_NODE_TYPES = ['deduplicate', 'clean_na', 'fill_na'];
+const CLEAN_CARD_TYPES = ['drop_duplicates', 'delete_na', 'fill_na'];
+
+// Does this node actually clean ? On teste le contenu, pas le type : un
+// notebook vide (Passthrough) ne nettoie rien, un ForEach dont les etapes
+// nettoient compte au meme titre qu'un notebook.
+function isCleaningNode(node, nodeConfigs) {
+  if (CLEAN_NODE_TYPES.includes(node.type)) return true;
+  if (node.type === 'notebook') {
+    const nb = getNotebook(nodeConfigs?.[node.id]?.notebookId);
+    return !!nb?.cards?.some(c => CLEAN_CARD_TYPES.includes(c.type));
+  }
+  if (node.type === 'foreach') {
+    return !!nodeConfigs?.[node.id]?.params?.steps?.some(s => CLEAN_NODE_TYPES.includes(s.nodeType));
+  }
+  return false;
 }
 
 // Check lakehouse has N children
@@ -272,7 +290,7 @@ export const EXERCISES = [
     id: 'pipe-03', title: 'Import en double', difficulty: 1,
     availableNotebookIds: ['sys-dedup'],
     notebookGuidance: 'use-prefab',
-    description: 'Suite à un problème technique, la table clients a été importée deux fois dans le système. Le fichier contient donc des doublons exacts qu\'il faut éliminer avant de mettre à jour le CRM.\n\nMéthodologie : Branche le notebook préfait "Dédoublonner" (palette → Notebooks) entre la source et l\'export. Tu peux aussi placer une carte Dédoublonner directement, mais le notebook prêt à l\'emploi est plus rapide.',
+    description: 'Suite à un problème technique, la table clients a été importée deux fois dans le système. Le fichier contient donc des doublons exacts qu\'il faut éliminer avant de mettre à jour le CRM.\n\nMéthodologie : Branche le notebook préfait "Dédoublonner" (palette → Notebooks) entre la source et l\'export.',
     hint: 'Source → Notebook "Dédoublonner" → Export CSV.',
     hintNodes: ['csv_source', 'notebook', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLIENTS_WITH_DUPES }] },
@@ -286,9 +304,9 @@ export const EXERCISES = [
   {
     id: 'pipe-04', title: 'Rapport salaires', difficulty: 1,
     availableNotebookIds: [],
-    description: 'La direction demande un rapport des employés classés par salaire, du plus élevé au plus bas, pour préparer la revue annuelle des rémunérations.\n\nMéthodologie : Triez les employés et exportez la liste ordonnée. Pas de notebook préfait pour ce tri spécifique : on utilise directement la carte Trier sur le canvas (parfois c\'est plus simple qu\'un notebook).',
-    hint: 'Source → Trier (salaire, décroissant) → Export CSV.',
-    hintNodes: ['csv_source', 'sort', 'csv_export'],
+    description: 'La direction demande un rapport des employés classés par salaire, du plus élevé au plus bas, pour préparer la revue annuelle des rémunérations.\n\nMéthodologie : Triez les employés et exportez la liste ordonnée. Aucun notebook préfait ne trie par salaire : crée le tien (palette → Notebooks → Nouveau notebook) avec une carte Trier.',
+    hint: 'Source → notebook [Trier salaire, décroissant] → Export CSV.',
+    hintNodes: ['csv_source', 'notebook', 'csv_export'],
     sources: { 'csv_source': [{ name: 'employes', data: EMPLOYES_FULL }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
@@ -303,9 +321,9 @@ export const EXERCISES = [
   {
     id: 'pipe-05', title: 'Nettoyage RGPD', difficulty: 1,
     availableNotebookIds: [],
-    description: 'Le DPO (responsable protection des données) a identifié que le fichier clients contient des colonnes techniques internes (_hash, _internal_id) qui ne doivent pas être exposées. Seules les colonnes id, nom, email et ville doivent être conservées.\n\nMéthodologie : Sélectionnez uniquement les colonnes autorisées et exportez le résultat. Carte atomique Sélectionner suffit ici.',
-    hint: 'Source → Sélectionner colonnes (id, nom, email, ville) → Export CSV.',
-    hintNodes: ['csv_source', 'select_cols', 'csv_export'],
+    description: 'Le DPO (responsable protection des données) a identifié que le fichier clients contient des colonnes techniques internes (_hash, _internal_id) qui ne doivent pas être exposées. Seules les colonnes id, nom, email et ville doivent être conservées.\n\nMéthodologie : Sélectionnez uniquement les colonnes autorisées et exportez le résultat. Un notebook avec une seule carte Sélectionner suffit ici.',
+    hint: 'Source → notebook [Sélectionner id, nom, email, ville] → Export CSV.',
+    hintNodes: ['csv_source', 'notebook', 'csv_export'],
     sources: { 'csv_source': [{ name: 'clients', data: CLIENTS_WITH_EXTRA_COLS }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
@@ -320,9 +338,9 @@ export const EXERCISES = [
   {
     id: 'pipe-06', title: 'API partenaire', difficulty: 1,
     availableNotebookIds: [],
-    description: 'Un partenaire logistique a besoin de recevoir nos commandes via son API, mais il attend des noms de colonnes spécifiques : "id" (au lieu de cmd_id) et "montant" (au lieu de mnt). Les autres colonnes peuvent rester telles quelles.\n\nMéthodologie : Renommez les colonnes pour respecter le format attendu par l\'API partenaire. Deux cartes Renommer atomiques.',
-    hint: 'Source → Renommer (cmd_id→id) → Renommer (mnt→montant) → Export.',
-    hintNodes: ['csv_source', 'rename_col', 'rename_col', 'csv_export'],
+    description: 'Un partenaire logistique a besoin de recevoir nos commandes via son API, mais il attend des noms de colonnes spécifiques : "id" (au lieu de cmd_id) et "montant" (au lieu de mnt). Les autres colonnes peuvent rester telles quelles.\n\nMéthodologie : Renommez les colonnes pour respecter le format attendu par l\'API partenaire. Un notebook avec deux cartes Renommer fait l\'affaire.',
+    hint: 'Source → notebook [Renommer cmd_id→id, Renommer mnt→montant] → Export.',
+    hintNodes: ['csv_source', 'notebook', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_TECH_NAMES }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
@@ -356,7 +374,7 @@ export const EXERCISES = [
   {
     id: 'pipe-08', title: 'Enrichir les commandes', difficulty: 2,
     availableNotebookIds: [],
-    description: 'Pour le reporting mensuel, le directeur commercial souhaite voir le nom et la ville du client directement sur chaque ligne de commande. Les commandes contiennent un "client_id" et la table clients utilise la même clé.\n\nMéthodologie : Combinez les deux tables sur leur colonne commune. Note : les notebooks ne gèrent qu\'une entrée — Joindre reste un nœud à part entière sur le canvas.',
+    description: 'Pour le reporting mensuel, le directeur commercial souhaite voir le nom et la ville du client directement sur chaque ligne de commande. Les commandes contiennent un "client_id" et la table clients utilise la même clé.\n\nMéthodologie : Combinez les deux tables sur leur colonne commune. Note : les notebooks ne gèrent qu\'une entrée, donc Joindre reste un nœud à part entière sur le canvas.',
     hint: 'Source 1 (commandes) + Source 2 (clients) → Joindre (sur client_id) → Export.',
     hintNodes: ['csv_source', 'db_source', 'join', 'csv_export'],
     sources: {
@@ -412,9 +430,9 @@ export const EXERCISES = [
   {
     id: 'pipe-11', title: 'Évaluations partielles', difficulty: 2,
     availableNotebookIds: [],
-    description: 'Les évaluations annuelles ont été saisies mais certains managers n\'ont pas rempli le champ commentaire. Le RH souhaite que chaque évaluation ait un commentaire : les vides doivent indiquer "Non évalué" plutôt que d\'être supprimés.\n\nMéthodologie : Comblez les trous sans perdre aucune ligne. Carte Remplir Vides avec une valeur custom — pas de notebook préfait pour ce libellé spécifique.',
-    hint: 'Source → Remplir Vides (commentaire → "Non evalue") → Export.',
-    hintNodes: ['csv_source', 'fill_na', 'csv_export'],
+    description: 'Les évaluations annuelles ont été saisies mais certains managers n\'ont pas rempli le champ commentaire. Le RH souhaite que chaque évaluation ait un commentaire : les vides doivent indiquer "Non évalué" plutôt que d\'être supprimés.\n\nMéthodologie : Comblez les trous sans perdre aucune ligne. Aucun notebook préfait ne porte ce libellé : crée le tien avec une carte Remplir Vides et ta propre valeur.',
+    hint: 'Source → notebook [Remplir Vides commentaire → "Non evalue"] → Export.',
+    hintNodes: ['csv_source', 'notebook', 'csv_export'],
     sources: { 'csv_source': [{ name: 'evaluations', data: EVALUATIONS_WITH_EMPTY }] },
     validate: (outputs, nodes, conns) => {
       const data = getDestinationData(outputs, nodes, conns);
@@ -483,7 +501,7 @@ export const EXERCISES = [
     availableNotebookIds: ['sys-silver-clean', 'sys-clean-customers'],
     notebookGuidance: 'reuse-from',
     reuseExerciseId: 'pipe-12',
-    description: 'Les commandes brutes sont stockées dans le Bronze mais contiennent des doublons et des lignes vides. L\'étape Silver consiste à nettoyer ces données pour les rendre exploitables par les analystes.\n\nMéthodologie : Chargez les données dans le Bronze, puis nettoie avant de stocker en Silver. Trois options pour le nettoyage : ton notebook créé en pipe-12, le notebook système "Silver : nettoyage standard", ou des cartes atomiques.',
+    description: 'Les commandes brutes sont stockées dans le Bronze mais contiennent des doublons et des lignes vides. L\'étape Silver consiste à nettoyer ces données pour les rendre exploitables par les analystes.\n\nMéthodologie : Chargez les données dans le Bronze, puis nettoie avant de stocker en Silver. Trois options pour le nettoyage : ton notebook créé en pipe-12, le notebook système "Silver : nettoyage standard", ou un notebook que tu crées ici.',
     hint: 'Source → Bronze → ton notebook (ou sys-silver-clean) → Silver.',
     hintNodes: ['csv_source', 'lakehouse_bronze', 'notebook', 'lakehouse_silver'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_DIRTY }] },
@@ -493,11 +511,17 @@ export const EXERCISES = [
       if (!hasBronze || !hasSilver) return { ok: false, msg: 'Utilisez un Lakehouse Bronze ET Silver.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1))
         return { ok: false, msg: 'Le Silver doit contenir au moins 1 table nettoyee.' };
-      // COMMANDES_DIRTY : 9 lignes, dont 2 doublons et 2 lignes incompletes.
+      // On teste les proprietes du Silver, pas son nombre de lignes : l'enonce
+      // autorise un notebook qui filtre en plus (celui de pipe-12), donc le
+      // compte exact varie selon l'option choisie.
       const silver = nodes.find(n => n.type === 'lakehouse_silver');
       const silverData = outputs[silver.id] || [];
-      if (silverData.length !== 5)
-        return { ok: false, msg: `Le Silver doit contenir 5 lignes propres (sans doublon ni cellule vide). Recu: ${silverData.length}.` };
+      if (silverData.length === 0) return { ok: false, msg: 'Le Silver est vide : branchez la table nettoyee.' };
+      if (silverData.some(r => Object.values(r).some(v => v == null || String(v).trim() === '')))
+        return { ok: false, msg: 'Le Silver contient encore des cellules vides.' };
+      const silverKeys = silverData.map(r => JSON.stringify(r));
+      if (new Set(silverKeys).size !== silverKeys.length)
+        return { ok: false, msg: 'Le Silver contient encore des doublons.' };
       return { ok: true, msg: 'Bronze → Silver réussi !' };
     },
   },
@@ -521,8 +545,8 @@ export const EXERCISES = [
     id: 'pipe-17', title: 'Aiguillage logistique', difficulty: 3,
     availableNotebookIds: ['sys-filter-active'],
     description: 'Le centre logistique doit router les commandes vers deux equipes differentes : les commandes livrees sont archivees, les commandes annulees sont transmises au service reclamation. Il faut d\'abord vérifier que le fichier n\'est pas vide avant de router.\n\nMethodologie : Validez la presence de données, puis separez en deux flux distincts avec des filtres.',
-    hint: 'Source → Si/Sinon (table_not_empty) → Filtrer Livree → Export 1 / Filtrer Annulee → Export 2.',
-    hintNodes: ['csv_source', 'if_condition', 'filter', 'filter', 'csv_export', 'csv_export'],
+    hint: 'Source → Si/Sinon (table_not_empty) → notebook filtre Livree → Export 1 / notebook filtre Annulee → Export 2.',
+    hintNodes: ['csv_source', 'if_condition', 'notebook', 'notebook', 'csv_export', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', montant: '150', statut: 'Livree' }, { id: 'CMD002', montant: '230', statut: 'Livree' },
       { id: 'CMD003', montant: '320', statut: 'En cours' }, { id: 'CMD004', montant: '85', statut: 'Livree' },
@@ -603,9 +627,9 @@ export const EXERCISES = [
     availableNotebookIds: ['sys-clean-customers', 'sys-silver-clean'],
     notebookGuidance: 'reuse-from',
     reuseExerciseId: 'pipe-12',
-    description: 'Les commandes brutes du Bronze ont des problèmes multiples : doublons, cellules vides, colonnes au format technique (mnt, st). La couche Silver doit contenir des données propres avec des noms métier, filtrées sur les commandes livrées.\n\nMéthodologie : Tu peux réutiliser ton notebook de pipe-12 pour la partie nettoyage + filtre, puis ajouter des nœuds atomiques Renommer pour la partie spécifique mnt→montant et st→statut. Sinon, tout faire à la main.',
-    hint: 'Bronze → ton notebook de pipe-12 (ou sys-clean-customers) → Renommer (mnt→montant) → Renommer (st→statut) → Silver.',
-    hintNodes: ['csv_source', 'lakehouse_bronze', 'notebook', 'rename_col', 'rename_col', 'lakehouse_silver'],
+    description: 'Les commandes brutes du Bronze ont des problèmes multiples : doublons, cellules vides, colonnes au format technique (mnt, st). La couche Silver doit contenir des données propres avec des noms métier, filtrées sur les commandes livrées.\n\nMéthodologie : Tu peux réutiliser ton notebook de pipe-12 pour la partie nettoyage + filtre, puis ajouter un second notebook avec deux cartes Renommer pour la partie spécifique mnt→montant et st→statut. Sinon, tout regrouper dans un seul notebook.',
+    hint: 'Bronze → ton notebook de pipe-12 (ou sys-clean-customers) → notebook [Renommer mnt→montant, Renommer st→statut] → Silver.',
+    hintNodes: ['csv_source', 'lakehouse_bronze', 'notebook', 'notebook', 'lakehouse_silver'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       ...COMMANDES_TECH_NAMES,
       { cmd_id: 'CMD001', clt_id: '1', dt_cmd: '2024-01-10', mnt: '150', st: 'Livree' },
@@ -653,8 +677,8 @@ export const EXERCISES = [
     id: 'pipe-23', title: 'Pipeline auditable', difficulty: 3,
     availableNotebookIds: [],
     description: 'L\'equipe conformite exige que chaque pipeline de production soit auditable. Pour chaque étape cle (chargement, filtrage), un journal doit enregistrer le nombre de lignes traitees.\n\nMethodologie : Intercalez des noeuds Journal entre vos étapes de transformation.',
-    hint: 'Source → Log → Filtrer → Log → Export.',
-    hintNodes: ['csv_source', 'log', 'filter', 'log', 'csv_export'],
+    hint: 'Source → Log → notebook filtre → Log → Export.',
+    hintNodes: ['csv_source', 'log', 'notebook', 'log', 'csv_export'],
     sources: { 'csv_source': [{ name: 'commandes', data: COMMANDES_WITH_EMPTY.filter(r => r.montant && r.statut) }] },
     validate: (outputs, nodes, conns, cfgs) => {
       const logs = nodes.filter(n => n.type === 'log');
@@ -704,8 +728,8 @@ export const EXERCISES = [
     id: 'pipe-26', title: 'Podium des ventes', difficulty: 3,
     availableNotebookIds: [],
     description: 'Pour la reunion commerciale, on veut presenter un podium des 3 meilleures ventes du trimestre. A partir de 6 commandes, il faut extraire uniquement les 3 plus gros montants et les envoyer vers un Dashboard.\n\nMethodologie : Triez ou classez par montant, puis extrayez le top 3 pour le Dashboard.',
-    hint: 'Source → Trier (montant desc) → Echantillonner (Top 3) → Dashboard.',
-    hintNodes: ['csv_source', 'sort', 'sample', 'dashboard'],
+    hint: 'Source → notebook [Trier montant desc] → Echantillonner (Top 3) → Dashboard.',
+    hintNodes: ['csv_source', 'notebook', 'sample', 'dashboard'],
     sources: { 'csv_source': [{ name: 'commandes', data: [
       { id: 'CMD001', montant: '150' }, { id: 'CMD002', montant: '230' },
       { id: 'CMD003', montant: '320' }, { id: 'CMD004', montant: '85' },
@@ -726,8 +750,8 @@ export const EXERCISES = [
     notebookGuidance: 'reuse-from',
     reuseExerciseId: 'pipe-12',
     description: 'Le projet data de la marketplace arrive à maturité. Il faut construire le pipeline complet : ingérer les données brutes (clients, commandes, produits) dans le Bronze, les nettoyer et enrichir (jointure commandes/clients) pour le Silver, puis agréger les ventes par catégorie pour le Gold. Le résultat alimente un Dashboard BI.\n\nMéthodologie : Architecture medallion complète. Réutilise ton notebook de pipe-12 et les notebooks systèmes pour le nettoyage, et ne place atomiquement que ce qui ne rentre pas dans un notebook (jointures, agrégats).',
-    hint: 'Sources → Bronze (3 tables) → Clean/Dedup → Join → Silver → Agréger → Gold → Dashboard.',
-    hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'deduplicate', 'clean_na', 'join', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
+    hint: 'Sources → Bronze (3 tables) → notebook de nettoyage (ou ForEach) → Silver → Agréger → Gold → Dashboard.',
+    hintNodes: ['csv_source', 'db_source', 'lakehouse_bronze', 'notebook', 'lakehouse_silver', 'aggregate', 'lakehouse_gold', 'dashboard'],
     sources: {
       'csv_source': [{ name: 'clients', data: CLEAN_CLIENTS }, { name: 'commandes', data: COMMANDES_DIRTY }],
       'db_source': [{ name: 'produits', data: PRODUITS_SMALL }],
@@ -739,10 +763,14 @@ export const EXERCISES = [
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_bronze', 2)) return { ok: false, msg: 'Bronze: au moins 2 tables.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_silver', 1)) return { ok: false, msg: 'Silver: au moins 1 table.' };
       if (!lakehouseHasChildren(nodes, cfgs, 'lakehouse_gold', 1)) return { ok: false, msg: 'Gold: au moins 1 table.' };
-      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_silver', ['notebook', 'deduplicate', 'clean_na', 'fill_na']))
-        return { ok: false, msg: 'Le Silver doit recevoir des donnees nettoyees : passez par un notebook de nettoyage.' };
-      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_gold', ['aggregate']))
+      const cleans = n => isCleaningNode(n, cfgs);
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_silver', cleans))
+        return { ok: false, msg: 'Le Silver doit recevoir des donnees nettoyees : notebook de nettoyage, ForEach ou cartes de nettoyage.' };
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_gold', n => n.type === 'aggregate'))
         return { ok: false, msg: 'Le Gold doit contenir un agregat : branchez sa table sur un noeud Agreger.' };
+      // Le Gold doit descendre de la branche nettoyee, pas d'une branche brute.
+      if (!lakehouseFedBy(nodes, conns, cfgs, 'lakehouse_gold', cleans))
+        return { ok: false, msg: 'Le Gold doit agreger des donnees nettoyees : faites-le descendre de la branche Silver.' };
       const gold = nodes.find(n => n.type === 'lakehouse_gold');
       if ((outputs[gold.id] || []).length === 0) return { ok: false, msg: 'La table Gold est vide : verifiez la configuration de l\'agregat.' };
       return { ok: true, msg: 'ETL E-Commerce complet !' };
@@ -770,8 +798,8 @@ export const EXERCISES = [
     id: 'pipe-29', title: 'Tri-routage commandes', difficulty: 4,
     availableNotebookIds: ['sys-filter-active'],
     description: 'Le centre de gestion a 3 workflows distincts pour les commandes : les livrees vont dans le Gold pour les KPIs, les commandes en cours restent en Silver pour suivi, et les annulees sont archivees en CSV avec un log d\'erreur. Il faut router chaque statut vers la bonne destination.\n\nMethodologie : Validez les données, puis creez 3 branches avec des filtres pour chaque statut.',
-    hint: 'Si/Sinon (not empty) → Filtrer (Livree) → Gold / Filtrer (En cours) → Silver / Filtrer (Annulee) → Log + CSV.',
-    hintNodes: ['csv_source', 'if_condition', 'filter', 'filter', 'filter', 'lakehouse_gold', 'lakehouse_silver', 'log', 'csv_export'],
+    hint: 'Si/Sinon (not empty) → notebook filtre Livree → Gold / notebook filtre En cours → Silver / notebook filtre Annulee → Log + CSV.',
+    hintNodes: ['csv_source', 'if_condition', 'notebook', 'notebook', 'notebook', 'lakehouse_gold', 'lakehouse_silver', 'log', 'csv_export'],
     sources: {
       'csv_source': [{ name: 'commandes', data: [
         { id: 'CMD001', client_id: '1', montant: '150', statut: 'Livree' },

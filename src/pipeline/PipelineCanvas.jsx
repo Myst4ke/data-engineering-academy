@@ -19,6 +19,7 @@ import SampleConfig from './SampleConfig';
 import LogConfig from './LogConfig';
 import NotebookConfig from './NotebookConfig';
 import { getNotebook, updateUserNotebook, runNotebook, listNotebooks, createUserNotebook, deleteUserNotebook } from './notebooks';
+import { applyWindowFunction } from './windowFunctions';
 
 function mapNodeTypeToTransform(nodeType) {
   const map = {
@@ -1291,33 +1292,7 @@ export default function PipelineCanvas({ onBack, exercise, onExerciseValidate })
       } else if (node.type === 'window_func') {
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];
-        const p = config?.params;
-        if (p?.func && p?.orderBy) {
-          const sorted = [...upstream].sort((a, b) => { const va = parseFloat(a[p.orderBy]) || 0, vb = parseFloat(b[p.orderBy]) || 0; return p.orderDir === 'desc' ? vb - va : va - vb; });
-          const partitions = new Map();
-          sorted.forEach(row => { const key = p.partitionBy ? String(row[p.partitionBy] ?? '') : '__all__'; if (!partitions.has(key)) partitions.set(key, []); partitions.get(key).push(row); });
-          const result = [];
-          partitions.forEach(rows => {
-            let cumSum = 0, cumCount = 0;
-            rows.forEach((row, i) => {
-              const newRow = { ...row };
-              const val = parseFloat(row[p.valueCol]) || 0;
-              cumSum += val; cumCount++;
-              switch (p.func) {
-                case 'row_number': newRow[p.alias] = String(i + 1); break;
-                case 'rank': { const prevVal = i > 0 ? (parseFloat(rows[i - 1][p.orderBy]) || 0) : null; const curVal = parseFloat(row[p.orderBy]) || 0; newRow[p.alias] = (i === 0 || curVal !== prevVal) ? String(i + 1) : rows[i - 1][p.alias] || String(i + 1); break; }
-                case 'dense_rank': { if (i === 0) { newRow[p.alias] = '1'; } else { const prev = parseFloat(rows[i - 1][p.orderBy]) || 0; const cur = parseFloat(row[p.orderBy]) || 0; newRow[p.alias] = cur === prev ? (rows[i - 1][p.alias] || '1') : String(parseInt(rows[i - 1][p.alias] || '0') + 1); } break; }
-                case 'sum_cum': newRow[p.alias] = String(cumSum); break;
-                case 'avg_cum': newRow[p.alias] = String(Math.round((cumSum / cumCount) * 100) / 100); break;
-                case 'lag': newRow[p.alias] = i > 0 ? String(rows[i - 1][p.valueCol] ?? '') : ''; break;
-                case 'lead': newRow[p.alias] = i < rows.length - 1 ? String(rows[i + 1][p.valueCol] ?? '') : ''; break;
-                default: newRow[p.alias] = '';
-              }
-              result.push(newRow);
-            });
-          });
-          outputs[nodeId] = result;
-        } else { outputs[nodeId] = upstream; }
+        outputs[nodeId] = applyWindowFunction(upstream, config?.params);
       } else if (node.type === 'sample') {
         const incoming = connections.filter(c => c.to === nodeId);
         const upstream = incoming.length > 0 ? (outputs[incoming[0].from] || []) : [];

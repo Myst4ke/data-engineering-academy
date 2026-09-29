@@ -36,15 +36,36 @@ describe('pipe-15 : Bronze vers Silver', () => {
   ];
   const cfgs = { t: { parentId: 'sl' } };
 
+  const validate = (rows) => exo('pipe-15').validate({ sl: rows }, nodes, [], cfgs);
+
   it('refuse un Silver alimenté avec les données brutes', () => {
-    const res = exo('pipe-15').validate({ sl: COMMANDES_DIRTY }, nodes, [], cfgs);
-    expect(res.ok).toBe(false);
+    expect(validate(COMMANDES_DIRTY).ok).toBe(false);
   });
 
-  it('accepte un Silver nettoyé', () => {
+  it('refuse un Silver vide', () => {
+    expect(validate([]).ok).toBe(false);
+  });
+
+  it('accepte le notebook système (5 lignes)', () => {
     const cleaned = runNotebook(getNotebook('sys-silver-clean'), COMMANDES_DIRTY);
-    const res = exo('pipe-15').validate({ sl: cleaned }, nodes, [], cfgs);
-    expect(res.ok).toBe(true);
+    expect(cleaned).toHaveLength(5);
+    expect(validate(cleaned).ok).toBe(true);
+  });
+
+  // L'énoncé propose le notebook créé en pipe-12, qui filtre en plus sur
+  // statut = Livree et ne sort donc que 4 lignes : il doit passer aussi.
+  it('accepte un notebook qui filtre en plus (4 lignes)', () => {
+    const pipe12 = {
+      cards: [
+        { type: 'drop_duplicates', params: {} },
+        { type: 'delete_na', params: {} },
+        { type: 'filter', params: { column: 'statut', value: 'Livree' } },
+        { type: 'sort', params: { column: 'date', order: 'desc' } },
+      ],
+    };
+    const cleaned = runNotebook(pipe12, COMMANDES_DIRTY);
+    expect(cleaned).toHaveLength(4);
+    expect(validate(cleaned).ok).toBe(true);
   });
 });
 
@@ -112,20 +133,38 @@ describe('pipe-27 : ETL E-Commerce', () => {
     { id: 'd', type: 'dashboard' },
     { id: 'nb', type: 'notebook' },
   ];
-  const cfgs = {
+  const layers = {
     bt1: { parentId: 'b' }, bt2: { parentId: 'b' },
     st: { parentId: 'sl' }, gt: { parentId: 'g' },
   };
   const outputs = { g: [{ categorie: 'Informatique', ca: '1685' }] };
+  // Chaine nominale : nettoyage → table Silver → agregat → table Gold.
+  const conns = [{ from: 'nb', to: 'st' }, { from: 'st', to: 'agg' }, { from: 'agg', to: 'gt' }];
+  const nodes = [...baseNodes, { id: 'agg', type: 'aggregate' }];
+  const run = (cleaner) => exo('pipe-27').validate(outputs, nodes, conns, { ...layers, ...cleaner });
 
   it('refuse un Gold qui ne descend pas d\'un agrégat', () => {
-    const conns = [{ from: 'nb', to: 'st' }, { from: 'sl', to: 'gt' }];
-    expect(exo('pipe-27').validate(outputs, baseNodes, conns, cfgs).ok).toBe(false);
+    const noAgg = [{ from: 'nb', to: 'st' }, { from: 'sl', to: 'gt' }];
+    const cfgs = { ...layers, nb: { notebookId: 'sys-silver-clean' } };
+    expect(exo('pipe-27').validate(outputs, baseNodes, noAgg, cfgs).ok).toBe(false);
   });
 
-  it('accepte un Silver nettoyé et un Gold agrégé', () => {
-    const nodes = [...baseNodes, { id: 'agg', type: 'aggregate' }];
-    const conns = [{ from: 'nb', to: 'st' }, { from: 'st', to: 'agg' }, { from: 'agg', to: 'gt' }];
-    expect(exo('pipe-27').validate(outputs, nodes, conns, cfgs).ok).toBe(true);
+  it('accepte le notebook système de nettoyage', () => {
+    expect(run({ nb: { notebookId: 'sys-silver-clean' } }).ok).toBe(true);
+  });
+
+  // pipe-25 enseigne le nettoyage par ForEach : il doit compter ici aussi.
+  it('accepte un ForEach dont les étapes nettoient', () => {
+    const foreachNodes = nodes.map(n => n.id === 'nb' ? { id: 'nb', type: 'foreach' } : n);
+    const cfgs = { ...layers, nb: { params: { steps: [{ nodeType: 'clean_na' }, { nodeType: 'deduplicate' }] } } };
+    expect(exo('pipe-27').validate(outputs, foreachNodes, conns, cfgs).ok).toBe(true);
+  });
+
+  it('refuse un notebook Passthrough qui ne nettoie rien', () => {
+    expect(run({ nb: { notebookId: 'sys-passthrough' } }).ok).toBe(false);
+  });
+
+  it('refuse un notebook non configuré', () => {
+    expect(run({}).ok).toBe(false);
   });
 });

@@ -19,6 +19,10 @@ const notebookCardTypes = new Set(
     .map(([type]) => type)
 );
 
+// Ces types ne sont utilisables que dans un notebook ou un ForEach : un indice
+// qui les cite enverrait le joueur chercher une carte absente de la palette.
+const isNotebookOnly = (type) => notebookCardTypes.has(type);
+
 describe('palette du Pipeline Dojo', () => {
   // Cause racine du bug : la catégorie 'transform' avait été retirée de
   // CATEGORIES alors que 11 types y pointaient encore, les rendant inatteignables.
@@ -30,12 +34,11 @@ describe('palette du Pipeline Dojo', () => {
   });
 
   it.each(EXERCISES.map(ex => [ex.id, ex]))(
-    '%s : les nœuds de l\'indice sont accessibles',
+    '%s : les nœuds de l\'indice sont posables sur le canvas',
     (id, ex) => {
       for (const type of ex.hintNodes || []) {
-        if (type === 'notebook') continue;
-        const reachable = paletteTypes.has(type) || notebookCardTypes.has(type);
-        expect(reachable, `${id} : "${type}" n'est ni dans la palette ni une carte de notebook`).toBe(true);
+        expect(isNotebookOnly(type), `${id} : "${type}" n'existe que dans un notebook, l'indice doit dire "notebook"`).toBe(false);
+        expect(paletteTypes.has(type), `${id} : "${type}" est absent de la palette`).toBe(true);
       }
     }
   );

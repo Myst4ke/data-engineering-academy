@@ -288,6 +288,13 @@ export default function ParamInputPopup({ cardType, cardName, cardIcon, columns,
                 <option key={col} value={col}>{col}</option>
               ))}
             </select>
+            {columns.length === 0 && (
+              <p className="mt-2 text-xs text-slate-500">
+                {cardType === 'join'
+                  ? 'Aucune colonne commune : connectez les deux tables en entrée.'
+                  : 'Connectez une table en entrée pour voir les colonnes.'}
+              </p>
+            )}
           </div>
         )}
 

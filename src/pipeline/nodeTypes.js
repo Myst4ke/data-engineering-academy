@@ -4,21 +4,28 @@ export const NODE_TYPES = {
   db_source: { name: 'Base SQL', icon: '🗄️', category: 'source', inputs: 0, outputs: 1, color: '#3B82F6', multiOutput: true },
   api_source: { name: 'API REST', icon: '🌐', category: 'source', inputs: 0, outputs: 1, color: '#8B5CF6', multiOutput: true },
 
-  // Transformations (all Data Dojo cards + extras)
-  filter: { name: 'Filtrer', icon: '🔍', category: 'transform', inputs: 1, outputs: 1, color: '#F59E0B' },
-  sort: { name: 'Trier', icon: '↕️', category: 'transform', inputs: 1, outputs: 1, color: '#06B6D4' },
-  join: { name: 'Joindre', icon: '🔀', category: 'logic', inputs: 2, outputs: 1, color: '#6366F1' },
-  concat: { name: 'Concaténer', icon: '⬇️', category: 'logic', inputs: 2, outputs: 1, color: '#84CC16' },
+  // Transformations exposées comme cartes atomiques du canvas : celles qui
+  // n'ont pas d'équivalent dans un notebook / ForEach (voir TRANSFORM_CARD_TYPES).
   aggregate: { name: 'Agréger', icon: '📊', category: 'transform', inputs: 1, outputs: 1, color: '#EC4899' },
-  select_cols: { name: 'Sélectionner', icon: '✅', category: 'transform', inputs: 1, outputs: 1, color: '#14B8A6' },
-  delete_col: { name: 'Suppr. Colonne', icon: '🗑️', category: 'transform', inputs: 1, outputs: 1, color: '#DC2626' },
-  rename_col: { name: 'Renommer', icon: '✏️', category: 'transform', inputs: 1, outputs: 1, color: '#F97316' },
-  deduplicate: { name: 'Dédoublonner', icon: '🔄', category: 'transform', inputs: 1, outputs: 1, color: '#A855F7' },
-  clean_na: { name: 'Suppr. Vides', icon: '🧹', category: 'transform', inputs: 1, outputs: 1, color: '#EF4444' },
-  fill_na: { name: 'Remplir Vides', icon: '🔧', category: 'transform', inputs: 1, outputs: 1, color: '#64748B' },
-  mapping: { name: 'Mapping', icon: '🗺️', category: 'logic', inputs: 1, outputs: 1, color: '#0D9488' },
   window_func: { name: 'Fenêtre', icon: '📐', category: 'transform', inputs: 1, outputs: 1, color: '#7E22CE' },
   sample: { name: 'Échantillonner', icon: '🎲', category: 'transform', inputs: 1, outputs: 1, color: '#EA580C' },
+
+  // Transformations disponibles uniquement à l'intérieur d'un notebook ou d'un
+  // ForEach : la catégorie 'transform_card' n'est pas listée dans CATEGORIES,
+  // donc ces types n'apparaissent pas dans la palette du canvas.
+  filter: { name: 'Filtrer', icon: '🔍', category: 'transform_card', inputs: 1, outputs: 1, color: '#F59E0B' },
+  sort: { name: 'Trier', icon: '↕️', category: 'transform_card', inputs: 1, outputs: 1, color: '#06B6D4' },
+  select_cols: { name: 'Sélectionner', icon: '✅', category: 'transform_card', inputs: 1, outputs: 1, color: '#14B8A6' },
+  delete_col: { name: 'Suppr. Colonne', icon: '🗑️', category: 'transform_card', inputs: 1, outputs: 1, color: '#DC2626' },
+  rename_col: { name: 'Renommer', icon: '✏️', category: 'transform_card', inputs: 1, outputs: 1, color: '#F97316' },
+  deduplicate: { name: 'Dédoublonner', icon: '🔄', category: 'transform_card', inputs: 1, outputs: 1, color: '#A855F7' },
+  clean_na: { name: 'Suppr. Vides', icon: '🧹', category: 'transform_card', inputs: 1, outputs: 1, color: '#EF4444' },
+  fill_na: { name: 'Remplir Vides', icon: '🔧', category: 'transform_card', inputs: 1, outputs: 1, color: '#64748B' },
+
+  // Transformations à 2 entrées : restent des nœuds canvas à part entière.
+  join: { name: 'Joindre', icon: '🔀', category: 'logic', inputs: 2, outputs: 1, color: '#6366F1' },
+  concat: { name: 'Concaténer', icon: '⬇️', category: 'logic', inputs: 2, outputs: 1, color: '#84CC16' },
+  mapping: { name: 'Mapping', icon: '🗺️', category: 'logic', inputs: 1, outputs: 1, color: '#0D9488' },
 
   // Notebook : encapsulates a chain of Data Dojo cards as a reusable unit.
   // The `notebookId` config field references a notebook from notebooks.js
@@ -51,6 +58,7 @@ export const NODE_TYPES = {
 export const CATEGORIES = [
   { id: 'source', name: 'Sources', icon: '📥' },
   { id: 'notebook', name: 'Notebooks', icon: '📓' },
+  { id: 'transform', name: 'Transformations', icon: '⚙️' },
   { id: 'logic', name: 'Boucles & Conditions', icon: '🔄' },
   { id: 'storage', name: 'Stockage', icon: '🗃️' },
   { id: 'monitoring', name: 'Monitoring', icon: '📊' },
